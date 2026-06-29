@@ -5,6 +5,8 @@ import android.app.Activity
 import android.app.Application
 import android.content.ComponentCallbacks2
 import android.content.Context
+import android.content.ContextWrapper
+import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.content.res.Resources
@@ -12,6 +14,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.LocaleList
 import android.provider.Settings
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.content.edit
@@ -298,6 +301,27 @@ internal class AndroidLocaleEasy(
 		super.onActivityPreCreated(activity, savedInstanceState)
 		println("$$$ onActivityPreCreated1: $activity |  ${activity.resources.configuration.locales}")
 
+		val appPackage = activity.packageName
+		val activityClass = activity::class.java.name
+
+		// I'm not sure this check is the best solution to check if an activity belongs to the developer's app
+		if (activityClass.startsWith(appPackage)) {
+			if (!activity.baseContext.hasLocaleEasyWrapper()) {
+				val isDebuggableApp = activity.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0
+				val errorMessage = """
+					Activity $activityClass missing LocaleEasy configuration."
+					"You must override attachBaseContext(newBase: Context) and wrap it using LocaleEasy."
+				""".trimIndent()
+
+				if (isDebuggableApp) {
+					error(errorMessage)
+				}
+				else {
+					Log.e("LocaleEasy", errorMessage)
+				}
+			}
+		}
+
 		if (!_isFollowingSystemLocale.value) {
 			val localeList = getPersistedAppLocaleList()
 
@@ -329,6 +353,7 @@ internal class AndroidLocaleEasy(
 	override fun onActivityStopped(activity: Activity) {
 		println("$$$ onActivityStopped: $activity |  ${activity.resources.configuration.locales}")
 	}
+
 	override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {
 		println("$$$ onActivitySaveInstanceState: $activity")
 	}
@@ -345,12 +370,12 @@ internal class AndroidLocaleEasy(
 	override fun onConfigurationChanged(newConfig: Configuration) {
 		println("$$$ onConfigurationChanged: $newConfig | ${LocaleListCompat.getDefault()}")
 		// preservers language after a configuration change (there must be a better way to do this)
-			val localeList = getPersistedAppLocaleList()
+		val localeList = getPersistedAppLocaleList()
 
-			println("$$$ AndroidLocaleEasy init3: $localeList")
+		println("$$$ AndroidLocaleEasy init3: $localeList")
 
-			updateResources(application, localeList)
-			refreshStartedActivities(localeList)
+		updateResources(application, localeList)
+		refreshStartedActivities(localeList)
 
 		_appLocaleList.value = if (_isFollowingSystemLocale.value) {
 			getSystemLocaleList()
@@ -395,7 +420,7 @@ internal class AndroidLocaleEasy(
 //		}, 1)
 //	}
 
-	fun Activity.triggerTrueConfigChangeRecreate() {
+	private fun Activity.triggerTrueConfigChangeRecreate() {
 //		try {
 //			// 1. Access the hidden primitive boolean field inside the native Activity class
 //			val changingConfigField: Field = Activity::class.java.getDeclaredField("mChangingConfigurations")
@@ -411,6 +436,21 @@ internal class AndroidLocaleEasy(
 //		// 3. Trigger the official platform recreation with the flag armed
 		ActivityCompat.recreate(this)
 	}
+
+	fun Context.hasLocaleEasyWrapper(): Boolean {
+		var currentContext: Context? = this
+		while (currentContext is ContextWrapper) {
+			if (currentContext is LocaleEasyContextWrapper) {
+				return true
+			}
+			currentContext = currentContext.baseContext
+		}
+		return false
+	}
+
+
+	private class LocaleEasyContextWrapper(context: Context) : ContextWrapper(context)
+
 
 	companion object {
 		const val LOCALE_SHARED_PREFERENCES_NAME = "locale_easy_prefs"
