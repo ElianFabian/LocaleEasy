@@ -1,0 +1,69 @@
+package com.elianfabian.localeeasy.ui.legacy
+
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.activityViewModels
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import com.elianfabian.localeeasy.MainViewModel
+import com.elianfabian.localeeasy.R
+import com.elianfabian.localeeasy.databinding.FragmentSampleBinding
+import com.elianfabian.localeeasy.ui.screens.LocaleSettingsSheet
+import com.elianfabian.localeeasy.ui.theme.LocaleEasyTheme
+import java.text.DateFormat
+import java.util.Date
+
+class SampleFragment : DialogFragment() {
+	private val viewModel: MainViewModel by activityViewModels()
+	private var _binding: FragmentSampleBinding? = null
+	private val binding get() = _binding!!
+	
+	private var showSettings by mutableStateOf(false)
+
+	override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+		_binding = FragmentSampleBinding.inflate(inflater, container, false)
+		return binding.root
+	}
+
+	@OptIn(ExperimentalMaterial3Api::class)
+	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+		super.onViewCreated(view, savedInstanceState)
+
+		val date = Date()
+		val dateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG)
+		binding.dateText.text = getString(R.string.date_format_example, dateFormat.format(date))
+
+		binding.btnSettings.setOnClickListener {
+			showSettings = true
+		}
+
+		binding.settingsComposeView.setContent {
+			val sheetState = rememberModalBottomSheetState()
+			LocaleEasyTheme {
+				if (showSettings) {
+					LocaleSettingsSheet(
+						viewModel = viewModel,
+						sheetState = sheetState,
+						onDismiss = { showSettings = false }
+					)
+				}
+			}
+		}
+	}
+
+	override fun onStart() {
+		super.onStart()
+		dialog?.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+	}
+
+	override fun onDestroyView() {
+		super.onDestroyView()
+		_binding = null
+	}
+}

@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">LocaleEasy Sample</string>
+    <string name="main_title">LocaleEasy Navigation</string>
+    <string name="compose_sample_btn">Compose Screen</string>
+    <string name="activity_sample_btn">Activity Navigation</string>
+    <string name="fragment_sample_btn">Fragment Sample</string>
+    <string name="webview_sample_btn">WebView Sample</string>
+
+    <string name="activity_title_1">Activity 1</string>
+    <string name="activity_title_2">Activity 2</string>
+    <string name="next_activity">Next Activity</string>
+
+    <string name="fragment_title">Fragment Localization</string>
+    <string name="webview_title">WebView Localization</string>
+
+    <string name="string_resource_example">Localized String: Green</string>
+    <string name="date_format_example">Date: %s</string>
+
+    <string name="settings_title">LocaleEasy State</string>
+    <string name="follow_system_locale">Follow System Locale</string>
+    <string name="state_following_system">Following System: %b</string>
+    <string name="state_app_locales">App Locales: %s</string>
+    <string name="state_system_locales">System Locales: %s</string>
+
+    <string name="fix_webview">Fix WebView Locale &amp; Reload</string>
+    <string name="open_settings">Open State &amp; Controls</string>
+</resources>

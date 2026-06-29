@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">Ejemplo LocaleEasy</string>
+    <string name="main_title">Navegación LocaleEasy</string>
+    <string name="compose_sample_btn">Pantalla Compose</string>
+    <string name="activity_sample_btn">Navegación de Activity</string>
+    <string name="fragment_sample_btn">Ejemplo de Fragment</string>
+    <string name="webview_sample_btn">Ejemplo de WebView</string>
+
+    <string name="activity_title_1">Actividad 1</string>
+    <string name="activity_title_2">Actividad 2</string>
+    <string name="next_activity">Siguiente Actividad</string>
+
+    <string name="fragment_title">Localización de Fragment</string>
+    <string name="webview_title">Localización de WebView</string>
+
+    <string name="string_resource_example">Cadena Localizada: Verde</string>
+    <string name="date_format_example">Fecha: %s</string>
+
+    <string name="settings_title">Estado de LocaleEasy</string>
+    <string name="follow_system_locale">Seguir idioma del sistema</string>
+    <string name="state_following_system">Siguiendo al sistema: %b</string>
+    <string name="state_app_locales">Locales de la App: %s</string>
+    <string name="state_system_locales">Locales del Sistema: %s</string>
+
+    <string name="fix_webview">Corregir Locale de WebView y Recargar</string>
+    <string name="open_settings">Abrir Estado y Controles</string>
+</resources>

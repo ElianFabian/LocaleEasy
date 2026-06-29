@@ -1,0 +1,4 @@
+<resources>
+    <color name="translated_text">#1B5E20</color> <!-- Darker Green for better contrast -->
+    <color name="hardcoded_text">#B71C1C</color> <!-- Darker Red for better contrast -->
+</resources>

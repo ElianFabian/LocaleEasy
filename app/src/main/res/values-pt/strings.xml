@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">Exemplo LocaleEasy</string>
+    <string name="main_title">Navegação LocaleEasy</string>
+    <string name="compose_sample_btn">Tela Compose</string>
+    <string name="activity_sample_btn">Navegação de Activity</string>
+    <string name="fragment_sample_btn">Exemplo de Fragment</string>
+    <string name="webview_sample_btn">Exemplo de WebView</string>
+
+    <string name="activity_title_1">Atividade 1</string>
+    <string name="activity_title_2">Atividade 2</string>
+    <string name="next_activity">Próxima Atividade</string>
+
+    <string name="fragment_title">Localização de Fragment</string>
+    <string name="webview_title">Localização de WebView</string>
+
+    <string name="string_resource_example">String Localizada: Verde</string>
+    <string name="date_format_example">Data: %s</string>
+
+    <string name="settings_title">Estado do LocaleEasy</string>
+    <string name="follow_system_locale">Seguir idioma do sistema</string>
+    <string name="state_following_system">Seguindo o sistema: %b</string>
+    <string name="state_app_locales">Locales do App: %s</string>
+    <string name="state_system_locales">Locales do Sistema: %s</string>
+
+    <string name="fix_webview">Corrigir Locale do WebView &amp; Recarregar</string>
+    <string name="open_settings">Abrir Estado &amp; Controles</string>
+</resources>
