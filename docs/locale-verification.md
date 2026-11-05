@@ -1,0 +1,98 @@
+# LocaleEasy verification report
+
+Date: 2026-11-05. This report separates implementation verification from wider compatibility claims.
+
+## Executed checks
+
+| Check | Environment | Result |
+| --- | --- | --- |
+| Preference model / persistence unit tests | JBR 21, Gradle 9.4.1 | 9 passed |
+| Sample lifecycle instrumentation | Phone_API_32, Android 12L | 13 discovered: 11 passed, 2 intentionally skipped |
+| Sample lifecycle instrumentation | Medium_Phone_API_36.0, Android 16 | 13 discovered: 10 passed, 3 intentionally skipped |
+| Library-only minimum-SDK fixture | Phone_API_21, Android 5.0.2 | 2 passed, including startup and plain-Activity recreation |
+| Separate-process persistence | API 32 | Seed and verification passed in different app processes |
+| Separate-process persistence | API 36 | Seed and verification passed in different app processes |
+| Visual inspection after restart | API 32 and API 36 | French Compose home screen displayed correctly |
+| Library lint | Debug | Passed: 0 errors, 2 warnings |
+| Sample lint | Debug | Passed: 0 errors, 25 warnings |
+| Sample / Android test APK builds | Debug | Passed |
+
+The minimum-SDK fixture is in the library's debug variant, independently of the sample's minSdk 23. Removing unused Material, AppCompat, and Navigation dependencies from the library removed an unintended API-23 dependency floor. AppCompat remains a sample dependency and is tested there.
+
+Sample instrumentation covers:
+
+- Repeated installation preserves instance identity.
+- Worker-thread mutations fail before changing preference.
+- Empty selections leave preference and persisted storage unchanged.
+- Plain Activity recreation replaces the activity and XML view, applies French, and restores user input.
+- An additional ActivityScenario recreation retains the selected translation.
+- Identical selections avoid another recreation; rapid requests settle on the final language.
+- Legacy stopped activities defer refresh until started again.
+- Legacy follow-system → app-locale mode changes rebuild the context even when languages match.
+- AppCompat two-level back navigation preserves translations and runtime titles.
+- A DialogFragment is restored once after its host's locale recreation.
+- API-33+ external LocaleManager selection/reset updates resources and flows, including selecting the same languages as the system.
+- WebView initialization followed by native-resource repair preserves the selected preference and native translation.
+- Compose navigation remains on its selected screen with translated text after locale recreation.
+
+The API-32 skips are the API-33+ framework test and the opt-in separate-process test. The API-36 skips are two legacy-only tests and the separate-process test. The separate-process test was subsequently executed explicitly in seed and verify phases on each API, not counted as a successful default-suite test.
+
+## Recreation evidence
+
+The debug `LocaleFixtureActivity` logs activity IDs, view identities, saved-state presence, translated text at creation, and `isChangingConfigurations` at destruction. The API-32 trace included:
+
+```text
+create instance=9 root=124841310 restored=false text=Localized String: Green
+destroy instance=9 changing=true
+create instance=10 root=2006063 restored=true text=Chaîne Localisée: Vert
+```
+
+Separate-process persistence on API 32 recorded seed process 7426 and verification process 7559, both creating French content before a second selection action. API 36 also passed both explicit phases.
+
+This establishes that ordinary recreation can replace views and restore state with the corrected integration on tested devices. It does not prove the cause of the author's earlier device-specific failure, or that every device/provider behaves identically. That reproduction remains open.
+
+Generated reports, screenshots, emulator logs, and traces are under `build/qa/` and module `build/` directories and are intentionally not committed. Screenshot review covered the French home screen, not every dialog or transition.
+
+## Reproducing the checks
+
+Use a compatible JDK (JBR 21 was used). Run from the repository root on Windows:
+
+```powershell
+./gradlew.bat :locale-easy:testDebugUnitTest :locale-easy:lintDebug :app:lintDebug :app:assembleDebug :app:assembleDebugAndroidTest --no-configuration-cache
+
+# Set a specific running emulator/device before each instrumentation run.
+$env:ANDROID_SERIAL = 'emulator-5556'
+./gradlew.bat :app:connectedDebugAndroidTest --no-configuration-cache
+
+# For API 21/22, use the independent library fixture.
+./gradlew.bat :locale-easy:connectedDebugAndroidTest --no-configuration-cache
+```
+
+For the persistence test, install both sample and test APKs, then run the phases separately. Gradle's connected task may uninstall its APKs at the end, so install them again before these commands:
+
+```powershell
+adb install -r app/build/outputs/apk/debug/app-debug.apk
+adb install -r app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+adb shell am instrument -w -e class com.elianfabian.localeeasy.PersistedLocaleTest -e localePhase seed com.elianfabian.localeeasy.test/androidx.test.runner.AndroidJUnitRunner
+adb shell am force-stop com.elianfabian.localeeasy
+adb shell am instrument -w -e class com.elianfabian.localeeasy.PersistedLocaleTest -e localePhase verify com.elianfabian.localeeasy.test/androidx.test.runner.AndroidJUnitRunner
+```
+
+Use `adb -s DEVICE` when multiple devices are connected. Each phase must report `OK (1 test)`. This intentionally leaves French selected in the disposable test app.
+
+Tests used headless emulators with `-read-only -no-snapshot`; saved AVD state was not overwritten. The API-36 AVD hit a low-storage installation reserve after its first suite; the temporary session's storage threshold was lowered to install the persistence fixture. No saved AVD setting was changed. Initial offline dependency-resolution failures were resolved by downloading missing build/test dependencies.
+
+## Remaining verification
+
+The broader acceptance checkboxes in [the reliability checklist](locale-reliability-checklist.md) remain open where appropriate:
+
+1. Reproduce the originally reported failure on its actual device/API with the creation trace enabled.
+2. Change actual device system languages in follow-system and app-locale modes, foreground and background; rotate and toggle dark mode. ActivityScenario recreation is not a substitute for all real configuration events.
+3. Exercise API 22–31 and 33–35 boundaries as needed, especially an API-23 sample startup smoke test and API-29 callbacks. API 21, 32, and 36 are the executed coverage, not the whole supported range.
+4. Test multiple tasks/windows, nested/navigation fragments, dialogs during saved-state transitions, and rapid background/foreground transitions.
+5. Verify RTL layout direction and unsupported-language fallback with suitable translated resources. The sample currently has English, Spanish, French, Portuguese, and Italian only.
+6. Verify Android Settings UI selection and one-time migration from an installed legacy version; direct external LocaleManager calls and fresh-process restoration are covered, an actual OS/app upgrade is not.
+7. Reproduce the old WebView issue with the affected provider version, and separately check web navigation/content state. The current test checks native locale preservation, not remote website translation.
+8. Validate language availability in a production app bundle. Library lint still warns that dynamic legacy locale changes require translations to be bundled or downloaded; the library cannot choose a consumer app's delivery policy.
+
+Other lint warnings include SDK/dependency updates and sample UI/style findings. They were not hidden with a baseline and are not reported as fixed by this work.

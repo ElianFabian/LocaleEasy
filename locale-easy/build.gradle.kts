@@ -33,11 +33,9 @@ dependencies {
 	implementation(libs.androidx.startupRuntime)
 	implementation(libs.kotlinxCoroutinesAndroid)
 
-	implementation(libs.androidx.appcompat)
 	implementation(libs.androidx.core.ktx)
-	implementation(libs.androidx.navigation.fragment.ktx)
-	implementation(libs.material)
 	testImplementation(libs.junit)
 	androidTestImplementation(libs.androidx.espresso.core)
 	androidTestImplementation(libs.androidx.junit)
+	androidTestUtil(libs.androidx.orchestrator)
 }

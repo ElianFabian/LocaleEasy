@@ -35,7 +35,7 @@ class WebViewFragment : DialogFragment() {
 		super.onViewCreated(view, savedInstanceState)
 
 		binding.webView.webViewClient = WebViewClient()
-		binding.webView.loadUrl("https://www.google.com")
+		binding.webView.loadUrl("file:///android_asset/locale-fixture.html")
 
 		binding.btnFix.setOnClickListener {
 			LocaleEasy.fixWebViewLocale()
@@ -66,6 +66,7 @@ class WebViewFragment : DialogFragment() {
 	}
 
 	override fun onDestroyView() {
+		binding.webView.destroy()
 		super.onDestroyView()
 		_binding = null
 	}

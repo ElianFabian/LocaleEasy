@@ -1,418 +1,256 @@
 package com.elianfabian.locale_easy
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Application
-import android.content.ComponentCallbacks2
+import android.app.LocaleManager
+import android.content.ComponentCallbacks
+import android.content.BroadcastReceiver
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.Context
 import android.content.ContextWrapper
-import android.content.pm.ApplicationInfo
-import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.os.LocaleList
-import android.provider.Settings
-import android.util.Log
+import android.view.LayoutInflater
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.content.edit
+import androidx.core.content.ContextCompat
 import androidx.core.os.ConfigurationCompat
-import androidx.core.os.LocaleListCompat
-import androidx.fragment.app.FragmentActivity
-import androidx.fragment.app.FragmentManager
-import androidx.lifecycle.Lifecycle
-import androidx.navigation.fragment.NavHostFragment
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import java.util.Collections
+import java.util.IdentityHashMap
 import java.util.Locale
-import java.util.concurrent.CopyOnWriteArrayList
 
 internal class AndroidLocaleEasy(
 	val application: Application,
-) : LocaleEasy, Application.ActivityLifecycleCallbacks, ComponentCallbacks2 {
-
-	private val _preferences by lazy {
-		application.getSharedPreferences(LOCALE_SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
-	}
-
-	private val _backstackActivities = CopyOnWriteArrayList<Activity>()
-
-	private val _systemLocaleList = MutableStateFlow(getSystemLocaleList())
+) : LocaleEasy, Application.ActivityLifecycleCallbacks, ComponentCallbacks {
+	private val preferences = application.getSharedPreferences(LOCALE_SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
+	private val handler = Handler(Looper.getMainLooper())
+	private val activities = IdentityHashMap<Activity, ActivityState>()
+	private val _systemLocaleList = MutableStateFlow(readSystemLocales())
 	override val systemLocaleList = _systemLocaleList.asStateFlow()
-
-	private val _preference = MutableStateFlow(restoreLocalePreference(
-		_preferences.getBoolean(KEY_FOLLOW_SYSTEM_LOCALE, true),
-		_preferences.getString(KEY_LANGUAGES, null),
-	))
+	private val _preference = MutableStateFlow(readInitialPreference())
 	override val preference = _preference.asStateFlow()
-
-	private val _isFollowingSystemLocale = MutableStateFlow(preference.value == LocalePreference.FollowSystem)
-	override val isFollowingSystemLocale = _isFollowingSystemLocale.asStateFlow()
-
 	private val _effectiveLocales = MutableStateFlow(preference.value.resolveLocales(systemLocaleList.value))
 	override val effectiveLocales = _effectiveLocales.asStateFlow()
-
-
-	init {
-		updateResources(application, effectiveLocales.value)
-
-		application.registerActivityLifecycleCallbacks(this)
-		application.registerComponentCallbacks(this)
+	private val _isFollowingSystemLocale = MutableStateFlow(preference.value == LocalePreference.FollowSystem)
+	override val isFollowingSystemLocale = _isFollowingSystemLocale.asStateFlow()
+	private val localeReceiver = object : BroadcastReceiver() {
+		override fun onReceive(context: Context, intent: Intent) {
+			// Preference can change without a resource diff, e.g. explicitly selecting
+			// the same languages as the system. Observe the system broadcast as well.
+			onConfigurationChanged(application.resources.configuration)
+		}
 	}
 
+	init {
+		checkMainThread()
+		persist(preference.value)
+		if (Build.VERSION.SDK_INT < 33) updateResources(application, effectiveLocales.value)
+		application.registerActivityLifecycleCallbacks(this)
+		application.registerComponentCallbacks(this)
+		if (Build.VERSION.SDK_INT >= 33) {
+			ContextCompat.registerReceiver(application, localeReceiver, IntentFilter(Intent.ACTION_LOCALE_CHANGED), ContextCompat.RECEIVER_NOT_EXPORTED)
+		}
+	}
 
 	override var followSystemLocale: Boolean
 		get() = preference.value == LocalePreference.FollowSystem
 		set(value) {
-			if (value) followSystem()
-			else if (followSystemLocale) setLocales(effectiveLocales.value)
+			checkMainThread()
+			if (value) followSystem() else if (followSystemLocale) setLocales(effectiveLocales.value)
 		}
 
-	override fun localizedContext(base: Context): Context {
-		return LocaleEasyContextWrapper(createContextConfiguration(base, effectiveLocales.value))
+	override fun setPreference(preference: LocalePreference) {
+		checkMainThread()
+		val selection = preference.immutableCopy()
+		if (selection == this.preference.value) return
+		persist(selection)
+		publish(selection, readSystemLocales())
+		if (Build.VERSION.SDK_INT >= 33) {
+			// The framework owns configuration delivery and activity recreation on Android 13+.
+			Api33.setPreference(application, selection)
+		} else {
+			updateResources(application, effectiveLocales.value)
+			activities.forEach { (activity, state) -> scheduleRefresh(activity, state) }
+		}
 	}
 
-	override fun setPreference(preference: LocalePreference) {
-		val selection = preference.immutableCopy()
-		if (selection == _preference.value) return
-		_preferences.edit {
+	override fun localizedContext(base: Context): Context {
+		if (Build.VERSION.SDK_INT >= 33) return base
+		val locales = effectiveLocales.value
+		val localized = if (preference.value == LocalePreference.FollowSystem) base
+		else base.createConfigurationContext(configurationFor(base, locales))
+		return LocaleEasyContextWrapper(localized, locales, preference.value)
+	}
+
+	private fun publish(selection: LocalePreference, system: List<Locale>) {
+		// State is resolved from user preference, never from mutable process defaults.
+		_systemLocaleList.value = system
+		_preference.value = selection
+		_isFollowingSystemLocale.value = selection == LocalePreference.FollowSystem
+		_effectiveLocales.value = selection.resolveLocales(system)
+	}
+
+	private fun persist(selection: LocalePreference) {
+		preferences.edit {
 			putBoolean(KEY_FOLLOW_SYSTEM_LOCALE, selection == LocalePreference.FollowSystem)
 			when (selection) {
 				LocalePreference.FollowSystem -> remove(KEY_LANGUAGES)
 				is LocalePreference.AppLocales -> putString(KEY_LANGUAGES, selection.locales.joinToString(",") { it.toLanguageTag() })
 			}
 		}
-		_preference.value = selection
-		_isFollowingSystemLocale.value = selection == LocalePreference.FollowSystem
-		applyEffectiveLocales()
 	}
 
-	private fun applyEffectiveLocales() {
-		val locales = preference.value.resolveLocales(systemLocaleList.value)
-		if (locales == effectiveLocales.value) return
-		// Publish before scheduling activity recreation so attachBaseContext sees the new selection.
-		_effectiveLocales.value = locales
-		updateResources(application, locales)
-		refreshStartedActivities(locales)
-	}
-
-	@Suppress("DEPRECATION")
-	private fun getSystemLocaleList(): List<Locale> {
-		val systemConfiguration = Resources.getSystem().configuration
-		return if (Build.VERSION.SDK_INT >= 24) {
-			val localesCompat = ConfigurationCompat.getLocales(systemConfiguration)
-			val locales = buildList {
-				for (i in 0 until localesCompat.size()) {
-					add(localesCompat[i] ?: return@buildList)
-				}
+	private fun readInitialPreference(): LocalePreference {
+		val saved = restoreLocalePreference(
+			preferences.getBoolean(KEY_FOLLOW_SYSTEM_LOCALE, true), preferences.getString(KEY_LANGUAGES, null),
+		)
+		if (Build.VERSION.SDK_INT < 33) return saved
+		val framework = Api33.readPreference(application)
+		// Migrate once; a later reset in Android Settings must not resurrect an old override.
+		if (!preferences.getBoolean(KEY_FRAMEWORK_MIGRATED, false)) {
+			if (framework == LocalePreference.FollowSystem && saved is LocalePreference.AppLocales) {
+				Api33.setPreference(application, saved)
 			}
-			locales.also {
-				println("$$$ system locales: $it, adb: ${Settings.System.getString(application.contentResolver, "system_locales")} | ${LocaleListCompat.getDefault()}")
-			}
+			preferences.edit { putBoolean(KEY_FRAMEWORK_MIGRATED, true) }
 		}
-		else listOf(systemConfiguration.locale)
+		return Api33.readPreference(application)
 	}
 
+	private fun readSystemLocales(): List<Locale> = if (Build.VERSION.SDK_INT >= 33) {
+		Api33.systemLocales(application)
+	} else configurationLocales(Resources.getSystem().configuration)
 
-	private fun refreshStartedActivities(localeList: List<Locale>) {
-		_backstackActivities.reversed().forEach { activity ->
-			updateResources(activity, localeList)
-			activity.resetTitle() // TODO: test this
-			if (activity is LocaleEasy.ViewCreatorComponent) {
-				//val view = activity.createContentView()
-				//activity.setContentView(view)
-				//ActivityCompat.recreate(activity)
-				activity.triggerTrueConfigChangeRecreate()
-			}
-			else {
-				//ActivityCompat.recreate(activity)
-				activity.triggerTrueConfigChangeRecreate()
-			}
-			if (activity is FragmentActivity) {
-				refreshStartedFragments(activity.supportFragmentManager)
-			}
+	override fun onConfigurationChanged(newConfig: Configuration) {
+		val system = readSystemLocales()
+		if (Build.VERSION.SDK_INT >= 33) {
+			val selection = Api33.readPreference(application)
+			persist(selection)
+			publish(selection, system)
+		} else {
+			// Android owns recreation for system configuration changes. Do not request a
+			// second recreation here. Custom wrapped contexts retain their locale override.
+			publish(preference.value, system)
+			updateResources(application, effectiveLocales.value)
 		}
 	}
 
-	private fun refreshStartedFragments(fragmentManager: FragmentManager) {
-		fragmentManager.fragments.forEach { fragment ->
-			if (!fragment.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED) && fragment !is NavHostFragment) {
-				return@forEach
-			}
-
-			try {
-				fragmentManager.beginTransaction()
-					.detach(fragment)
-					.commitNow()
-				fragmentManager.beginTransaction()
-					.attach(fragment)
-					.commitNow()
-			}
-			catch (_: IllegalStateException) {
-				fragmentManager.beginTransaction()
-					.detach(fragment)
-					.commitNowAllowingStateLoss()
-				fragmentManager.beginTransaction()
-					.attach(fragment)
-					.commitNowAllowingStateLoss()
-			}
-
-			refreshStartedFragments(fragment.childFragmentManager)
+	private fun scheduleRefresh(activity: Activity, state: ActivityState) {
+		if (!state.started || state.pending || state.recreating || state.matchesSelection()) return
+		state.pending = true
+		handler.post {
+			state.pending = false
+			if (activities[activity] !== state || !state.started || state.recreating ||
+				activity.isFinishing || activity.isDestroyed || state.matchesSelection()) return@post
+			state.recreating = true
+			// One rebuild owner: never detach fragments or replace content on the outgoing activity.
+			ActivityCompat.recreate(activity)
 		}
-	}
-
-	@RequiresApi(Build.VERSION_CODES.N)
-	private fun LocaleList.toLocales(): List<Locale> {
-		if (size() == 0) {
-			return emptyList()
-		}
-
-		val localeList = this
-		return buildList {
-			for (i in 0 until localeList.size()) {
-				add(localeList[i])
-			}
-		}
-	}
-
-	@Suppress("DEPRECATION")
-	@SuppressLint("ObsoleteSdkInt")
-	fun updateResources(context: Context, localeList: List<Locale>) {
-		val firstLocale = localeList.first()
-
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-			LocaleList.setDefault(LocaleList(*localeList.toTypedArray()))
-		}
-		else {
-			Locale.setDefault(firstLocale)
-		}
-
-		val resources = context.resources
-
-//		val currentLocale = if (Build.VERSION.SDK_INT >= 24) {
-//			resources.configuration.locales[0]
-//		}
-//		else resources.configuration.locale
-//
-//		if (currentLocale == firstLocale && localeList.size == 1) {
-//			return
-//		}
-
-		val newConfig = Configuration(resources.configuration).apply {
-			when {
-				Build.VERSION.SDK_INT >= 24 -> {
-					setLocales(LocaleList(*localeList.toTypedArray()))
-				}
-				Build.VERSION.SDK_INT >= 17 -> {
-					setLocale(firstLocale)
-				}
-				else -> {
-					this.locale = firstLocale
-				}
-			}
-		}
-
-		resources.updateConfiguration(newConfig, resources.displayMetrics)
-	}
-
-	private fun createContextConfiguration(context: Context, localeList: List<Locale>): Context {
-		val firstLocale = localeList.first()
-
-		val resources = context.resources
-
-//		val currentLocale = if (Build.VERSION.SDK_INT >= 24) {
-//			resources.configuration.locales[0]
-//		}
-//		else resources.configuration.locale
-//
-//		if (currentLocale == firstLocale && localeList.size == 1) {
-//			return
-//		}
-
-		val newConfig = Configuration(resources.configuration).apply {
-			when {
-				Build.VERSION.SDK_INT >= 24 -> {
-					setLocales(LocaleList(*localeList.toTypedArray()))
-				}
-				Build.VERSION.SDK_INT >= 17 -> {
-					setLocale(firstLocale)
-				}
-				else -> {
-					this.locale = firstLocale
-				}
-			}
-		}
-
-		return context.createConfigurationContext(newConfig)
-	}
-
-	@Suppress("DEPRECATION")
-	private fun Activity.resetTitle() {
-		try {
-			val info = if (Build.VERSION.SDK_INT >= 33) {
-				packageManager.getActivityInfo(componentName, PackageManager.ComponentInfoFlags.of(PackageManager.GET_META_DATA.toLong()))
-			}
-			else {
-				packageManager.getActivityInfo(componentName, PackageManager.GET_META_DATA)
-			}
-			if (info.labelRes != 0) {
-				setTitle(info.labelRes)
-			}
-		}
-		catch (e: PackageManager.NameNotFoundException) {
-			e.printStackTrace()
-		}
-	}
-
-	override fun onActivityPreCreated(activity: Activity, savedInstanceState: Bundle?) {
-		super.onActivityPreCreated(activity, savedInstanceState)
-		println("$$$ onActivityPreCreated1: $activity |  ${activity.resources.configuration.locales}")
-
-		val appPackage = activity.packageName
-		val activityClass = activity::class.java.name
-
-		// I'm not sure this check is the best solution to check if an activity belongs to the developer's app
-		if (activityClass.startsWith(appPackage)) {
-			if (!activity.baseContext.hasLocaleEasyWrapper()) {
-				val isDebuggableApp = activity.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0
-				val errorMessage = """
-					Activity $activityClass missing LocaleEasy configuration."
-					"You must override attachBaseContext(newBase: Context) and wrap it using LocaleEasy."
-				""".trimIndent()
-
-				if (isDebuggableApp) {
-					error(errorMessage)
-				}
-				else {
-					Log.e("LocaleEasy", errorMessage)
-				}
-			}
-		}
-
-		if (!_isFollowingSystemLocale.value) {
-			val localeList = effectiveLocales.value
-
-			println("$$$ onActivityPreCreated2: $localeList")
-
-			updateResources(activity, localeList)
-		}
-
-		println("$$$ onActivityPreCreated3: ${LocaleListCompat.getDefault()}")
 	}
 
 	override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
-		println("$$$ onActivityCreated: $activity |  ${activity.resources.configuration.locales}")
-		_backstackActivities.add(activity)
+		if (Build.VERSION.SDK_INT >= 33) return
+		// Only explicitly wrapped activities participate. No class/package-name guesses.
+		val wrapper = activity.baseContext.localeEasyWrapper() ?: return
+		activities[activity] = ActivityState(wrapper.locales, wrapper.selection)
 	}
 
 	override fun onActivityStarted(activity: Activity) {
-		println("$$$ onActivityStarted: $activity |  ${activity.resources.configuration.locales}")
-	}
-
-	override fun onActivityResumed(activity: Activity) {
-		println("$$$ onActivityResumed: $activity |  ${activity.resources.configuration.locales}")
-	}
-
-	override fun onActivityPaused(activity: Activity) {
-		println("$$$ onActivityPaused: $activity |  ${activity.resources.configuration.locales}")
-	}
-
-	override fun onActivityStopped(activity: Activity) {
-		println("$$$ onActivityStopped: $activity |  ${activity.resources.configuration.locales}")
-	}
-
-	override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {
-		println("$$$ onActivitySaveInstanceState: $activity")
-	}
-
-	override fun onActivityDestroyed(activity: Activity) {
-		println("$$$ onActivityDestroyed: $activity |  ${activity.resources.configuration.locales}")
-		_backstackActivities.remove(activity)
-	}
-
-	override fun onTrimMemory(level: Int) {
-		// no-op
-	}
-
-	override fun onConfigurationChanged(newConfig: Configuration) {
-		println("$$$ onConfigurationChanged: $newConfig | ${LocaleListCompat.getDefault()}")
-		_systemLocaleList.value = getSystemLocaleList()
-		// Reapply to application resources if Android replaced their configuration, but
-		// only request a locale refresh when the resolved selection actually changes.
-		updateResources(application, preference.value.resolveLocales(systemLocaleList.value))
-		applyEffectiveLocales()
-	}
-
-	@Deprecated("Deprecated in Java")
-	override fun onLowMemory() {
-		// no-op
-	}
-
-//	private fun Activity.smoothRecreateActivity() {
-//		val restartIntent = this.intent.apply {
-//			addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
-//		}
-//
-//		startActivity(restartIntent)
-//		finish()
-//
-//		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-//			overrideActivityTransition(Activity.OVERRIDE_TRANSITION_OPEN, 0, 0)
-//		} else {
-//			@Suppress("DEPRECATION")
-//			overridePendingTransition(0, 0)
-//		}
-//	}
-
-//	fun Activity.forceRealConfigChange() {
-//		val originalOrientation = this.requestedOrientation
-//
-//		// Toggle orientation to force a real OS-driven configuration change
-//		this.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-//
-//		Handler(Looper.getMainLooper()).postDelayed({
-//			// Restore to original after the system processed the destruction/creation
-//			this.requestedOrientation = originalOrientation
-//		}, 1)
-//	}
-
-	private fun Activity.triggerTrueConfigChangeRecreate() {
-//		try {
-//			// 1. Access the hidden primitive boolean field inside the native Activity class
-//			val changingConfigField: Field = Activity::class.java.getDeclaredField("mChangingConfigurations")
-//			changingConfigField.isAccessible = true
-//
-//			// 2. Force it to true so the OS and Jetpack components think a hardware change is happening
-//			changingConfigField.setBoolean(this, true)
-//		} catch (e: Exception) {
-//			// Fallback for strict environment restrictions or non-standard ROMs
-//			e.printStackTrace()
-//		}
-//
-//		// 3. Trigger the official platform recreation with the flag armed
-		ActivityCompat.recreate(this)
-	}
-
-	fun Context.hasLocaleEasyWrapper(): Boolean {
-		var currentContext: Context? = this
-		while (currentContext is ContextWrapper) {
-			if (currentContext is LocaleEasyContextWrapper) {
-				return true
+		activities[activity]?.let { state ->
+			state.started = true
+			if (state.selection == preference.value && preference.value == LocalePreference.FollowSystem &&
+				configurationLocales(activity.resources.configuration) == effectiveLocales.value) {
+				state.locales = effectiveLocales.value
 			}
-			currentContext = currentContext.baseContext
+			scheduleRefresh(activity, state)
 		}
-		return false
 	}
 
+	override fun onActivityStopped(activity: Activity) { activities[activity]?.started = false }
+	override fun onActivityDestroyed(activity: Activity) { activities.remove(activity) }
+	override fun onActivityResumed(activity: Activity) = Unit
+	override fun onActivityPaused(activity: Activity) = Unit
+	override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) = Unit
+	@Deprecated("Deprecated in Android")
+	override fun onLowMemory() = Unit
 
-	private class LocaleEasyContextWrapper(context: Context) : ContextWrapper(context)
+	/** Reapply native resources after a demonstrated WebView-provider configuration mutation. */
+	fun reapplyResources() {
+		checkMainThread()
+		if (Build.VERSION.SDK_INT >= 33) return
+		updateResources(application, effectiveLocales.value)
+		activities.keys.forEach { updateResources(it, effectiveLocales.value) }
+	}
 
+	@Suppress("DEPRECATION")
+	private fun updateResources(context: Context, locales: List<Locale>) {
+		if (Build.VERSION.SDK_INT >= 24) LocaleList.setDefault(LocaleList(*locales.toTypedArray()))
+		else Locale.setDefault(locales.first())
+		val resources = context.resources
+		resources.updateConfiguration(configurationFor(context, locales), resources.displayMetrics)
+	}
+
+	private fun configurationFor(context: Context, locales: List<Locale>): Configuration =
+		Configuration(context.resources.configuration).apply {
+			if (Build.VERSION.SDK_INT >= 24) setLocales(LocaleList(*locales.toTypedArray()))
+			else setLocale(locales.first())
+		}
+
+	private fun Context.localeEasyWrapper(): LocaleEasyContextWrapper? {
+		var current: Context? = this
+		while (current is ContextWrapper) {
+			if (current is LocaleEasyContextWrapper) return current
+			current = current.baseContext
+		}
+		return null
+	}
+
+	private class LocaleEasyContextWrapper(context: Context, val locales: List<Locale>, val selection: LocalePreference) : ContextWrapper(context) {
+		private val inflater by lazy { LayoutInflater.from(baseContext).cloneInContext(this) }
+		override fun getSystemService(name: String): Any? =
+			if (name == LAYOUT_INFLATER_SERVICE) inflater else super.getSystemService(name)
+	}
+
+	private fun ActivityState.matchesSelection(): Boolean = selection == preference.value && locales == effectiveLocales.value
+
+	private class ActivityState(var locales: List<Locale>, val selection: LocalePreference, var started: Boolean = false,
+		var pending: Boolean = false, var recreating: Boolean = false)
+
+	@RequiresApi(33)
+	private object Api33 {
+		private fun manager(context: Context): LocaleManager = context.getSystemService(LocaleManager::class.java)
+		fun systemLocales(context: Context): List<Locale> = manager(context).systemLocales.toList()
+		fun readPreference(context: Context): LocalePreference {
+			val locales = manager(context).applicationLocales.toList()
+			return if (locales.isEmpty()) LocalePreference.FollowSystem else LocalePreference.AppLocales(locales).immutableCopy()
+		}
+		fun setPreference(context: Context, selection: LocalePreference) {
+			val locales = (selection as? LocalePreference.AppLocales)?.locales.orEmpty()
+			manager(context).applicationLocales = LocaleList(*locales.toTypedArray())
+		}
+		private fun LocaleList.toList(): List<Locale> = Collections.unmodifiableList(List(size()) { get(it) })
+	}
 
 	companion object {
 		const val LOCALE_SHARED_PREFERENCES_NAME = "locale_easy_prefs"
 		const val KEY_FOLLOW_SYSTEM_LOCALE = "KEY_FOLLOW_SYSTEM_LOCALE"
 		const val KEY_LANGUAGES = "KEY_LANGUAGES"
+		private const val KEY_FRAMEWORK_MIGRATED = "KEY_FRAMEWORK_MIGRATED"
+		private fun configurationLocales(configuration: Configuration): List<Locale> {
+			val locales = ConfigurationCompat.getLocales(configuration)
+			return Collections.unmodifiableList(List(locales.size()) { requireNotNull(locales[it]) })
+		}
 	}
+}
+
+internal fun checkMainThread() {
+	check(Looper.myLooper() == Looper.getMainLooper()) { "LocaleEasy mutations must run on the main thread" }
 }

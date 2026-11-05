@@ -4,11 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
-import android.os.PersistableBundle
 import android.view.View
-import androidx.activity.OnBackPressedCallback
-import androidx.activity.OnBackPressedDispatcher
-import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -16,7 +12,6 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.core.os.LocaleListCompat
 import com.elianfabian.locale_easy.LocaleEasy
@@ -27,7 +22,7 @@ import com.elianfabian.localeeasy.ui.screens.ComposeSampleScreen
 import com.elianfabian.localeeasy.ui.screens.MainScreen
 import com.elianfabian.localeeasy.ui.theme.LocaleEasyTheme
 
-class MainActivity : AppCompatActivity(), LocaleEasy.ViewCreatorComponent {
+class MainActivity : AppCompatActivity() {
 	private val viewModel: MainViewModel by viewModels()
 
 	override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,32 +31,28 @@ class MainActivity : AppCompatActivity(), LocaleEasy.ViewCreatorComponent {
 		setContentView(createContentView())
 		setTitle(R.string.app_name)
 
-		onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
-			override fun handleOnBackPressed() {
-
-			}
-		})
-
 		println("$$$$ string: ${getString(R.string.main_title)} | ${LocaleListCompat.getDefault()}")
 	}
 
 	override fun onConfigurationChanged(newConfig: Configuration) {
 		super.onConfigurationChanged(newConfig)
 
-		println("$$$ MainActivity onConfigurationChanged: ${LocaleListCompat.getDefault()} | ${newConfig.locales}")
+		println("$$$ MainActivity onConfigurationChanged: ${LocaleListCompat.getDefault()} | ${androidx.core.os.ConfigurationCompat.getLocales(newConfig)}")
 	}
 
 	override fun attachBaseContext(newBase: Context) {
 		super.attachBaseContext(LocaleEasy.getInstance().localizedContext(newBase))
 
-		println("$$$ MainActivity attachBaseContext($newBase): ${LocaleListCompat.getDefault()} | ${newBase?.resources?.configuration?.locales}")
+		println("$$$ MainActivity attachBaseContext($newBase): ${LocaleListCompat.getDefault()}")
 	}
 
-	override fun createContentView(): View {
+	private fun createContentView(): View {
 		return ComposeView(this).apply {
+			id = R.id.main_compose_view
 			setContent {
 				LocaleEasyTheme {
 					var currentScreen by rememberSaveable { mutableStateOf("main") }
+					androidx.activity.compose.BackHandler(enabled = currentScreen != "main") { currentScreen = "main" }
 
 					println("$$$ currentScreen: $currentScreen")
 					

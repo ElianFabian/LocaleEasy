@@ -42,17 +42,52 @@ Existing consumer calls remain available:
 
 The flows represent individual observable values; reading multiple flows is not an atomic snapshot. Observe `preference` to determine the selected mode rather than inferring it from the effective list. This change adds interface members, so custom implementations of `LocaleEasy` must implement the new preference operations and effective flow.
 
-Activities using the custom context integration still call `localizedContext()` from `attachBaseContext()`. This change does not replace the activity recreation strategy or introduce a framework `LocaleManager` backend.
+## Android integration
+
+AndroidX Startup now installs LocaleEasy automatically. Calling `install()` again is safe and retains the same instance and subscriptions. Applications that opt out can remove only LocaleEasy's initializer metadata and call `LocaleEasy.install(this)` from `Application.onCreate()`:
+
+```xml
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <application>
+        <provider android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup" tools:node="merge">
+            <meta-data android:name="com.elianfabian.locale_easy.LocaleEasyInitializer"
+                tools:node="remove" />
+        </provider>
+    </application>
+</manifest>
+```
+
+Installation, locale mutations, and `fixWebViewLocale()` must run on the main thread. Calls from worker threads fail before changing state. Locale changes are synchronous requests; view recreation remains asynchronous.
+
+On **API 33+**, the framework `LocaleManager` owns app-language overrides, persistence, and configuration delivery. Existing framework preferences take priority. A legacy stored override is migrated once when no framework override exists; subsequent resets in Android Settings do not revive it. Configuration callbacks and locale broadcasts reconcile the flows with external changes. Activities do not need wrapping on this path. Consumers should declare their supported languages with `android:localeConfig` (as the sample does) to expose the app in Android's language settings.
+
+On **API 21–32**, participating activities wrap their base context before inflation:
+
+```kotlin
+override fun attachBaseContext(newBase: Context) {
+    super.attachBaseContext(LocaleEasy.getInstance().localizedContext(newBase))
+}
+```
+
+This works with plain `Activity`, `ComponentActivity`, and `AppCompatActivity`; AppCompat is not required by the library. LocaleEasy updates application resources and queues one refresh per started, wrapped activity when its selection is stale. Stopped activities refresh when started again, and finishing/destroyed activities are skipped. Rapid requests made before the queued refresh executes use the latest selection. Unwrapped third-party activities are not enrolled automatically.
+
+Android owns recreation for system configuration events. Apps that opt out through `configChanges` remain responsible for updating their own views for those events. Use one locale owner; independently changing AppCompatDelegate locales below API 33 can conflict with LocaleEasy's context strategy. For language-split app bundles below API 33, bundle needed translations or arrange their download before selecting them.
+
+`ViewCreatorComponent` is deprecated and is not called. LocaleEasy does not detach fragments, replace activity content, or reset runtime titles. Normal activity/fragment saved-state contracts apply. The sample gives its programmatic ComposeView a stable ID to support saved navigation state.
+
+`fixWebViewLocale()` now only reapplies native application/participating-activity resources below API 33; it does not construct another WebView. It does not translate HTML, reload web content, or reinflate native views. It is a no-op on API 33+, where framework locales own resources. The sample loads deterministic local HTML so website preferences/network behavior do not obscure native locale behavior.
 
 ## Verification
 
 Unit tests cover validation, data-class copying/destructuring, immutable copies, value equality, preference resolution, language-tag persistence, legacy region tags, and corrupt-storage recovery.
 
-Manual device verification remains required for Android lifecycle behavior:
+The executed emulator checks and remaining manual/device coverage are recorded in [the verification report](locale-verification.md). Additional device verification remains required for:
 
 1. Select French on an English device, restart the process without clearing data, and verify the initial screen and newly opened sample activities use French.
 2. Select follow-system, change system language, and verify effective languages and visible resources update. Repeat with a custom selection and verify it remains fixed.
 3. Disable follow-system using the sample checkbox; verify the current languages become a custom preference and survive restart.
 4. Reapply the same selection and verify no additional refresh. Check both XML and Compose screens.
 
-The broader remaining recreation, threading, back-stack, and WebView work is tracked in [the reliability checklist](locale-reliability-checklist.md). Its original checkboxes are not a claim that these device checks have passed.
+The [reliability checklist](locale-reliability-checklist.md) records implementation status separately from broader device acceptance.

@@ -6,10 +6,9 @@ import androidx.startup.Initializer
 public class LocaleEasyInitializer : Initializer<LocaleEasy> {
 
 	override fun create(context: Context): LocaleEasy {
-		println("$$$ LocaleEasyInitializer")
 		LocaleEasy.install(context)
 		return LocaleEasy.getInstance()
 	}
 
-	override fun dependencies(): List<Class<out Initializer<*>?>?> = emptyList()
+	override fun dependencies(): List<Class<out Initializer<*>>> = emptyList()
 }

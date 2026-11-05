@@ -6,10 +6,9 @@ The numbered findings below describe the initial source review. Progress and exe
 
 ## Progress
 
-- Preference API implemented: `LocalePreference.FollowSystem` / `AppLocales`, `preference`, `effectiveLocales`, convenience methods, and compatibility aliases.
-- Steps 2–3 have unit coverage for persistence formats, legacy region tags, invalid storage, and invalid model inputs. Steps 5–7 and 9 have initial state/context changes; their Android acceptance checks remain pending.
-- Executed: `:locale-easy:testDebugUnitTest` (9 tests passed) and `:app:assembleDebug` (passed), using JBR 21 and `--offline --no-configuration-cache`.
-- Manual device verification and the original recreation reproduction have not yet been executed.
+The public model is `LocalePreference.FollowSystem` / `AppLocales`. Implementation now includes automatic/idempotent installation, API-specific locale application, main-thread enforcement, explicit context participation below API 33, queued activity refresh, and a bounded native WebView-resource repair. The fragment detach/attach and title-reset paths have been removed; `ViewCreatorComponent` is deprecated.
+
+See [the API guide](locale-preference-api.md) for integration and [the verification report](locale-verification.md) for actual test counts, traces, and remaining checks. Historical findings below are retained to explain each task; their status lines describe the current implementation. Broader acceptance checkboxes stay open where coverage remains incomplete.
 
 The activity/view symptom is reported by the project author: manually rebuilding views has worked in previous attempts, while calling `recreate()` has not produced the expected UI update. Its exact cause has **not** been reproduced. Do not treat an unchanged translation as proof that Android retained the same view.
 
@@ -43,6 +42,8 @@ For device checks, record API level, device/emulator, app build, initial system 
 
 ## 1. Make the sample launch on its supported Android versions
 
+**Current status:** Implemented: removed unguarded framework diagnostics and API-24 logging; removed unused Material/AppCompat/Navigation dependencies from the library (Material required API 23). API-21 fixture verification is recorded in the report.
+
 **Confirmed issue.** `LocaleEasyApplication.onCreate()` accesses `LOCALE_SERVICE` and `LocaleManager.systemLocales` without an API-33 guard. The sample declares minSdk 23. Library lifecycle logging also reads `configuration.locales`, an API-24 property, in callbacks that run on older devices.
 
 **Locations:** `app/.../LocaleEasyApplication.kt`; lifecycle logging in `locale-easy/.../AndroidLocaleEasy.kt`.
@@ -59,6 +60,8 @@ Verification — **Automated sufficient:** launch the sample on API 23 and API 3
 
 ## 2. Persist locale language tags consistently
 
+**Current status:** Implemented and unit-tested: BCP 47 writes, strict reads, ordered region/script round trips, common underscore-tag migration, and malformed-storage fallback. Duplicate entries preserve caller order; Android resource locale lists may deduplicate them.
+
 **Confirmed issue.** `setAppLocaleListInternal()` writes `localeList.joinToString(",")`, which invokes `Locale.toString()`. `getPersistedAppLocaleList()` reads with `Locale.forLanguageTag()`. Regional/script locales do not reliably round-trip through these different representations.
 
 Fix:
@@ -69,9 +72,11 @@ Fix:
 
 Verification — **Automated sufficient:** round-trip `en`, `en-US`, `pt-BR`, `zh-Hant-TW`, and an ordered list such as `[fr-CA, en-US]`. Check language, script, region, and order after reload. Include legacy stored values and malformed entries.
 
-- [ ] Valid selections survive serialization without losing region, script, or ordering.
+- [x] Valid selections survive serialization without losing region, script, or ordering.
 
 ## 3. Define empty-list and invalid-data behavior
+
+**Current status:** Implemented and tested: AppLocales rejects empty lists/root locales before mutations; invalid stored overrides recover to FollowSystem. Instrumentation checks rejected input leaves preference storage unchanged.
 
 **Confirmed issue.** Both resource/context helpers call `localeList.first()`. `setAppLocaleList(emptyList())` can change follow-system state and persistence before throwing. Missing persisted text is parsed as an empty language tag rather than being treated as absent data.
 
@@ -83,9 +88,11 @@ Fix:
 
 Verification — **Automated sufficient:** exercise empty input, absent storage, blank entries, malformed tags, and duplicates. Assert either the documented fallback or a deliberate argument error. Rejected input must leave mode, stored selection, flows, and resource configuration unchanged.
 
-- [ ] No accidental `first()` failure or partial state update is possible through invalid input.
+- [x] No accidental `first()` failure or partial state update is possible through invalid input.
 
 ## 4. Make installation idempotent and choose an initialization owner
+
+**Current status:** Implemented and device-tested: AndroidX Startup metadata is registered; repeated install calls retain one instance. The API guide documents opting out and manual initialization.
 
 **Confirmed issues.** Every `LocaleEasy.install()` constructs a new instance and registers callbacks. Old instances remain registered. `LocaleEasyInitializer` exists, but the library manifest does not register it with AndroidX Startup; the sample currently installs manually.
 
@@ -97,9 +104,11 @@ Fix:
 
 Verification — **Automated sufficient:** call installation twice, assert stable instance identity, then verify one callback/update path per event. For automatic initialization, inspect the merged manifest and launch a consumer without a manual install call. For manual initialization, verify the documented pre-install error and successful startup after installation.
 
-- [ ] One active implementation owns callback registration; the documented initialization path works.
+- [x] One active implementation owns callback registration; the documented initialization path works.
 
 ## 5. Repair context wrapping and its validation
+
+**Current status:** Implemented: localized inflater wrapper below API 33; only explicitly wrapped activities are tracked. Package-prefix checks and false debug errors are removed. API 33+ uses framework configuration without requiring wrappers. Plain and AppCompat activities are tested; broader unrelated-activity/device coverage remains open.
 
 **Confirmed issue.** `hasLocaleEasyWrapper()` searches for `LocaleEasyContextWrapper`, but no code constructs that wrapper. `localizedContext()` returns a configuration context directly. The debug check therefore rejects the prescribed integration on API 29+. `SampleActivity` does not wrap its base context, and the package-name prefix check is only a heuristic for identifying participating activities.
 
@@ -116,6 +125,8 @@ Verification — **Manual required:** on API 29+, launch MainActivity and both l
 
 ## 6. Initialize effective state before activity contexts consume it
 
+**Current status:** Implemented and tested across two separate processes on API 32 and API 36: persisted French is present in the initial preference/effective flow and freshly created XML view. French Compose home screens were visually inspected after restart.
+
 **Confirmed issue.** `_appLocaleList` is populated before `init` applies persisted locales and is not updated afterward. `localizedContext()` then reads potentially stale state.
 
 Fix:
@@ -126,9 +137,11 @@ Fix:
 
 Verification — **Manual required:** set the system to English, select French in the app, terminate the process without clearing app data, and relaunch. Inspect the first screen, then open another activity. Both must start in French without a second locale action. Automate assertions on the initial flow, wrapped-context resources, and activity resources.
 
-- [ ] A persisted override is correct on the first frame and in the first flow value after process restart.
+- [x] A persisted override is correct on the first frame and in the first flow value after process restart.
 
 ## 7. Separate preference from effective locale state
+
+**Current status:** Implemented: explicit preference drives effective state, context creation no longer mutates process defaults, disabling follow-system freezes effective languages. Public flows are individually observable, not an atomic multi-flow snapshot. Full system-language-change coverage remains open.
 
 **Confirmed design problem.** `getAppLocaleList()` reads mutable process defaults. Context creation changes those defaults as a side effect. Enabling follow-system also writes current system locales into the stored app-language key, overwriting the previous override. Separate flows can temporarily report incompatible mode/locale values.
 
@@ -147,6 +160,8 @@ Verification — **Manual required:** select French, enable follow-system on an 
 
 ## 8. Define threading, ordering, and repeated-selection behavior
 
+**Current status:** Implemented and device-tested: main-thread checks, identical-preference no-op, pending refresh coalescing, and latest-selection checks. Tests cover worker rejection, repeated/rapid updates, and legacy mode changes with identical effective languages.
+
 **Confirmed gap.** Public setters can reach activity/fragment operations from any caller thread. `CopyOnWriteArrayList` protects iteration, not Android UI calls. The same-locale early return is commented out.
 
 Fix:
@@ -157,9 +172,11 @@ Fix:
 
 Verification — **Automated sufficient:** call from a worker thread and assert the documented rejection or main-thread dispatch. Reapply the same selection and assert no unnecessary recreation. Submit rapid French → Spanish → Italian changes; verify the final state/resources are Italian and no stale request wins.
 
-- [ ] UI work runs on the main thread and duplicate/stale updates cannot cause extra refresh cycles.
+- [x] UI work runs on the main thread and duplicate/stale updates cannot cause extra refresh cycles.
 
 ## 9. Correct configuration-change handling
+
+**Current status:** Implemented: framework callbacks/broadcasts reconcile API-33+ external selections; legacy callbacks preserve custom resources without requesting duplicate system-event recreation. External framework set/reset is tested, including selecting system-equivalent languages. Actual system-language, rotation, theme, and background-event matrix remains open.
 
 **Confirmed issue.** `onConfigurationChanged()` applies persisted locales and refreshes activities before checking follow-system mode. It also schedules this work for non-locale configuration changes.
 
@@ -176,6 +193,8 @@ Verification — **Manual required:** in follow-system mode, change the system l
 
 ## 10. Stop rebuilding fragments while their activity is being recreated
 
+**Current status:** Implemented: fragment transactions are removed from activity refresh. DialogFragment restoration is tested with one restored dialog on API 32 and API 36. Nested/navigation/state-save stress checks remain open.
+
 **Confirmed issue.** The library requests activity recreation and immediately detaches/attaches fragments on that outgoing activity. It retries failed transactions allowing state loss.
 
 Fix:
@@ -189,6 +208,8 @@ Verification — **Manual required:** open SampleFragment as a dialog, change la
 - [ ] Fragment state survives locale updates without competing rebuilds or state-loss transactions.
 
 ## 11. Reproduce and isolate the activity/view recreation symptom
+
+**Current status:** Controlled recreation now passes: fixture traces show different activity/view identities, changingConfigurations=true, restored state, and French XML; Compose navigation/translation also survives. This does not identify the original device-specific failure; reproduce on that device before closing the task.
 
 **Reported behavior; cause unconfirmed.** The author observed manual view rebuilding working where `recreate()` did not update the UI. Current MainActivity calls `createContentView()` from `onCreate()`. `triggerTrueConfigChangeRecreate()` currently only calls `ActivityCompat.recreate()`; its name does not establish that a framework locale change occurred.
 
@@ -206,6 +227,8 @@ Verification — **Manual required:** reproduce on the device/API where the fail
 
 ## 12. Select and implement locale application strategies by Android version
 
+**Current status:** Implemented: LocaleManager on API 33+, explicit context wrapping on API 21–32 (including AppCompat), one-time legacy migration, framework preference reconciliation, and sample localeConfig. AppCompat autoStore metadata is removed to avoid a second owner. Wider API/RTL/language-split and settings-UI coverage remains open.
+
 **Confirmed architectural gap.** The library currently mutates resources through deprecated `Resources.updateConfiguration()` and process defaults. It does not set the framework per-app locale preference. This is separate from a request to recreate an activity.
 
 Fix:
@@ -221,6 +244,8 @@ Verification — **Manual required:** below API 33, test both AppCompatActivity 
 - [ ] Each advertised integration works on its documented API range, with one owner of locale application and persistence.
 
 ## 13. Define back-stack refresh and optional manual view rebuilding
+
+**Current status:** Implemented: stale started activities receive queued recreation; stopped activities defer until started; no title reset or view-factory invocation. Sample back handling and ComposeView ID are corrected. Two-level AppCompat back navigation/title tests pass. Multi-window/tasks and broader navigation stress remain open.
 
 **Confirmed issues.** `_backstackActivities` tracks all created, undestroyed activities, not just started ones or a task-aware back stack. Every entry is refreshed. `ViewCreatorComponent` promises view-only rebuilding, but both branches recreate the activity. `resetTitle()` can also replace an activity's runtime title with its manifest label.
 
@@ -238,6 +263,8 @@ Verification — **Manual required:** navigate Main → Sample level 1 → Sampl
 - [ ] Refresh behavior is predictable across the stack; optional view rebuilding has an explicit state/lifecycle contract.
 
 ## 14. Verify and constrain the WebView workaround
+
+**Current status:** Implemented a narrower contract: repair native resources without creating another WebView; API 33+ no-op; local HTML sample and WebView cleanup. Native-locale preservation after WebView initialization is tested on API 32 and API 36. Original affected provider/version behavior and web-state preservation remain open.
 
 **Unverified workaround.** `fixWebViewLocale()` creates/destroys a new WebView and reapplies application resources. It has a TODO to test it. This does not establish that existing activity resources, existing WebViews, or remote website language preferences are repaired. The sample loads a remote website, which is not a deterministic locale test.
 

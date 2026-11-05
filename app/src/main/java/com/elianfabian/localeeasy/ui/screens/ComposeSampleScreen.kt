@@ -61,7 +61,7 @@ fun ComposeSampleScreen(
 			)
 
 			Text(
-				text = stringResource(R.string.string_resource_example) + " - ${Locale.getDefault()} + ${resources().configuration.locales}",
+				text = stringResource(R.string.string_resource_example) + " - ${Locale.getDefault()} + ${androidx.core.os.ConfigurationCompat.getLocales(resources().configuration)}",
 				color = TranslatedGreen,
 				style = MaterialTheme.typography.bodyLarge
 			)
@@ -96,6 +96,6 @@ fun ComposeSampleScreen(
 @ReadOnlyComposable
 internal fun resources(): Resources {
 	LocalConfiguration.current
-	println("$$$ localcontext: ${LocalContext.current} | ${LocalContext.current.resources.configuration.locales}")
+	println("$$$ localcontext: ${LocalContext.current}")
 	return LocalContext.current.resources
 }

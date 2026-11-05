@@ -2,4 +2,11 @@
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <application>
+        <provider android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup" android:exported="false">
+            <meta-data android:name="com.elianfabian.locale_easy.LocaleEasyInitializer"
+                android:value="androidx.startup" />
+        </provider>
+    </application>
 </manifest>
