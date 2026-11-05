@@ -1,0 +1,5 @@
+<resources>
+    <string name="lab_title">Charge de recréation</string>
+    <string name="lab_row">Ligne localisée</string>
+    <string name="lab_hint">Saisie conservée</string>
+</resources>

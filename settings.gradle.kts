@@ -25,3 +25,4 @@ dependencyResolutionManagement {
 rootProject.name = "LocaleEasy"
 include(":app")
 include(":locale-easy")
+include(":recreation-lab")

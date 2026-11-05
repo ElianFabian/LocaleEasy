@@ -211,6 +211,8 @@ Verification — **Manual required:** open SampleFragment as a dialog, change la
 
 **Current status:** Controlled recreation now passes: fixture traces show different activity/view identities, changingConfigurations=true, restored state, and French XML; Compose navigation/translation also survives. This does not identify the original device-specific failure; reproduce on that device before closing the task.
 
+Follow-up: the separate [Recreation Lab](../recreation-lab/README.md) captures actual ART/framework call paths, heap class inventories, memory snapshots/timelines, and system traces. See [initial findings](recreation-lab-findings.md) for the executed comparison. The original-device acceptance checkbox remains open.
+
 **Reported behavior; cause unconfirmed.** The author observed manual view rebuilding working where `recreate()` did not update the UI. Current MainActivity calls `createContentView()` from `onCreate()`. `triggerTrueConfigChangeRecreate()` currently only calls `ActivityCompat.recreate()`; its name does not establish that a framework locale change occurred.
 
 Investigation:

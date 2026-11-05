@@ -84,6 +84,8 @@ Tests used headless emulators with `-read-only -no-snapshot`; saved AVD state wa
 
 ## Remaining verification
 
+A follow-up [isolated profiling lab](../recreation-lab/README.md) now compares real rotation, local recreation, framework locale changes, LocaleEasy, and view-only rebuilding. Its [findings](recreation-lab-findings.md) record actual method paths, window identities, memory/class inventories, and Perfetto captures. That controlled workload supplements these sample tests; it does not close the original-device reproduction or the sample's full system-configuration matrix.
+
 The broader acceptance checkboxes in [the reliability checklist](locale-reliability-checklist.md) remain open where appropriate:
 
 1. Reproduce the originally reported failure on its actual device/API with the creation trace enabled.

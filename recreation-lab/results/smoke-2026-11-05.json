@@ -1,0 +1,177 @@
+{
+  "date": "2026-11-05",
+  "purpose": "Harness validation, not a performance ranking",
+  "rows": 200,
+  "iterations_per_case": 2,
+  "build_type": "debug",
+  "environments": {
+    "32": {
+      "serial": "emulator-5556",
+      "api": 32,
+      "seed": 42,
+      "mode": "timing",
+      "rows": 200,
+      "iterations": 2,
+      "perfetto": false,
+      "skipped_cases": [
+        "framework_locale"
+      ],
+      "fingerprint": "google/sdk_gphone64_x86_64/emulator64_x86_64_arm64:12/SE1B.240122.005/11418786:userdebug/dev-keys",
+      "installed_apk_sha256": "850153386d502f920bfad371df71a32b5f45d56e5fa34a9a2be6dfeb7b6b2ffc",
+      "display_size": "Physical size: 1080x1920",
+      "display_density": "Physical density: 480"
+    },
+    "36": {
+      "serial": "emulator-5558",
+      "api": 36,
+      "seed": 42,
+      "mode": "timing",
+      "rows": 200,
+      "iterations": 2,
+      "perfetto": false,
+      "skipped_cases": [],
+      "fingerprint": "google/sdk_gphone64_x86_64/emu64xa:16/BE2A.250530.026.D1/13818094:user/release-keys",
+      "installed_apk_sha256": "850153386d502f920bfad371df71a32b5f45d56e5fa34a9a2be6dfeb7b6b2ffc",
+      "display_size": "Physical size: 1080x2400",
+      "display_density": "Physical density: 420"
+    }
+  },
+  "cases": {
+    "32": [
+      {
+        "case": "localeeasy",
+        "count": 2,
+        "status": "PASS",
+        "median_commit_ms": 129.21605,
+        "min_commit_ms": 126.0115,
+        "max_commit_ms": 132.4206,
+        "median_pss_delta_kb": 4552.0,
+        "decor_preserved": true,
+        "activity_replaced": true,
+        "root_replaced": true
+      },
+      {
+        "case": "manual_locale",
+        "count": 2,
+        "status": "PASS",
+        "median_commit_ms": 118.6747,
+        "min_commit_ms": 107.0761,
+        "max_commit_ms": 130.2733,
+        "median_pss_delta_kb": 3930.0,
+        "decor_preserved": true,
+        "activity_replaced": true,
+        "root_replaced": true
+      },
+      {
+        "case": "recreate",
+        "count": 2,
+        "status": "PASS",
+        "median_commit_ms": 133.63835,
+        "min_commit_ms": 104.6338,
+        "max_commit_ms": 162.6429,
+        "median_pss_delta_kb": 4753.0,
+        "decor_preserved": true,
+        "activity_replaced": true,
+        "root_replaced": true
+      },
+      {
+        "case": "rotation",
+        "count": 2,
+        "status": "PASS",
+        "median_commit_ms": 312.5322,
+        "min_commit_ms": 297.2502,
+        "max_commit_ms": 327.8142,
+        "median_pss_delta_kb": 4212.5,
+        "decor_preserved": false,
+        "activity_replaced": true,
+        "root_replaced": true
+      },
+      {
+        "case": "view_only",
+        "count": 2,
+        "status": "PASS",
+        "median_commit_ms": 125.5076,
+        "min_commit_ms": 113.8769,
+        "max_commit_ms": 137.1383,
+        "median_pss_delta_kb": 4653.0,
+        "decor_preserved": true,
+        "activity_replaced": false,
+        "root_replaced": true
+      }
+    ],
+    "36": [
+      {
+        "case": "framework_locale",
+        "count": 2,
+        "status": "PASS",
+        "median_commit_ms": 152.7912,
+        "min_commit_ms": 145.8151,
+        "max_commit_ms": 159.7673,
+        "median_pss_delta_kb": 4740.0,
+        "decor_preserved": false,
+        "activity_replaced": true,
+        "root_replaced": true
+      },
+      {
+        "case": "localeeasy",
+        "count": 2,
+        "status": "PASS",
+        "median_commit_ms": 147.0722,
+        "min_commit_ms": 134.6196,
+        "max_commit_ms": 159.5248,
+        "median_pss_delta_kb": 4697.0,
+        "decor_preserved": false,
+        "activity_replaced": true,
+        "root_replaced": true
+      },
+      {
+        "case": "manual_locale",
+        "count": 2,
+        "status": "PASS",
+        "median_commit_ms": 166.09515,
+        "min_commit_ms": 149.0753,
+        "max_commit_ms": 183.115,
+        "median_pss_delta_kb": 5307.5,
+        "decor_preserved": true,
+        "activity_replaced": true,
+        "root_replaced": true
+      },
+      {
+        "case": "recreate",
+        "count": 2,
+        "status": "PASS",
+        "median_commit_ms": 80.0564,
+        "min_commit_ms": 70.7909,
+        "max_commit_ms": 89.3219,
+        "median_pss_delta_kb": 4190.5,
+        "decor_preserved": true,
+        "activity_replaced": true,
+        "root_replaced": true
+      },
+      {
+        "case": "rotation",
+        "count": 2,
+        "status": "PASS",
+        "median_commit_ms": 384.3583,
+        "min_commit_ms": 213.0779,
+        "max_commit_ms": 555.6387,
+        "median_pss_delta_kb": 3551.0,
+        "decor_preserved": false,
+        "activity_replaced": true,
+        "root_replaced": true
+      },
+      {
+        "case": "view_only",
+        "count": 2,
+        "status": "PASS",
+        "median_commit_ms": 74.79525,
+        "min_commit_ms": 68.6009,
+        "max_commit_ms": 80.9896,
+        "median_pss_delta_kb": 947.0,
+        "decor_preserved": true,
+        "activity_replaced": false,
+        "root_replaced": true
+      }
+    ]
+  }
+}

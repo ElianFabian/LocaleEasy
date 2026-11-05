@@ -1,0 +1,7 @@
+<resources>
+    <string name="lab_title">Recreation workload</string>
+    <string name="lab_row">Localized row</string>
+    <string name="lab_hint">Saved user input</string>
+    <item name="lab_root" type="id" />
+    <item name="lab_input" type="id" />
+</resources>
