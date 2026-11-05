@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.elianfabian.locale_easy.LocalePreference
 import com.elianfabian.localeeasy.MainViewModel
 import com.elianfabian.localeeasy.R
 import com.elianfabian.localeeasy.UiAction
@@ -35,8 +36,9 @@ fun LocaleSettingsSheet(
 	sheetState: SheetState,
 	onDismiss: () -> Unit
 ) {
-	val isFollowingSystem by viewModel.isFollowingSystemLocale.collectAsStateWithLifecycle()
-	val appLocales by viewModel.appLocaleList.collectAsStateWithLifecycle()
+	val preference by viewModel.preference.collectAsStateWithLifecycle()
+	val isFollowingSystem = preference == LocalePreference.FollowSystem
+	val appLocales by viewModel.effectiveLocales.collectAsStateWithLifecycle()
 	val systemLocales by viewModel.systemLocaleList.collectAsStateWithLifecycle()
 
 	ModalBottomSheet(

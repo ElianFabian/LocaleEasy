@@ -1,12 +1,10 @@
 package com.elianfabian.localeeasy
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.elianfabian.locale_easy.LocaleEasy
+import com.elianfabian.locale_easy.LocalePreference
 import kotlinx.coroutines.launch
 import java.util.Locale
 
@@ -21,7 +19,7 @@ class MainViewModel : ViewModel() {
 
 	init {
 		viewModelScope.launch {
-			localeEasy.appLocaleList.collect {
+			localeEasy.effectiveLocales.collect {
 				println("$$$ viewModel.appLocalesList: $it | ${LocaleListCompat.getDefault()}")
 			}
 		}
@@ -32,14 +30,18 @@ class MainViewModel : ViewModel() {
 		}
 	}
 
-	val isFollowingSystemLocale = localeEasy.isFollowingSystemLocale
+	val preference = localeEasy.preference
 	val systemLocaleList = localeEasy.systemLocaleList
-	val appLocaleList = localeEasy.appLocaleList
+	val effectiveLocales = localeEasy.effectiveLocales
 
 	fun sendAction(action: UiAction) {
 		when (action) {
-			is UiAction.SetLocale -> localeEasy.setAppLocale(action.locale)
-			is UiAction.SetFollowSystemLocale -> localeEasy.followSystemLocale = action.follow
+			is UiAction.SetLocale -> localeEasy.setLocale(action.locale)
+			is UiAction.SetFollowSystemLocale -> if (action.follow) {
+				localeEasy.followSystem()
+			} else {
+				localeEasy.setPreference(LocalePreference.AppLocales(effectiveLocales.value))
+			}
 			UiAction.FixWebViewLocale -> LocaleEasy.fixWebViewLocale()
 		}
 	}

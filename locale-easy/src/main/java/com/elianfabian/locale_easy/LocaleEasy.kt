@@ -12,17 +12,38 @@ import java.util.Locale
 // Based on. https://github.com/YarikSOffice/lingver/blob/master/library/src/main/java/com/yariksoffice/lingver/Lingver.kt
 public interface LocaleEasy {
 
+	/** The user's selection. This is not a signal that activity recreation has completed. */
+	public val preference: StateFlow<LocalePreference>
+
+	/**
+	 * Locales resolved from [preference] and system languages, in preference order.
+	 * Resource fallback may select a different supported language. Existing views may
+	 * still be awaiting refresh when this value changes.
+	 */
+	public val effectiveLocales: StateFlow<List<Locale>>
+
+	public fun setPreference(preference: LocalePreference)
+
+	public fun followSystem() { setPreference(LocalePreference.FollowSystem) }
+
+	public fun setLocale(locale: Locale) { setLocales(listOf(locale)) }
+
+	public fun setLocales(locales: List<Locale>) { setPreference(LocalePreference.AppLocales(locales)) }
+
+	/** Compatibility view of whether [preference] is [LocalePreference.FollowSystem]. */
 	public val isFollowingSystemLocale: StateFlow<Boolean>
 
 	public val systemLocaleList: StateFlow<List<Locale>>
 
-	public val appLocaleList: StateFlow<List<Locale>>
+	/** Compatibility alias for [effectiveLocales]. */
+	public val appLocaleList: StateFlow<List<Locale>> get() = effectiveLocales
 
+	/** Setting false freezes the current effective locales as a custom preference. */
 	public var followSystemLocale: Boolean
 
-	public fun setAppLocale(locale: Locale)
+	public fun setAppLocale(locale: Locale) { setLocale(locale) }
 
-	public fun setAppLocaleList(localeList: List<Locale>)
+	public fun setAppLocaleList(localeList: List<Locale>) { setLocales(localeList) }
 
 	public fun localizedContext(base: Context): Context
 

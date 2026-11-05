@@ -39,25 +39,24 @@ internal class AndroidLocaleEasy(
 
 	private val _backstackActivities = CopyOnWriteArrayList<Activity>()
 
-	private val _isFollowingSystemLocale = MutableStateFlow(_preferences.getBoolean(KEY_FOLLOW_SYSTEM_LOCALE, true))
-	override val isFollowingSystemLocale = _isFollowingSystemLocale.asStateFlow()
-
 	private val _systemLocaleList = MutableStateFlow(getSystemLocaleList())
 	override val systemLocaleList = _systemLocaleList.asStateFlow()
 
-	private val _appLocaleList = MutableStateFlow(getAppLocaleList())
-	override val appLocaleList = _appLocaleList.asStateFlow()
+	private val _preference = MutableStateFlow(restoreLocalePreference(
+		_preferences.getBoolean(KEY_FOLLOW_SYSTEM_LOCALE, true),
+		_preferences.getString(KEY_LANGUAGES, null),
+	))
+	override val preference = _preference.asStateFlow()
+
+	private val _isFollowingSystemLocale = MutableStateFlow(preference.value == LocalePreference.FollowSystem)
+	override val isFollowingSystemLocale = _isFollowingSystemLocale.asStateFlow()
+
+	private val _effectiveLocales = MutableStateFlow(preference.value.resolveLocales(systemLocaleList.value))
+	override val effectiveLocales = _effectiveLocales.asStateFlow()
 
 
 	init {
-		if (!_isFollowingSystemLocale.value) {
-			val localeList = getPersistedAppLocaleList()
-
-			println("$$$ AndroidLocaleEasy init1: $localeList")
-
-			updateResources(application, localeList)
-		}
-		println("$$$ AndroidLocaleEasy init2: ${getAppLocaleList()}")
+		updateResources(application, effectiveLocales.value)
 
 		application.registerActivityLifecycleCallbacks(this)
 		application.registerComponentCallbacks(this)
@@ -65,37 +64,38 @@ internal class AndroidLocaleEasy(
 
 
 	override var followSystemLocale: Boolean
-		get() = _isFollowingSystemLocale.value
+		get() = preference.value == LocalePreference.FollowSystem
 		set(value) {
-			persistFollowSystemLocale(value)
+			if (value) followSystem()
+			else if (followSystemLocale) setLocales(effectiveLocales.value)
 		}
-
-	override fun setAppLocale(locale: Locale) {
-		setAppLocaleList(listOf(locale))
-	}
-
-	override fun setAppLocaleList(localeList: List<Locale>) {
-		persistFollowSystemLocale(false)
-		setAppLocaleListInternal(localeList)
-	}
 
 	override fun localizedContext(base: Context): Context {
-		return createContextConfiguration(base, appLocaleList.value)
+		return LocaleEasyContextWrapper(createContextConfiguration(base, effectiveLocales.value))
 	}
 
-	private fun setAppLocaleListInternal(localeList: List<Locale>) {
-//		if (localeList == _appLocaleList.value) {
-//			// It seems reasonable to skip updating the language when we set it to the same previous value
-//			return
-//		}
-		// I prefer avoiding this since the developer is then forced to use AppCompactActivity
-		//AppCompatDelegate.setApplicationLocales(LocaleListCompat.create(*localeList.toTypedArray()))
+	override fun setPreference(preference: LocalePreference) {
+		val selection = preference.immutableCopy()
+		if (selection == _preference.value) return
 		_preferences.edit {
-			putString(KEY_LANGUAGES, localeList.joinToString(","))
+			putBoolean(KEY_FOLLOW_SYSTEM_LOCALE, selection == LocalePreference.FollowSystem)
+			when (selection) {
+				LocalePreference.FollowSystem -> remove(KEY_LANGUAGES)
+				is LocalePreference.AppLocales -> putString(KEY_LANGUAGES, selection.locales.joinToString(",") { it.toLanguageTag() })
+			}
 		}
-		updateResources(application, localeList)
-		refreshStartedActivities(localeList)
-		_appLocaleList.value = getAppLocaleList()
+		_preference.value = selection
+		_isFollowingSystemLocale.value = selection == LocalePreference.FollowSystem
+		applyEffectiveLocales()
+	}
+
+	private fun applyEffectiveLocales() {
+		val locales = preference.value.resolveLocales(systemLocaleList.value)
+		if (locales == effectiveLocales.value) return
+		// Publish before scheduling activity recreation so attachBaseContext sees the new selection.
+		_effectiveLocales.value = locales
+		updateResources(application, locales)
+		refreshStartedActivities(locales)
 	}
 
 	@Suppress("DEPRECATION")
@@ -113,15 +113,6 @@ internal class AndroidLocaleEasy(
 			}
 		}
 		else listOf(systemConfiguration.locale)
-	}
-
-	private fun getAppLocaleList(): List<Locale> {
-		return if (Build.VERSION.SDK_INT >= 24) {
-			LocaleList.getDefault().toLocales().also {
-				println("$$$ appLocales: $it | ${LocaleListCompat.getDefault()}")
-			}
-		}
-		else listOf(Locale.getDefault())
 	}
 
 
@@ -229,13 +220,6 @@ internal class AndroidLocaleEasy(
 	private fun createContextConfiguration(context: Context, localeList: List<Locale>): Context {
 		val firstLocale = localeList.first()
 
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-			LocaleList.setDefault(LocaleList(*localeList.toTypedArray()))
-		}
-		else {
-			Locale.setDefault(firstLocale)
-		}
-
 		val resources = context.resources
 
 //		val currentLocale = if (Build.VERSION.SDK_INT >= 24) {
@@ -282,21 +266,6 @@ internal class AndroidLocaleEasy(
 		}
 	}
 
-	private fun persistFollowSystemLocale(value: Boolean) {
-		_preferences.edit { putBoolean(KEY_FOLLOW_SYSTEM_LOCALE, value) }
-		_isFollowingSystemLocale.value = value
-		if (value) {
-			setAppLocaleListInternal(getSystemLocaleList())
-		}
-	}
-
-	private fun getPersistedAppLocaleList(): List<Locale> {
-		return _preferences.getString(KEY_LANGUAGES, null)
-			.orEmpty()
-			.split(",")
-			.map { Locale.forLanguageTag(it) }
-	}
-
 	override fun onActivityPreCreated(activity: Activity, savedInstanceState: Bundle?) {
 		super.onActivityPreCreated(activity, savedInstanceState)
 		println("$$$ onActivityPreCreated1: $activity |  ${activity.resources.configuration.locales}")
@@ -323,7 +292,7 @@ internal class AndroidLocaleEasy(
 		}
 
 		if (!_isFollowingSystemLocale.value) {
-			val localeList = getPersistedAppLocaleList()
+			val localeList = effectiveLocales.value
 
 			println("$$$ onActivityPreCreated2: $localeList")
 
@@ -369,22 +338,11 @@ internal class AndroidLocaleEasy(
 
 	override fun onConfigurationChanged(newConfig: Configuration) {
 		println("$$$ onConfigurationChanged: $newConfig | ${LocaleListCompat.getDefault()}")
-		// preservers language after a configuration change (there must be a better way to do this)
-		val localeList = getPersistedAppLocaleList()
-
-		println("$$$ AndroidLocaleEasy init3: $localeList")
-
-		updateResources(application, localeList)
-		refreshStartedActivities(localeList)
-
-		_appLocaleList.value = if (_isFollowingSystemLocale.value) {
-			getSystemLocaleList()
-		}
-		else {
-			updateResources(application, getPersistedAppLocaleList())
-			getAppLocaleList()
-		}
 		_systemLocaleList.value = getSystemLocaleList()
+		// Reapply to application resources if Android replaced their configuration, but
+		// only request a locale refresh when the resolved selection actually changes.
+		updateResources(application, preference.value.resolveLocales(systemLocaleList.value))
+		applyEffectiveLocales()
 	}
 
 	@Deprecated("Deprecated in Java")
