@@ -10,6 +10,16 @@ import java.util.Locale
 // Based on. https://github.com/YarikSOffice/lingver/blob/master/library/src/main/java/com/yariksoffice/lingver/Lingver.kt
 public interface LocaleEasy {
 
+	/**
+	 * Temporary comparison flag. Defaults to true on API 33+, false on older Android.
+	 * False uses localized activity contexts and Activity.recreate(); true delegates to
+	 * LocaleManager (requires API 33+). Persisted across process restarts.
+	 * Changing backend can itself recreate activities; compare subsequent language changes.
+	 * Manual mode does not synchronize with Android's per-app language settings.
+	 */
+	@set:MainThread
+	public var useFrameworkLocaleRecreation: Boolean
+
 	/** The user's selection. This is not a signal that activity recreation has completed. */
 	public val preference: StateFlow<LocalePreference>
 
@@ -54,7 +64,7 @@ public interface LocaleEasy {
 
 	/**
 	 * Legacy interface. LocaleEasy uses activity recreation and does not call this method.
-	 * Wrap the activity context below API 33 instead; no view factory is required.
+		 * Use localizedContext() from attachBaseContext(); no view factory is required.
 	 */
 	@Deprecated("LocaleEasy recreates activities; a view factory is not required")
 	public interface ViewCreatorComponent {
@@ -77,9 +87,9 @@ public interface LocaleEasy {
 		}
 
 		/**
-		 * Reapply native resources below API 33 after a WebView provider changes configuration.
+		 * Reapply native resources in manual mode after a WebView provider changes configuration.
 		 * Does not translate websites, reload existing WebViews, or rebuild native views.
-		 * Framework locales own configuration on API 33+, where this is a no-op.
+		 * This is a no-op while framework locale recreation is enabled.
 		 */
 		@MainThread
 		public fun fixWebViewLocale() {

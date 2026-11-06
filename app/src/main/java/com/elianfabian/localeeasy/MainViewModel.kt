@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.elianfabian.locale_easy.LocaleEasy
 import com.elianfabian.locale_easy.LocalePreference
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import java.util.Locale
 
 sealed interface UiAction {
@@ -33,6 +35,13 @@ class MainViewModel : ViewModel() {
 	val preference = localeEasy.preference
 	val systemLocaleList = localeEasy.systemLocaleList
 	val effectiveLocales = localeEasy.effectiveLocales
+	private val _frameworkRecreation = MutableStateFlow(localeEasy.useFrameworkLocaleRecreation)
+	val frameworkRecreation = _frameworkRecreation.asStateFlow()
+
+	fun setFrameworkRecreation(enabled: Boolean) {
+		localeEasy.useFrameworkLocaleRecreation = enabled
+		_frameworkRecreation.value = enabled
+	}
 
 	fun sendAction(action: UiAction) {
 		when (action) {

@@ -28,8 +28,8 @@ class LocaleLifecycleTest {
     private val app get() = instrumentation.targetContext.applicationContext
     private val api get() = LocaleEasy.getInstance()
 
-    @Before fun reset() { main { api.followSystem() }; instrumentation.waitForIdleSync() }
-    @After fun cleanup() { main { api.followSystem() }; instrumentation.waitForIdleSync() }
+    @Before fun reset() { main { api.useFrameworkLocaleRecreation = Build.VERSION.SDK_INT >= 33; api.followSystem() }; instrumentation.waitForIdleSync() }
+    @After fun cleanup() { main { api.followSystem(); api.useFrameworkLocaleRecreation = Build.VERSION.SDK_INT >= 33 }; instrumentation.waitForIdleSync() }
     private fun main(block: () -> Unit) = instrumentation.runOnMainSync(block)
 
     private fun await(condition: () -> Boolean) {
@@ -93,6 +93,22 @@ class LocaleLifecycleTest {
             // Natural recreation must retain the selected language too.
             scenario.recreate()
             scenario.onActivity { assertEquals(translated("fr"), it.findViewById<TextView>(R.id.locale_fixture_label).text) }
+        }
+    }
+
+    @Test fun manualBackendOnModernAndroidRecreatesXmlAndKeepsFrameworkOverrideEmpty() {
+        assumeTrue(Build.VERSION.SDK_INT >= 33)
+        main { api.useFrameworkLocaleRecreation = false }
+        plainActivityRecreatesItsXmlViewAndRestoresUserInput()
+        assertTrue(app.getSystemService(LocaleManager::class.java).applicationLocales.isEmpty)
+        assertEquals(LocalePreference.AppLocales(listOf(Locale.FRENCH)), api.preference.value)
+    }
+
+    @Test fun legacyAndroidRejectsFrameworkBackendWithoutChangingTheFlag() {
+        assumeTrue(Build.VERSION.SDK_INT < 33)
+        main {
+            assertTrue(runCatching { api.useFrameworkLocaleRecreation = true }.exceptionOrNull() is IllegalArgumentException)
+            assertFalse(api.useFrameworkLocaleRecreation)
         }
     }
 

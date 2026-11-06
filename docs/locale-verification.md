@@ -1,8 +1,24 @@
 # LocaleEasy verification report
 
-Date: 2026-11-05; interactive lab verification updated 2026-11-06. This report separates implementation verification from wider compatibility claims.
+Date: 2026-11-05; sample recreation selector verification updated 2026-11-06. This report separates implementation verification from wider compatibility claims.
 
 ## Executed checks
+
+Current sample selector and temporary backend flag, verified 2026-11-06:
+
+| Check | Environment | Result |
+| --- | --- | --- |
+| Complete sample instrumentation suite | API 36 | 18 discovered: 13 passed, 5 intentional skips |
+| Complete sample instrumentation suite | API 32 | 18 discovered: 13 passed, 5 intentional skips |
+| Separate-process persistence, manual backend | API 36 | Seed and verify passed; flag, preference, and French XML restored |
+| Separate-process persistence, framework backend | API 36 | Seed and verify passed; flag, preference, and French XML restored |
+| Preference unit tests | JBR 21 | 9 passed |
+| Final sample build and lint | Debug, JBR 21 | APK built; library lint 0 errors/2 warnings; sample lint 0 errors/25 warnings |
+| Sample selector layout | API 36 | Visually inspected within the original home screen |
+
+The new tests drive manual → framework → manual through the actual Compose selector and language buttons, asserting replacement of the activity and Compose root within the same task. Separate tests cover saved Compose navigation and XML input in manual mode on API 33+, an empty framework override in that mode, and disabled/rejected framework selection on API 32. See [usage and manual checks](recreation-comparison.md).
+
+Earlier checks and retired lab history:
 
 | Check | Environment | Result |
 | --- | --- | --- |
@@ -22,7 +38,7 @@ Date: 2026-11-05; interactive lab verification updated 2026-11-06. This report s
 | Lab CLI regression after adding UI | API 36 | Manual/framework locale trials both passed with the final APK |
 | Lab build and lint | Debug, JBR 21 | App/test APKs built; lint: 0 errors, 20 warnings |
 
-The lab now has launcher controls for manual/framework locale recreation, a rotation control, language/content-size selectors, and latest-run results. Static menu and workload layouts were visually inspected on API 36. See [interactive instructions](../recreation-lab/README.md#interactive-comparison). Behavioral tests do not assess perceived smoothness or visible blank frames; those still require watching transitions on the affected device.
+The lab entries above describe the retired harness. Its Android module has since been removed; current interactive testing uses the [original sample and its single method selector](recreation-comparison.md). Historical profiling results remain archived. Behavioral tests do not assess perceived smoothness or visible blank frames; those still require watching transitions on the affected device.
 
 The minimum-SDK fixture is in the library's debug variant, independently of the sample's minSdk 23. Removing unused Material, AppCompat, and Navigation dependencies from the library removed an unintended API-23 dependency floor. AppCompat remains a sample dependency and is tested there.
 

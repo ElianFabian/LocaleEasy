@@ -1,5 +1,7 @@
 # Recreation Lab: initial findings
 
+The Android lab module was retired on 2026-11-06. These findings describe the earlier isolated harness; use the [sample selector](recreation-comparison.md) for current interactive comparison. Historical source is available in commit `89194fc`.
+
 Date: 2026-11-05. The [isolated lab](../recreation-lab/README.md) is implemented and executable. These are harness-validation observations from debug builds on disposable emulators, not a production performance ranking or a reproduction of the original device-specific failure.
 
 Follow-up: the [2026-11-06 headless comparison](headless-locale-comparison-2026-11-06.md) completed 20 timing trials and five memory trials per locale path on one API-36 emulator, plus fresh method captures.

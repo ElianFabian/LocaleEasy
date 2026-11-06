@@ -1,4 +1,10 @@
 <resources>
+    <!-- Temporary diagnostic controls stay stable while sample content changes language. -->
+    <string name="recreation_method" translatable="false">Recreation method</string>
+    <string name="recreation_manual" translatable="false">Manual — Activity.recreate()</string>
+    <string name="recreation_framework" translatable="false">Framework — app language change</string>
+    <string name="recreation_hint" translatable="false">Choose a method, then open State &amp; Controls to change language. Switching methods can also rebuild the activity.</string>
+    <string name="recreation_legacy_hint" translatable="false">Open State &amp; Controls to change language and test manual recreation. Framework app language changes require Android 13 (API 33).</string>
     <string name="app_name">LocaleEasy Sample</string>
     <string name="main_title">LocaleEasy Navigation</string>
     <string name="compose_sample_btn">Compose Screen</string>

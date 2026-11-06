@@ -21,8 +21,14 @@ class PersistedLocaleTest {
         assumeTrue(phase == "seed" || phase == "verify")
         val instrumentation = InstrumentationRegistry.getInstrumentation()
         val api = LocaleEasy.getInstance()
-        if (phase == "seed") instrumentation.runOnMainSync { api.setLocale(Locale.FRENCH) }
+        val backend = InstrumentationRegistry.getArguments().getString("localeBackend")
+        val framework = when (backend) { "manual" -> false; "framework" -> true; else -> null }
+        if (phase == "seed") instrumentation.runOnMainSync {
+            if (framework != null) api.useFrameworkLocaleRecreation = framework
+            api.setLocale(Locale.FRENCH)
+        }
         instrumentation.waitForIdleSync()
+        if (framework != null) assertEquals(framework, api.useFrameworkLocaleRecreation)
         assertEquals(LocalePreference.AppLocales(listOf(Locale.FRENCH)), api.preference.value)
         assertEquals(listOf(Locale.FRENCH), api.effectiveLocales.value)
         ActivityScenario.launch(LocaleFixtureActivity::class.java).use { scenario ->

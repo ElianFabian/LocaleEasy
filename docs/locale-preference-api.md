@@ -61,7 +61,7 @@ AndroidX Startup now installs LocaleEasy automatically. Calling `install()` agai
 
 Installation, locale mutations, and `fixWebViewLocale()` must run on the main thread. Calls from worker threads fail before changing state. Locale changes are synchronous requests; view recreation remains asynchronous.
 
-On **API 33+**, the framework `LocaleManager` owns app-language overrides, persistence, and configuration delivery. Existing framework preferences take priority. A legacy stored override is migrated once when no framework override exists; subsequent resets in Android Settings do not revive it. Configuration callbacks and locale broadcasts reconcile the flows with external changes. Activities do not need wrapping on this path. Consumers should declare their supported languages with `android:localeConfig` (as the sample does) to expose the app in Android's language settings.
+By default on **API 33+**, the framework `LocaleManager` owns app-language overrides, persistence, and configuration delivery. Existing framework preferences take priority. A legacy stored override is migrated once when no framework override exists; subsequent resets in Android Settings do not revive it. Configuration callbacks and locale broadcasts reconcile the flows with external changes. Activities do not need wrapping on this path, but should call `localizedContext()` on every API to participate in the temporary manual-backend comparison described below. Consumers should declare their supported languages with `android:localeConfig` (as the sample does) to expose the app in Android's language settings.
 
 On **API 21–32**, participating activities wrap their base context before inflation:
 
@@ -77,7 +77,7 @@ Android owns recreation for system configuration events. Apps that opt out throu
 
 `ViewCreatorComponent` is deprecated and is not called. LocaleEasy does not detach fragments, replace activity content, or reset runtime titles. Normal activity/fragment saved-state contracts apply. The sample gives its programmatic ComposeView a stable ID to support saved navigation state.
 
-`fixWebViewLocale()` now only reapplies native application/participating-activity resources below API 33; it does not construct another WebView. It does not translate HTML, reload web content, or reinflate native views. It is a no-op on API 33+, where framework locales own resources. The sample loads deterministic local HTML so website preferences/network behavior do not obscure native locale behavior.
+`fixWebViewLocale()` only reapplies native application/participating-activity resources in manual mode; it does not construct another WebView. It does not translate HTML, reload web content, or reinflate native views. It is a no-op while framework recreation is enabled. The sample loads deterministic local HTML so website preferences/network behavior do not obscure native locale behavior.
 
 ## Verification
 
@@ -91,3 +91,7 @@ The executed emulator checks and remaining manual/device coverage are recorded i
 4. Reapply the same selection and verify no additional refresh. Check both XML and Compose screens.
 
 The [reliability checklist](locale-reliability-checklist.md) records implementation status separately from broader device acceptance.
+
+## Temporary recreation comparison
+
+The sample now exposes one method selector backed by `LocaleEasy.useFrameworkLocaleRecreation`. The flag defaults to framework on API 33+ and manual below, and remembers the selection across restarts. Manual mode uses localized contexts even on API 33+; always call `localizedContext()` from your activity's `attachBaseContext()` when testing it. See [comparison instructions and limitations](recreation-comparison.md). This diagnostic switch does not change the preference model.
