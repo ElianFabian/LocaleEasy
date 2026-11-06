@@ -30,7 +30,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.elianfabian.localeeasy.MainViewModel
 import com.elianfabian.localeeasy.R
-import com.elianfabian.localeeasy.ui.theme.TranslatedGreen
+import com.elianfabian.localeeasy.ui.theme.TranslatedTextColor
+import com.elianfabian.localeeasy.ui.theme.EnglishOnlyColor
+import com.elianfabian.localeeasy.ui.theme.localizableButtonColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,25 +48,27 @@ fun MainScreen(
     val locales by viewModel.effectiveLocales.collectAsStateWithLifecycle()
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        topBar = { TopAppBar(title = { Text(stringResource(R.string.main_title), color = TranslatedGreen) }) }
+        topBar = { TopAppBar(title = { Text(stringResource(R.string.main_title), color = TranslatedTextColor) }) }
     ) { innerPadding ->
         Column(
             modifier = Modifier.padding(innerPadding).verticalScroll(rememberScrollState()).padding(20.dp).fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             Text(stringResource(R.string.sample_intro), style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant)
+                color = EnglishOnlyColor)
+            TextOriginLegend()
             Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)) {
                 Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    RecreationMethodSelector(viewModel)
+                    Text(stringResource(R.string.local_recreation_status), color = EnglishOnlyColor,
+                        style = MaterialTheme.typography.labelLarge)
                     Text(stringResource(R.string.state_app_locales, locales.joinToString { it.toLanguageTag() }),
-                        style = MaterialTheme.typography.bodyMedium, color = TranslatedGreen)
-                    Button(onClick = { showSettings = true }, modifier = Modifier.fillMaxWidth()) {
+                        style = MaterialTheme.typography.bodyMedium, color = TranslatedTextColor)
+                    Button(onClick = { showSettings = true }, modifier = Modifier.fillMaxWidth(), colors = localizableButtonColors()) {
                         Text(stringResource(R.string.open_settings))
                     }
                 }
             }
-            Text(stringResource(R.string.sample_screens), style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.sample_screens), style = MaterialTheme.typography.titleMedium, color = EnglishOnlyColor)
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 SampleDestination(R.string.compose_sample_btn, R.string.compose_description, onOpenCompose)
                 SampleDestination(R.string.activity_sample_btn, R.string.activity_description, onOpenActivity)
@@ -82,11 +86,11 @@ private fun SampleDestination(title: Int, description: Int, onClick: () -> Unit)
         Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(stringResource(title), style = MaterialTheme.typography.titleSmall)
+                Text(stringResource(title), style = MaterialTheme.typography.titleSmall, color = TranslatedTextColor)
                 Text(stringResource(description), style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    color = EnglishOnlyColor)
             }
-            Text("›", style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.primary)
+            Text("›", style = MaterialTheme.typography.headlineSmall, color = EnglishOnlyColor)
         }
     }
 }

@@ -32,8 +32,8 @@ class LocaleLifecycleTest {
     private val app get() = instrumentation.targetContext.applicationContext
     private val api get() = LocaleEasy.getInstance()
 
-    @Before fun reset() { main { api.useFrameworkLocaleRecreation = Build.VERSION.SDK_INT >= 33; api.followSystem() }; instrumentation.waitForIdleSync() }
-    @After fun cleanup() { main { api.followSystem(); api.useFrameworkLocaleRecreation = Build.VERSION.SDK_INT >= 33 }; instrumentation.waitForIdleSync() }
+    @Before fun reset() { main { api.useFrameworkLocaleRecreation = false; api.followSystem() }; instrumentation.waitForIdleSync() }
+    @After fun cleanup() { main { api.followSystem(); api.useFrameworkLocaleRecreation = false }; instrumentation.waitForIdleSync() }
     private fun main(block: () -> Unit) = instrumentation.runOnMainSync(block)
 
     private fun await(condition: () -> Boolean) {
@@ -100,11 +100,11 @@ class LocaleLifecycleTest {
         }
     }
 
-    @Test fun manualBackendOnModernAndroidRecreatesXmlAndKeepsFrameworkOverrideEmpty() {
+    @Test fun frameworkExperimentOnlyRunsAfterExplicitOptIn() {
         assumeTrue(Build.VERSION.SDK_INT >= 33)
-        main { api.useFrameworkLocaleRecreation = false }
+        main { api.useFrameworkLocaleRecreation = true }
         plainActivityRecreatesItsXmlViewAndRestoresUserInput()
-        assertTrue(app.getSystemService(LocaleManager::class.java).applicationLocales.isEmpty)
+        assertEquals(Locale.FRENCH, app.getSystemService(LocaleManager::class.java).applicationLocales[0])
         assertEquals(LocalePreference.AppLocales(listOf(Locale.FRENCH)), api.preference.value)
     }
 
@@ -134,8 +134,7 @@ class LocaleLifecycleTest {
         }
     }
 
-    @Test fun stoppedLegacyActivityRefreshesWhenStartedAgain() {
-        assumeTrue(Build.VERSION.SDK_INT < 33)
+    @Test fun stoppedManualActivityRefreshesWhenStartedAgain() {
         ActivityScenario.launch(LocaleFixtureActivity::class.java).use { scenario ->
             var initialId = 0
             scenario.onActivity { initialId = it.instanceId }
@@ -152,8 +151,7 @@ class LocaleLifecycleTest {
         }
     }
 
-    @Test fun legacyModeSwitchWithIdenticalLanguagesStillRebuildsTheContext() {
-        assumeTrue(Build.VERSION.SDK_INT < 33)
+    @Test fun manualModeSwitchWithIdenticalLanguagesStillRebuildsTheContext() {
         ActivityScenario.launch(LocaleFixtureActivity::class.java).use { scenario ->
             var initialId = 0
             scenario.onActivity { initialId = it.instanceId; api.followSystemLocale = false }
@@ -246,6 +244,7 @@ class LocaleLifecycleTest {
 
     @Test fun frameworkCallbackCanRecreateXmlAndRestoreStateWithoutReplacingDecor() {
         assumeTrue(Build.VERSION.SDK_INT >= 33)
+        main { api.useFrameworkLocaleRecreation = true }
         ActivityScenario.launch(LocalRelaunchSampleActivity::class.java).use { scenario ->
             for (locale in listOf(Locale.FRENCH, Locale.ITALIAN, Locale.forLanguageTag("es"))) {
                 var old: LocalRelaunchSampleActivity? = null
@@ -321,6 +320,7 @@ class LocaleLifecycleTest {
 
     @Test fun externalFrameworkSelectionUpdatesFlowAndResources() {
         assumeTrue(Build.VERSION.SDK_INT >= 33)
+        main { api.useFrameworkLocaleRecreation = true }
         ActivityScenario.launch(LocaleFixtureActivity::class.java).use { scenario ->
             val system = api.systemLocaleList.value
             main { app.getSystemService(LocaleManager::class.java).applicationLocales = LocaleList(*system.toTypedArray()) }

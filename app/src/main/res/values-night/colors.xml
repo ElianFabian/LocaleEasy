@@ -1,3 +1,6 @@
 <resources>
     <color name="window_background">#1C1B1F</color>
+    <color name="translated_text">#86EFAC</color>
+    <color name="english_only_text">#C4C1CA</color>
+    <color name="localized_surface">#1E3625</color>
 </resources>

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/window_background"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -13,8 +14,8 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
+            android:background="@color/localized_surface"
+            app:titleTextColor="@color/translated_text" />
 
         <ScrollView
             android:layout_width="match_parent"
@@ -27,11 +28,13 @@
                 android:orientation="vertical"
                 android:padding="24dp">
 
+                <include layout="@layout/view_text_origin_legend" />
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Hardcoded Marker (Activity)"
-                    android:textColor="@color/hardcoded_text"
+                    android:textColor="@color/english_only_text"
                     android:textSize="12sp"
                     android:paddingBottom="8dp" />
 
@@ -59,7 +62,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/next_activity"
                     android:background="@drawable/sample_button_primary"
-                    android:textColor="@android:color/white"
+                    android:textColor="@color/translated_text"
                     android:textAllCaps="false"
                     android:minHeight="48dp" />
 
@@ -70,7 +73,7 @@
                     android:layout_marginTop="16dp"
                     android:text="@string/open_settings"
                     android:background="@drawable/sample_button_secondary"
-                    android:textColor="@color/native_primary"
+                    android:textColor="@color/translated_text"
                     android:textAllCaps="false"
                     android:minHeight="48dp" />
 

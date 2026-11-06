@@ -2,13 +2,15 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white">
+    android:background="@color/window_background">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:padding="16dp">
+
+        <include layout="@layout/view_text_origin_legend" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -29,14 +31,20 @@
             android:id="@+id/btnFix"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/fix_webview" />
+            android:text="@string/fix_webview"
+            android:textColor="@color/translated_text"
+            android:background="@drawable/sample_button_primary"
+            android:textAllCaps="false" />
 
         <Button
             android:id="@+id/btnSettings"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="@string/open_settings" />
+            android:text="@string/open_settings"
+            android:textColor="@color/translated_text"
+            android:background="@drawable/sample_button_secondary"
+            android:textAllCaps="false" />
 
     </LinearLayout>
 

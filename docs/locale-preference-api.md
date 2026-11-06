@@ -61,9 +61,9 @@ AndroidX Startup now installs LocaleEasy automatically. Calling `install()` agai
 
 Installation, locale mutations, and `fixWebViewLocale()` must run on the main thread. Calls from worker threads fail before changing state. Locale changes are synchronous requests; view recreation remains asynchronous.
 
-By default on **API 33+**, the framework `LocaleManager` owns app-language overrides, persistence, and configuration delivery. Existing framework preferences take priority. A legacy stored override is migrated once when no framework override exists; subsequent resets in Android Settings do not revive it. Configuration callbacks and locale broadcasts reconcile the flows with external changes. Activities do not need wrapping on this path, but should call `localizedContext()` on every API to participate in the temporary manual-backend comparison described below. Consumers should declare their supported languages with `android:localeConfig` (as the sample does) to expose the app in Android's language settings.
+LocaleEasy currently uses **local activity recreation on every supported API**, including API 33+. It owns the persisted preference, updates application resources, and supplies localized activity contexts. Automatic framework locale recreation exposed a gap with no visible app surface in the tested configuration; [the investigation](framework-window-handoff-investigation.md) documents the evidence and a promising hybrid that has not been promoted into the normal backend. This does not mean every use of LocaleManager must flash.
 
-On **API 21–32**, participating activities wrap their base context before inflation:
+On **all API levels**, participating activities wrap their base context before inflation:
 
 ```kotlin
 override fun attachBaseContext(newBase: Context) {
@@ -73,7 +73,9 @@ override fun attachBaseContext(newBase: Context) {
 
 This works with plain `Activity`, `ComponentActivity`, and `AppCompatActivity`; AppCompat is not required by the library. LocaleEasy updates application resources and queues one refresh per started, wrapped activity when its selection is stale. Stopped activities refresh when started again, and finishing/destroyed activities are skipped. Rapid requests made before the queued refresh executes use the latest selection. Unwrapped third-party activities are not enrolled automatically.
 
-Android owns recreation for system configuration events. Apps that opt out through `configChanges` remain responsible for updating their own views for those events. Use one locale owner; independently changing AppCompatDelegate locales below API 33 can conflict with LocaleEasy's context strategy. For language-split app bundles below API 33, bundle needed translations or arrange their download before selecting them.
+Android owns recreation for system configuration events. Apps that opt out through `configChanges` remain responsible for updating their own views for those events. Use one locale owner; independently changing AppCompatDelegate or framework app locales can conflict with LocaleEasy's current context strategy. Bundle needed translations or arrange their download before selecting them in language-split app bundles.
+
+Android's per-app language Settings do not control the current manual backend. On first installation without an existing LocaleEasy preference, or when migrating an old persisted framework-owner switch, the current framework selection is imported before its override is cleared. This also respects an OS reset when migrating from framework ownership. Saved LocaleEasy preferences take priority afterward. The stale comparison switch is removed at startup, and normal language changes do not write `LocaleManager.applicationLocales`. LocaleManager is still used on API 33+ to read the real system locales and clear a previous framework override.
 
 `ViewCreatorComponent` is deprecated and is not called. LocaleEasy does not detach fragments, replace activity content, or reset runtime titles. Normal activity/fragment saved-state contracts apply. The sample gives its programmatic ComposeView a stable ID to support saved navigation state.
 
@@ -92,6 +94,6 @@ The executed emulator checks and remaining manual/device coverage are recorded i
 
 The [reliability checklist](locale-reliability-checklist.md) records implementation status separately from broader device acceptance.
 
-## Temporary recreation comparison
+## Temporary framework diagnostic
 
-The sample now exposes one method selector backed by `LocaleEasy.useFrameworkLocaleRecreation`. The flag defaults to framework on API 33+ and manual below, and remembers the selection across restarts. Manual mode uses localized contexts even on API 33+; always call `localizedContext()` from your activity's `attachBaseContext()` when testing it. See [comparison instructions and limitations](recreation-comparison.md). This diagnostic switch does not change the preference model.
+`LocaleEasy.useFrameworkLocaleRecreation` is retained solely as an explicit API-33+ investigation opt-in. It starts false in every process, is not persisted, and is absent from the normal sample UI. Existing diagnostic tests can enable it for that process; a restart returns to local recreation while preserving the selected language. See [sample instructions](recreation-comparison.md). This diagnostic switch does not change the preference model.

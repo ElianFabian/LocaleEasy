@@ -34,7 +34,13 @@ internal class AndroidLocaleEasy(
 	private val preferences = application.getSharedPreferences(LOCALE_SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
 	private val handler = Handler(Looper.getMainLooper())
 	private val activities = IdentityHashMap<Activity, ActivityState>()
-	private var frameworkRecreation = Build.VERSION.SDK_INT >= 33 && preferences.getBoolean(KEY_FRAMEWORK_RECREATION, true)
+	// Use localized contexts + a local relaunch on every API for now. In our API-36
+	// captures, automatic LocaleManager recreation removed the old app surface before
+	// the new one appeared, exposing black frames. The config-callback/local-relaunch
+	// prototype avoided that gap, but still needs a consumer integration contract and
+	// wider coverage. Keep framework recreation as an explicit, process-local diagnostic
+	// opt-in only. See docs/framework-window-handoff-investigation.md in the repository.
+	private var frameworkRecreation = false
 	private val _systemLocaleList = MutableStateFlow(readSystemLocales())
 	override val systemLocaleList = _systemLocaleList.asStateFlow()
 	private val _preference = MutableStateFlow(readInitialPreference())
@@ -53,11 +59,16 @@ internal class AndroidLocaleEasy(
 
 	init {
 		checkMainThread()
+		// Retire the old persisted comparison switch; an earlier experiment must not
+		// silently enable framework recreation on the next process start.
+		preferences.edit { remove(KEY_FRAMEWORK_RECREATION) }
 		persist(preference.value)
-		if (!frameworkRecreation) {
-			if (Build.VERSION.SDK_INT >= 33) Api33.setPreference(application, LocalePreference.FollowSystem)
-			updateResources(application, effectiveLocales.value)
+		// Clear a previous framework override only when present, so it cannot compete
+		// with our wrapped contexts. Normal startup/language updates do not set it.
+		if (Build.VERSION.SDK_INT >= 33 && Api33.readPreference(application) != LocalePreference.FollowSystem) {
+			Api33.setPreference(application, LocalePreference.FollowSystem)
 		}
+		updateResources(application, effectiveLocales.value)
 		application.registerActivityLifecycleCallbacks(this)
 		application.registerComponentCallbacks(this)
 		if (Build.VERSION.SDK_INT >= 33) {
@@ -72,7 +83,6 @@ internal class AndroidLocaleEasy(
 			require(!value || Build.VERSION.SDK_INT >= 33) { "Framework locale recreation requires API 33+" }
 			if (frameworkRecreation == value) return
 			frameworkRecreation = value
-			preferences.edit { putBoolean(KEY_FRAMEWORK_RECREATION, value) }
 			if (Build.VERSION.SDK_INT >= 33 && value) {
 				Api33.setPreference(application, preference.value)
 			} else {
@@ -134,16 +144,13 @@ internal class AndroidLocaleEasy(
 		val saved = restoreLocalePreference(
 			preferences.getBoolean(KEY_FOLLOW_SYSTEM_LOCALE, true), preferences.getString(KEY_LANGUAGES, null),
 		)
-		if (Build.VERSION.SDK_INT < 33 || !frameworkRecreation) return saved
-		val framework = Api33.readPreference(application)
-		// Migrate once; a later reset in Android Settings must not resurrect an old override.
-		if (!preferences.getBoolean(KEY_FRAMEWORK_MIGRATED, false)) {
-			if (framework == LocalePreference.FollowSystem && saved is LocalePreference.AppLocales) {
-				Api33.setPreference(application, saved)
-			}
-			preferences.edit { putBoolean(KEY_FRAMEWORK_MIGRATED, true) }
-		}
-		return Api33.readPreference(application)
+		if (Build.VERSION.SDK_INT < 33) return saved
+		// A previous framework owner may have changed in Android Settings while our
+		// process was absent. Import that authoritative selection (including reset),
+		// or a first-install OS selection, before clearing the override and old switch.
+		val wasFrameworkOwner = preferences.getBoolean(KEY_FRAMEWORK_RECREATION, false)
+		return if (!wasFrameworkOwner && preferences.contains(KEY_FOLLOW_SYSTEM_LOCALE)) saved
+		else Api33.readPreference(application)
 	}
 
 	private fun readSystemLocales(): List<Locale> = if (Build.VERSION.SDK_INT >= 33) {
@@ -265,7 +272,6 @@ internal class AndroidLocaleEasy(
 		const val LOCALE_SHARED_PREFERENCES_NAME = "locale_easy_prefs"
 		const val KEY_FOLLOW_SYSTEM_LOCALE = "KEY_FOLLOW_SYSTEM_LOCALE"
 		const val KEY_LANGUAGES = "KEY_LANGUAGES"
-		private const val KEY_FRAMEWORK_MIGRATED = "KEY_FRAMEWORK_MIGRATED"
 		private const val KEY_FRAMEWORK_RECREATION = "KEY_FRAMEWORK_RECREATION"
 		private fun configurationLocales(configuration: Configuration): List<Locale> {
 			val locales = ConfigurationCompat.getLocales(configuration)

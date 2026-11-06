@@ -2,7 +2,7 @@
 
 2026-11-06. These checks investigate the reported toolbar shift and framework black flash in the original sample, independently of the retired lab.
 
-**Follow-up:** [Synchronized surface tracing](framework-window-handoff-investigation.md) now identifies a window-handoff gap and verifies a debug-only workaround retaining framework locale preferences. The normal automatic framework path still reproduces the flash; the workaround has not been enabled as the library default.
+**Follow-up:** [Synchronized surface tracing](framework-window-handoff-investigation.md) identifies a window-handoff gap and verifies a debug-only workaround retaining framework locale preferences. Automatic framework recreation still reproduces the flash as an explicit experiment. The [normal backend now uses local recreation](recreation-comparison.md) on every API; the hybrid has not been promoted to a library default.
 
 ## Toolbar overlapping the status bar: fixed in the sample
 

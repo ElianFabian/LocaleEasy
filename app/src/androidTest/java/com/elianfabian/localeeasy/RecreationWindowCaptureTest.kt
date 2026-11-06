@@ -124,7 +124,7 @@ class RecreationWindowCaptureTest {
                 }
             }
         } finally {
-            instrumentation.runOnMainSync { api.followSystem(); api.useFrameworkLocaleRecreation = true }
+            instrumentation.runOnMainSync { api.followSystem(); api.useFrameworkLocaleRecreation = false }
         }
     }
 }

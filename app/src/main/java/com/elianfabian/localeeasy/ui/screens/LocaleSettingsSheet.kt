@@ -30,7 +30,8 @@ import com.elianfabian.locale_easy.LocalePreference
 import com.elianfabian.localeeasy.MainViewModel
 import com.elianfabian.localeeasy.R
 import com.elianfabian.localeeasy.UiAction
-import com.elianfabian.localeeasy.ui.theme.TranslatedGreen
+import com.elianfabian.localeeasy.ui.theme.TranslatedTextColor
+import com.elianfabian.localeeasy.ui.theme.EnglishOnlyColor
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -59,13 +60,14 @@ fun LocaleSettingsSheet(
 			Text(
 				text = stringResource(R.string.settings_title),
 				style = MaterialTheme.typography.titleLarge,
-				color = TranslatedGreen
+				color = TranslatedTextColor
 			)
+			TextOriginLegend()
 
 			Row(modifier = Modifier.fillMaxWidth().toggleable(value = isFollowingSystem, role = Role.Switch,
 				onValueChange = { viewModel.sendAction(UiAction.SetFollowSystemLocale(it)) }), verticalAlignment = Alignment.CenterVertically,
 				horizontalArrangement = Arrangement.SpaceBetween) {
-				Text(text = stringResource(R.string.follow_system_locale), modifier = Modifier.weight(1f))
+				Text(text = stringResource(R.string.follow_system_locale), modifier = Modifier.weight(1f), color = TranslatedTextColor)
 				Switch(checked = isFollowingSystem, onCheckedChange = null)
 			}
 			LanguageButtons(selectedLocale = if (isFollowingSystem) null else appLocales.firstOrNull(),
@@ -74,15 +76,15 @@ fun LocaleSettingsSheet(
 
 			Text(
 				text = stringResource(R.string.state_following_system, isFollowingSystem),
-				color = TranslatedGreen
+				color = TranslatedTextColor
 			)
 			Text(
 				text = stringResource(R.string.state_app_locales, appLocales.joinToString { it.toLanguageTag() }),
-				color = TranslatedGreen
+				color = TranslatedTextColor
 			)
 			Text(
 				text = stringResource(R.string.state_system_locales, systemLocales.joinToString { it.toLanguageTag() }),
-				color = TranslatedGreen
+				color = TranslatedTextColor
 			)
 
 		}
@@ -106,7 +108,7 @@ fun LanguageButtons(selectedLocale: Locale? = null, onLanguageSelected: (Locale)
 	) {
 		languages.forEach { (name, locale) ->
 			FilterChip(selected = selectedLocale?.language == locale.language,
-				onClick = { onLanguageSelected(locale) }, label = { Text(text = name) })
+				onClick = { onLanguageSelected(locale) }, label = { Text(text = name, color = EnglishOnlyColor) })
 		}
 	}
 }

@@ -11,9 +11,12 @@ import java.util.Locale
 public interface LocaleEasy {
 
 	/**
-	 * Temporary comparison flag. Defaults to true on API 33+, false on older Android.
+	 * Temporary diagnostic opt-in. Defaults to false on every API and every process start.
 	 * False uses localized activity contexts and Activity.recreate(); true delegates to
-	 * LocaleManager (requires API 33+). Persisted across process restarts.
+	 * LocaleManager (requires API 33+). This flag is not persisted or exposed in the sample UI.
+	 * Normal updates avoid automatic framework window replacement because it exposed black
+	 * frames in the tested configuration. This is not a claim that every LocaleManager
+	 * integration flashes; a window-preserving hybrid is still under investigation.
 	 * Changing backend can itself recreate activities; compare subsequent language changes.
 	 * Manual mode does not synchronize with Android's per-app language settings.
 	 */

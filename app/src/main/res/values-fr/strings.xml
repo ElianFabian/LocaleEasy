@@ -1,4 +1,5 @@
 <resources>
+    <string name="legend_localizable">Texte traduisible</string>
     <string name="app_name">Exemple LocaleEasy</string>
     <string name="main_title">Navigation LocaleEasy</string>
     <string name="compose_sample_btn">Écran Compose</string>
