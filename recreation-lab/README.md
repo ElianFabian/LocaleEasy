@@ -119,6 +119,14 @@ Method analysis now also reports `main_thread_timings` in microseconds using ART
 
 The [longer headless comparison](../docs/headless-locale-comparison-2026-11-06.md) records 20 timing trials and five memory trials per path on one emulator.
 
+The saved graphics dumps can also be analyzed without a device or screen access:
+
+```powershell
+python recreation-lab/tools/analyze_rendering.py --input-dir build/recreation-lab/locale-timing --out build/recreation-lab/rendering.json
+```
+
+This extracts the first completed workload frame starting inside the replacement `onCreate` → frame-commit interval. It rejects unaligned Uptime/Realtime clock headers and frames within a 1 ms ambiguity band at the boundaries. It reports raw frame-work, vsync lateness, traversal/draw/sync intervals, deadline overrun, flags, and presentation-timestamp availability. Initial startup frames and harness windows are excluded. The deadline-overrun counts include new-window first draws and must not be presented as ordinary animation jank rates. Frame completion is not display presentation, and the parser does not classify pixel content.
+
 ## Experimental controls
 
 - Use one device/API and the same workload/mode/settings for a comparison. Keep system language, display geometry, power/thermal state, animation settings, and background work consistent.

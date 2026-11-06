@@ -38,6 +38,31 @@ The extra time was not confined to content construction. It appeared before the 
 
 The decor identity difference is consistent with the earlier source/trace investigation: a local relaunch and a system locale relaunch can coordinate windows differently even while sharing activity construction code. It is a lead for investigating frame presentation, not proof that decor replacement caused the measured latency or that decor preservation prevents flashing.
 
+## Replacement-frame rendering metrics
+
+A follow-up headless analysis used the already saved `gfxinfo ... framestats` dumps, with no additional device runs or screenshots. It selected the first completed workload-window frame whose recorded start fell after the replacement activity's `onCreate` and before its frame-commit callback. Initial harness/workload startup frames were excluded.
+
+The lab event and graphics clocks were aligned only when the dump's millisecond Uptime/Realtime headers agreed, with a 1 ms exclusion margin at each selection boundary. That produced 20 manual and 19 framework frames. One framework trial was excluded because its clock headers differed; no alignment was guessed. The [rendering result](../recreation-lab/results/rendering-comparison-2026-11-06.json) records selected raw rows, source hashes, exclusions, and distributions.
+
+| Median recorded frame interval | Manual, n=20 | Framework, n=19 |
+| --- | ---: | ---: |
+| Actual frame start → frame complete | 71.2 ms | 89.6 ms |
+| Intended vsync → actual frame start | 54.2 ms | 97.1 ms |
+| Traversals start → draw start | 34.0 ms | 53.6 ms |
+| Draw start → render sync queued | 16.3 ms | 15.5 ms |
+| Render sync queued → frame complete | 17.5 ms | 19.2 ms |
+| Completion beyond recorded frame deadline | 109.2 ms | 152.5 ms |
+
+The larger differences appeared in start lateness and the traversal interval, while draw-command recording was similar. The traversal interval includes framework measure/layout work; the sync-to-completion interval includes scheduling, queueing, and rendering. These are timestamp intervals, not pure CPU or GPU utilization measurements. Their separate medians should not be added.
+
+Every matched replacement frame exceeded its recorded deadline. This is **not** an Android JankStats rate or a comparable steady-animation jank percentage: manual frames had flags 0, while framework frames had flags 1 for their new window's first draw. The whole-process headline `Janky frames` statistics also mix harness/startup and replacement work and were deliberately not used for this comparison.
+
+This flag difference is a concrete lead for the perceived-smoothness problem. API-36 `FrameMetrics` maps flag bit 1 to `FIRST_DRAW_FRAME`; Android documents these frames as expected to be slow, generally exempt from animation-jank calculations, and often masked by window animations. Window/surface presentation could therefore differ even when manual recreation has lower measured latency. That is an inference to test, not proof of the original flash. See [FrameMetrics.FIRST_DRAW_FRAME](https://developer.android.com/reference/android/view/FrameMetrics#FIRST_DRAW_FRAME).
+
+`DisplayPresentTime` was zero for every selected row, so these dumps do not establish actual presentation time, blank-frame count, or pixel content. That is the remaining distinction between objective headless rendering metrics and proof of a visible flash. The measured results do establish that both paths contain slow replacement frames in this emulator workload; they do not reproduce the manual path being slower.
+
+The rendering parser has tests for timestamp calculations, excluding harness data, rejecting unaligned clocks, and rejecting boundary-ambiguous frames. The complete Python suite now has 13 passing tests. The analysis follows Android's [rendering instrumentation guidance](https://developer.android.com/topic/performance/rendering/inspect-gpu-rendering), while retaining the narrower raw-interval definitions above rather than treating every number as a GPU measurement.
+
 ## Memory: five separate profiled trials per path
 
 The memory sampler runs on a background thread. It changes runtime behavior, so its timings are excluded from the primary timing comparison. Snapshot PSS was collected before the request and roughly 200 ms after commit; Java/native maxima below are only the maxima of observed samples during the transition.
@@ -86,7 +111,7 @@ LocaleManager.setApplicationLocales
 
 The arrow between the LocaleManager request and incoming transaction spans asynchronous work; it is not a single continuous Java stack or a full system-server call graph.
 
-The analyzer now extracts inclusive CPU/wall and self timings for matching method entry/exit records, reports coverage, and excludes self timings with incomplete child intervals. Nine parser/summary tests pass, including nested calls, partial stacks, clock wraparound, percentile calculation, and event ordering.
+The analyzer now extracts inclusive CPU/wall and self timings for matching method entry/exit records, reports coverage, and excludes self timings with incomplete child intervals. Tests cover nested calls, partial stacks, clock wraparound, percentile calculation, and event ordering; with the rendering parser, the suite has 13 passing tests.
 
 The manual captures contained balanced `onCreate`/content-construction records; under instrumentation, content construction accounted for most of their measured `onCreate` interval. The framework captures did not provide matched records for these stages: one had no recorded `onCreate` entry, and the other had an entry without its exit, despite successful lifecycle/view checks. Their durations are intentionally absent. An overflow-free file does not imply exhaustive method coverage or balanced pairs. This prevents a reliable method-time comparison of those stages; the unprofiled lifecycle intervals above remain the stronger cross-case evidence. Missing durations are not treated as zero work, and the cause of the recorder gap is unconfirmed.
 
