@@ -10,7 +10,8 @@ import com.elianfabian.localeeasy.databinding.ActivitySampleBinding
 import java.text.DateFormat
 import java.util.Date
 
-class SampleActivity : BaseSampleActivity() {
+// Open so the debug-only window-recreation fixture can reuse the identical native workload.
+open class SampleActivity : BaseSampleActivity() {
 	private lateinit var binding: ActivitySampleBinding
 
 	override fun onCreate(savedInstanceState: Bundle?) {

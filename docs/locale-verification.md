@@ -4,6 +4,8 @@ Date: 2026-11-05; sample recreation selector verification updated 2026-11-06. Th
 
 ## Executed checks
 
+Framework-flash investigation on 2026-11-06: synchronized SurfaceFlinger traces confirm the old app surface disappears before the replacement appears. Animation disabling does not remove this gap. A debug-only framework-preference/local-relaunch fixture retained its decor and had no observed app-surface gaps or black screenshots in three API-36 captures. API-33 sampling likewise showed no black frame. Full suites on API 33 and 36 each discovered 21 tests: 15 passed, 6 intentional skips. A strengthened focused test subsequently passed on both, including externally selected framework locales, saved-state restoration, and follow-system reset. Final sample lint passed with 0 errors and 20 warnings. See [the investigation and remaining integration checks](framework-window-handoff-investigation.md).
+
 Window/UI follow-up on 2026-11-06: the toolbar overlap was reproduced (`y=0`, status inset 63 px) and fixed with explicit XML insets. Updated suites on API 32 and 36 discovered 20 tests each: 14 passed, 6 intentionally skipped, including the opt-in screen-capture diagnostic. A strengthened focused check also passed on API 36, asserting translated XML and both title values after each path. Sample lint passed with 0 errors and 19 warnings. The final home screen and captured native layouts were visually inspected. Frame sampling reproduced the framework black flash, which remains open; see [evidence and limits](recreation-window-findings.md).
 
 Current sample selector and temporary backend flag, verified 2026-11-06:

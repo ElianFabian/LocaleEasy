@@ -1,8 +1,10 @@
 package com.elianfabian.localeeasy
 
 import android.graphics.Bitmap
+import android.content.Intent
 import android.os.Build
 import android.os.SystemClock
+import android.os.Trace
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -30,24 +32,39 @@ class RecreationWindowCaptureTest {
         val api = LocaleEasy.getInstance()
         val directory = File(instrumentation.targetContext.filesDir, "window-captures").apply { mkdirs() }
         try {
-            for (framework in listOf(false, true)) {
+            val path = InstrumentationRegistry.getArguments().getString("capturePath")
+            val modes = when (path) { "manual" -> listOf(false); "framework" -> listOf(true); else -> listOf(false, true) }
+            for (framework in modes) {
+                val name = if (framework) "framework" else "manual"
                 instrumentation.runOnMainSync { api.useFrameworkLocaleRecreation = framework; api.followSystem() }
                 instrumentation.waitForIdleSync()
-                ActivityScenario.launch(SampleActivity::class.java).use { scenario ->
+                val localRelaunch = InstrumentationRegistry.getArguments().getString("localRelaunch") == "true"
+                val target = if (localRelaunch) LocalRelaunchSampleActivity::class.java else SampleActivity::class.java
+                ActivityScenario.launch<SampleActivity>(Intent(instrumentation.targetContext, target)).use { scenario ->
                     instrumentation.waitForIdleSync()
                     var original: SampleActivity? = null
-                    scenario.onActivity { original = it }
+                    var originalDecor: android.view.View? = null
+                    var originalRoot: android.view.View? = null
+                    scenario.onActivity {
+                        original = it
+                        originalDecor = it.window.decorView
+                        originalRoot = it.findViewById<android.view.ViewGroup>(android.R.id.content).getChildAt(0)
+                    }
                     val running = AtomicBoolean(true)
                     val ready = CountDownLatch(1)
-                    val frames = mutableListOf<Pair<Long, Bitmap>>()
+                    data class Frame(val start: Long, val end: Long, val bitmap: Bitmap)
+                    val frames = mutableListOf<Frame>()
                     val capture = Thread {
                         try {
                             while (running.get()) {
                                 val time = SystemClock.elapsedRealtimeNanos()
-                                instrumentation.uiAutomation.takeScreenshot()?.let { full ->
+                                Trace.beginSection("LocaleEasy.screenshot.$name")
+                                val screenshot = try { instrumentation.uiAutomation.takeScreenshot() } finally { Trace.endSection() }
+                                val captured = SystemClock.elapsedRealtimeNanos()
+                                screenshot?.let { full ->
                                     val small = Bitmap.createScaledBitmap(full, 180, 400, true)
                                     full.recycle()
-                                    frames.add(time to small)
+                                    frames.add(Frame(time, captured, small))
                                     ready.countDown()
                                 }
                                 Thread.sleep(20)
@@ -59,7 +76,9 @@ class RecreationWindowCaptureTest {
                         assertTrue("Screenshot sampling did not start", ready.await(5, TimeUnit.SECONDS))
                         val trigger = SystemClock.elapsedRealtimeNanos()
                         instrumentation.runOnMainSync {
-                            api.setLocale(if (api.effectiveLocales.value.first().language == "fr") Locale.ITALIAN else Locale.FRENCH)
+                            Trace.beginSection("LocaleEasy.change.$name")
+                            try { api.setLocale(if (api.effectiveLocales.value.first().language == "fr") Locale.ITALIAN else Locale.FRENCH) }
+                            finally { Trace.endSection() }
                         }
                         val deadline = SystemClock.uptimeMillis() + 15_000
                         var replaced = false
@@ -73,12 +92,12 @@ class RecreationWindowCaptureTest {
                         running.set(false)
                         capture.join(5_000)
                         assertTrue("Screenshot worker did not stop", !capture.isAlive)
-                        val name = if (framework) "framework" else "manual"
                         val metadata = JSONArray()
-                        frames.forEachIndexed { index, (time, bitmap) ->
+                        frames.forEachIndexed { index, (time, captured, bitmap) ->
                             val file = "$name-$index.png"
                             File(directory, file).outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
-                            metadata.put(JSONObject().put("file", file).put("trigger_offset_ms", (time - trigger) / 1_000_000.0))
+                            metadata.put(JSONObject().put("file", file).put("trigger_offset_ms", (time - trigger) / 1_000_000.0)
+                                .put("capture_start_ns", time).put("capture_end_ns", captured))
                             bitmap.recycle()
                         }
                         assertTrue("No screenshots were captured", frames.isNotEmpty())
@@ -86,13 +105,21 @@ class RecreationWindowCaptureTest {
                         scenario.onActivity {
                             File(directory, "$name-state.json").writeText(JSONObject()
                                 .put("activity_locales", it.resources.configuration.locales.toLanguageTags())
+                                .put("trigger_ns", trigger)
+                                .put("local_relaunch", localRelaunch)
+                                .put("activity_replaced", it !== original)
+                                .put("decor_replaced", it.window.decorView !== originalDecor)
+                                .put("root_replaced", it.findViewById<android.view.ViewGroup>(android.R.id.content).getChildAt(0) !== originalRoot)
                                 .put("view_text", it.findViewById<android.widget.TextView>(R.id.textViewLocalized).text)
-                                .put("preference", api.preference.value.toString()).toString(2))
+                                .put("preference", api.preference.value.toString())
+                                .put("framework_backend", api.useFrameworkLocaleRecreation)
+                                .put("framework_locales", it.getSystemService(android.app.LocaleManager::class.java).applicationLocales.toLanguageTags())
+                                .put("handled_config_mask", it.packageManager.getActivityInfo(it.componentName, 0).configChanges).toString(2))
                         }
                     } finally {
                         running.set(false)
                         capture.join(5_000)
-                        frames.forEach { if (!it.second.isRecycled) it.second.recycle() }
+                        frames.forEach { if (!it.bitmap.isRecycled) it.bitmap.recycle() }
                     }
                 }
             }

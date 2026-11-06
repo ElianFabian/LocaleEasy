@@ -209,6 +209,8 @@ Verification — **Manual required:** open SampleFragment as a dialog, change la
 
 ## 11. Reproduce and isolate the activity/view recreation symptom
 
+**Framework flash investigation:** [Surface-level evidence and prototype](framework-window-handoff-investigation.md) identify an interval with no visible app surface during automatic framework recreation. A debug fixture handling the delivered locale/layout configuration and requesting local recreation preserves the decor, replaces activity/views, and retains framework preference integration. It passed repeated language/external-selection/state/reset checks on API 33 and 36; production integration and the wider device/configuration matrix remain open.
+
 **Window follow-up, 2026-11-06:** the sample's XML toolbar/status-bar overlap was reproduced and fixed with explicit system-bar insets. A separate framework-only black flash is now captured in the actual sample and remains unresolved; [window findings](recreation-window-findings.md) distinguish this visible evidence from activity/view identity checks. The updated sample UI exposes the existing comparison more clearly without changing the recreation paths.
 
 **Current status:** Controlled recreation now passes: fixture traces show different activity/view identities, changingConfigurations=true, restored state, and French XML; Compose navigation/translation also survives. This does not identify the original device-specific failure; reproduce on that device before closing the task.

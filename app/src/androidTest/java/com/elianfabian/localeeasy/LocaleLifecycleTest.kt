@@ -3,6 +3,7 @@ package com.elianfabian.localeeasy
 import android.app.LocaleManager
 import android.content.res.Configuration
 import android.os.Build
+import android.os.Bundle
 import android.os.LocaleList
 import android.widget.EditText
 import android.widget.TextView
@@ -239,6 +240,61 @@ class LocaleLifecycleTest {
                     assertEquals("Toolbar title used a stale locale: framework=$framework", expectedTitle,
                         it.findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolbar).title.toString())
                 }
+            }
+        }
+    }
+
+    @Test fun frameworkCallbackCanRecreateXmlAndRestoreStateWithoutReplacingDecor() {
+        assumeTrue(Build.VERSION.SDK_INT >= 33)
+        ActivityScenario.launch(LocalRelaunchSampleActivity::class.java).use { scenario ->
+            for (locale in listOf(Locale.FRENCH, Locale.ITALIAN, Locale.forLanguageTag("es"))) {
+                var old: LocalRelaunchSampleActivity? = null
+                var decor: View? = null
+                var root: View? = null
+                scenario.onActivity {
+                    old = it
+                    decor = it.window.decorView
+                    root = it.findViewById<android.view.ViewGroup>(android.R.id.content).getChildAt(0)
+                    it.savedStateRegistry.registerSavedStateProvider("hybrid-test") {
+                        Bundle().apply { putString("marker", "preserve-${locale.language}") }
+                    }
+                    if (locale == Locale.ITALIAN) {
+                        app.getSystemService(LocaleManager::class.java).applicationLocales = LocaleList(locale)
+                    } else api.setLocale(locale)
+                }
+                await {
+                    var ready = false
+                    scenario.onActivity {
+                        ready = it !== old && it.findViewById<TextView>(R.id.textViewLocalized).text.toString() == translated(locale.language) &&
+                            api.preference.value == LocalePreference.AppLocales(listOf(locale)) && it.findViewById<View>(R.id.toolbar).isLaidOut
+                    }
+                    ready
+                }
+                scenario.onActivity {
+                    assertSame("The hybrid must preserve the existing decor", decor, it.window.decorView)
+                    assertNotSame(root, it.findViewById<android.view.ViewGroup>(android.R.id.content).getChildAt(0))
+                    assertEquals("preserve-${locale.language}", it.savedStateRegistry.consumeRestoredStateForKey("hybrid-test")?.getString("marker"))
+                    assertTrue(api.useFrameworkLocaleRecreation)
+                    assertEquals(locale, app.getSystemService(LocaleManager::class.java).applicationLocales[0])
+                    val toolbar = it.findViewById<View>(R.id.toolbar)
+                    val location = IntArray(2)
+                    toolbar.getLocationInWindow(location)
+                    val bars = requireNotNull(ViewCompat.getRootWindowInsets(toolbar))
+                        .getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout())
+                    assertTrue("Hybrid toolbar overlaps system bars", location[1] >= bars.top)
+                }
+            }
+            var old: LocalRelaunchSampleActivity? = null
+            var decor: View? = null
+            scenario.onActivity { old = it; decor = it.window.decorView; api.followSystem() }
+            await {
+                var ready = false
+                scenario.onActivity { ready = it !== old && api.preference.value == LocalePreference.FollowSystem }
+                ready
+            }
+            scenario.onActivity {
+                assertSame(decor, it.window.decorView)
+                assertTrue(app.getSystemService(LocaleManager::class.java).applicationLocales.isEmpty)
             }
         }
     }

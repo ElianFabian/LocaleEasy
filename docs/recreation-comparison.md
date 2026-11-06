@@ -1,6 +1,6 @@
 # Compare recreation in the sample
 
-The home screen now groups the method selector, effective locale, and **Open State & Controls** button in one card, followed by the sample screens. Language choices highlight the selected override. The XML toolbar inset regression is fixed; the framework black flash has been reproduced and remains open. See [window findings and capture instructions](recreation-window-findings.md).
+The home screen now groups the method selector, effective locale, and **Open State & Controls** button in one card, followed by the sample screens. Language choices highlight the selected override. The XML toolbar inset regression is fixed. The automatic framework path still flashes in the tested emulator; [the follow-up investigation](framework-window-handoff-investigation.md) identifies its surface gap and verifies an opt-in debug prototype. That prototype has not replaced either normal selector mode.
 
 Run the existing **app** module. There is no separate lab app or trial navigation.
 

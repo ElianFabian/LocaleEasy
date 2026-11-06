@@ -2,6 +2,8 @@
 
 2026-11-06. These checks investigate the reported toolbar shift and framework black flash in the original sample, independently of the retired lab.
 
+**Follow-up:** [Synchronized surface tracing](framework-window-handoff-investigation.md) now identifies a window-handoff gap and verifies a debug-only workaround retaining framework locale preferences. The normal automatic framework path still reproduces the flash; the workaround has not been enabled as the library default.
+
 ## Toolbar overlapping the status bar: fixed in the sample
 
 The supplied screenshots showed the existing XML toolbar shifting into the clock/status-bar area. The native sample did not handle system-bar insets. On the API-36 emulator, a regression check failed with toolbar `y=0` and a status-bar inset of 63 px. This was an overlap, not an additional action bar.
@@ -25,7 +27,7 @@ The framework black samples were requested approximately 107 ms and 185 ms after
 
 Both final activity resource configurations and XML text were French after the change. Manual mode reported `fr`; framework mode reported `fr,en-US`. The black output still occurred with an explicit light `android:windowBackground`, so that background setting is **not a fix** for this flash. The capture establishes the visible failure; it does not establish the responsible WindowManager/SurfaceFlinger operation. No animation, reflection, configuration opt-out, or screenshot-overlay workaround has been added to conceal it or change what the comparison measures.
 
-The next investigation should synchronize a system window/surface trace with a recorded blackout, identify which surface disappears or becomes black, and test a mitigation against both restoration and visual behavior. Physical-device and other API coverage remain necessary. The absence of a black sampled image in manual mode does not prove that arbitrarily short flashes are impossible.
+The follow-up synchronized system traces identify the disappearing app surface and validate a local-relaunch prototype; see the report linked above. Physical-device and other API coverage remain necessary. The absence of a black sampled image in manual mode does not prove that arbitrarily short flashes are impossible.
 
 Environment: `Medium_Phone_API_36.0`, Android 16, fingerprint `google/sdk_gphone64_x86_64/emu64xa:16/BE2A.250530.026.D1/13818094:user/release-keys`. Screenshot sampling perturbs timing and is not a benchmark. Images are reduced to 180×400; actual capture cadence is slower than the worker's 20 ms sleep. Raw local captures are under ignored `build/qa/window-captures-polished/`.
 

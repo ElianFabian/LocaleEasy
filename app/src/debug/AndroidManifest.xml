@@ -1,5 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application>
+        <activity android:name=".LocalRelaunchSampleActivity" android:exported="false"
+            android:configChanges="locale|layoutDirection|screenLayout" android:theme="@style/Theme.LocaleEasy" />
         <activity android:name=".LocaleFixtureActivity" android:exported="false" />
     </application>
 </manifest>

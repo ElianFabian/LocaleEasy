@@ -1,0 +1,1003 @@
+{
+  "date": "2026-11-06",
+  "runs": [
+    {
+      "capture": "flash-trace-baseline",
+      "trace_sha256": "37f6c333719ead8fde285c4974f8a2f401a51270eeeaa1664900a32403f0211e",
+      "state": {
+        "activity_locales": "fr,en-US",
+        "trigger_ns": 211265200700,
+        "view_text": "Cha\u00c3\u00aene Localis\u00c3\u00a9e: Vert",
+        "preference": "AppLocales(locales=[fr])"
+      },
+      "environment": {
+        "serial": "emulator-5558",
+        "path": "framework",
+        "animations": "unchanged",
+        "fingerprint": "google/sdk_gphone64_x86_64/emu64xa:16/BE2A.250530.026.D1/13818094:user/release-keys",
+        "original_scales": {
+          "window_animation_scale": "1.0",
+          "transition_animation_scale": "1.0",
+          "animator_duration_scale": "null"
+        },
+        "capture_scales": {
+          "window_animation_scale": "1.0",
+          "transition_animation_scale": "1.0",
+          "animator_duration_scale": "null"
+        },
+        "perfetto_pid": "5826",
+        "restored_scales": {
+          "window_animation_scale": "1.0",
+          "transition_animation_scale": "1.0",
+          "animator_duration_scale": "null"
+        }
+      },
+      "sample_count": 12,
+      "black_sample_count": 2,
+      "surface_gaps": [
+        {
+          "start_ns": 211387874700,
+          "end_ns": 211561961000,
+          "start_ms": 122.674,
+          "end_ms": 296.76,
+          "duration_ms": 174.086
+        }
+      ],
+      "surface_state_changes": [
+        {
+          "id": 76,
+          "ts": 211277281400,
+          "offset_ms": 12.081,
+          "app_layers": 1,
+          "visible_layers": "com.elianfabian.localeeasy/com.elianfabian.localeeasy.ui.legacy.SampleActivity#112 | StatusBar#102 | Taskbar#85"
+        },
+        {
+          "id": 80,
+          "ts": 211387874700,
+          "offset_ms": 122.674,
+          "app_layers": 0,
+          "visible_layers": "StatusBar#102 | Taskbar#85"
+        },
+        {
+          "id": 86,
+          "ts": 211561961000,
+          "offset_ms": 296.76,
+          "app_layers": 1,
+          "visible_layers": "com.elianfabian.localeeasy/com.elianfabian.localeeasy.ui.legacy.SampleActivity#120 | StatusBar#102 | Taskbar#85"
+        }
+      ],
+      "lifecycle_events": [
+        {
+          "ts": 211285137500,
+          "offset_ms": 19.937,
+          "dur_ms": 18.851,
+          "name": "LocaleEasy.change.framework"
+        },
+        {
+          "ts": 211335725700,
+          "offset_ms": 70.525,
+          "dur_ms": 1.286,
+          "name": "performPause:com.elianfabian.localeeasy.ui.legacy.SampleActivity"
+        },
+        {
+          "ts": 211337278300,
+          "offset_ms": 72.078,
+          "dur_ms": 4.192,
+          "name": "performStop:com.elianfabian.localeeasy.ui.legacy.SampleActivity"
+        },
+        {
+          "ts": 211351397800,
+          "offset_ms": 86.197,
+          "dur_ms": 4.405,
+          "name": "performDestroy:com.elianfabian.localeeasy.ui.legacy.SampleActivity"
+        },
+        {
+          "ts": 211388812800,
+          "offset_ms": 123.612,
+          "dur_ms": 65.973,
+          "name": "performCreate:com.elianfabian.localeeasy.ui.legacy.SampleActivity"
+        },
+        {
+          "ts": 211455563600,
+          "offset_ms": 190.363,
+          "dur_ms": 0.863,
+          "name": "performStart:com.elianfabian.localeeasy.ui.legacy.SampleActivity"
+        },
+        {
+          "ts": 211457808300,
+          "offset_ms": 192.608,
+          "dur_ms": 1.054,
+          "name": "performResume:com.elianfabian.localeeasy.ui.legacy.SampleActivity"
+        }
+      ]
+    },
+    {
+      "capture": "flash-trace-baseline-repeat",
+      "trace_sha256": "3d1bdb143f31bdde69a525a2e2e857e781e33d12aba1fca695251e77865c2bf5",
+      "state": {
+        "activity_locales": "fr,en-US",
+        "trigger_ns": 1077704704800,
+        "local_relaunch": false,
+        "activity_replaced": true,
+        "decor_replaced": true,
+        "root_replaced": true,
+        "view_text": "Cha\u00c3\u00aene Localis\u00c3\u00a9e: Vert",
+        "preference": "AppLocales(locales=[fr])",
+        "framework_backend": true,
+        "framework_locales": "fr",
+        "handled_config_mask": 3
+      },
+      "environment": {
+        "serial": "emulator-5558",
+        "path": "framework",
+        "animations": "unchanged",
+        "local_relaunch": false,
+        "fingerprint": "google/sdk_gphone64_x86_64/emu64xa:16/BE2A.250530.026.D1/13818094:user/release-keys",
+        "original_scales": {
+          "window_animation_scale": "1.0",
+          "transition_animation_scale": "1.0",
+          "animator_duration_scale": "null"
+        },
+        "capture_scales": {
+          "window_animation_scale": "1.0",
+          "transition_animation_scale": "1.0",
+          "animator_duration_scale": "null"
+        },
+        "perfetto_pid": "8618",
+        "restored_scales": {
+          "window_animation_scale": "1.0",
+          "transition_animation_scale": "1.0",
+          "animator_duration_scale": "null"
+        }
+      },
+      "sample_count": 12,
+      "black_sample_count": 2,
+      "surface_gaps": [
+        {
+          "start_ns": 1077843303400,
+          "end_ns": 1078062547300,
+          "start_ms": 138.599,
+          "end_ms": 357.842,
+          "duration_ms": 219.244
+        }
+      ],
+      "surface_state_changes": [
+        {
+          "id": 48,
+          "ts": 1077688706600,
+          "offset_ms": -15.998,
+          "app_layers": 1,
+          "visible_layers": "com.elianfabian.localeeasy/com.elianfabian.localeeasy.ui.legacy.SampleActivity#1156 | StatusBar#102 | Taskbar#85"
+        },
+        {
+          "id": 53,
+          "ts": 1077843303400,
+          "offset_ms": 138.599,
+          "app_layers": 0,
+          "visible_layers": "StatusBar#102 | Taskbar#85"
+        },
+        {
+          "id": 60,
+          "ts": 1078062547300,
+          "offset_ms": 357.842,
+          "app_layers": 1,
+          "visible_layers": "com.elianfabian.localeeasy/com.elianfabian.localeeasy.ui.legacy.SampleActivity#1164 | StatusBar#102 | Taskbar#85"
+        }
+      ],
+      "lifecycle_events": [
+        {
+          "ts": 1077707684500,
+          "offset_ms": 2.98,
+          "dur_ms": 13.006,
+          "name": "LocaleEasy.change.framework"
+        },
+        {
+          "ts": 1077758085100,
+          "offset_ms": 53.38,
+          "dur_ms": 4.348,
+          "name": "performPause:com.elianfabian.localeeasy.ui.legacy.SampleActivity"
+        },
+        {
+          "ts": 1077762860000,
+          "offset_ms": 58.155,
+          "dur_ms": 22.825,
+          "name": "performStop:com.elianfabian.localeeasy.ui.legacy.SampleActivity"
+        },
+        {
+          "ts": 1077789378700,
+          "offset_ms": 84.674,
+          "dur_ms": 5.957,
+          "name": "performDestroy:com.elianfabian.localeeasy.ui.legacy.SampleActivity"
+        },
+        {
+          "ts": 1077839196900,
+          "offset_ms": 134.492,
+          "dur_ms": 45.498,
+          "name": "performCreate:com.elianfabian.localeeasy.ui.legacy.SampleActivity"
+        },
+        {
+          "ts": 1077885565600,
+          "offset_ms": 180.861,
+          "dur_ms": 1.133,
+          "name": "performStart:com.elianfabian.localeeasy.ui.legacy.SampleActivity"
+        },
+        {
+          "ts": 1077887480300,
+          "offset_ms": 182.775,
+          "dur_ms": 2.211,
+          "name": "performResume:com.elianfabian.localeeasy.ui.legacy.SampleActivity"
+        }
+      ]
+    },
+    {
+      "capture": "flash-trace-no-animations",
+      "trace_sha256": "b293b3d906f9b99fd8bebe4592d3ad888a984fea2ef20294474ee5a07c4bf4c7",
+      "state": {
+        "activity_locales": "fr,en-US",
+        "trigger_ns": 251515715000,
+        "view_text": "Cha\u00c3\u00aene Localis\u00c3\u00a9e: Vert",
+        "preference": "AppLocales(locales=[fr])"
+      },
+      "environment": {
+        "serial": "emulator-5558",
+        "path": "framework",
+        "animations": "off",
+        "fingerprint": "google/sdk_gphone64_x86_64/emu64xa:16/BE2A.250530.026.D1/13818094:user/release-keys",
+        "original_scales": {
+          "window_animation_scale": "1.0",
+          "transition_animation_scale": "1.0",
+          "animator_duration_scale": "null"
+        },
+        "capture_scales": {
+          "window_animation_scale": "0",
+          "transition_animation_scale": "0",
+          "animator_duration_scale": "0"
+        },
+        "perfetto_pid": "6138",
+        "restored_scales": {
+          "window_animation_scale": "1.0",
+          "transition_animation_scale": "1.0",
+          "animator_duration_scale": "null"
+        }
+      },
+      "sample_count": 16,
+      "black_sample_count": 2,
+      "surface_gaps": [
+        {
+          "start_ns": 251591080700,
+          "end_ns": 251724234300,
+          "start_ms": 75.366,
+          "end_ms": 208.519,
+          "duration_ms": 133.154
+        }
+      ],
+      "surface_state_changes": [
+        {
+          "id": 28,
+          "ts": 251542105100,
+          "offset_ms": 26.39,
+          "app_layers": 1,
+          "visible_layers": "com.elianfabian.localeeasy/com.elianfabian.localeeasy.ui.legacy.SampleActivity#160 | StatusBar#102 | Taskbar#85"
+        },
+        {
+          "id": 30,
+          "ts": 251591080700,
+          "offset_ms": 75.366,
+          "app_layers": 0,
+          "visible_layers": "StatusBar#102 | Taskbar#85"
+        },
+        {
+          "id": 36,
+          "ts": 251724234300,
+          "offset_ms": 208.519,
+          "app_layers": 1,
+          "visible_layers": "com.elianfabian.localeeasy/com.elianfabian.localeeasy.ui.legacy.SampleActivity#168 | StatusBar#102 | Taskbar#85"
+        }
+      ],
+      "lifecycle_events": [
+        {
+          "ts": 251516228400,
+          "offset_ms": 0.513,
+          "dur_ms": 5.48,
+          "name": "LocaleEasy.change.framework"
+        },
+        {
+          "ts": 251529974100,
+          "offset_ms": 14.259,
+          "dur_ms": 1.828,
+          "name": "performPause:com.elianfabian.localeeasy.ui.legacy.SampleActivity"
+        },
+        {
+          "ts": 251531975200,
+          "offset_ms": 16.26,
+          "dur_ms": 4.372,
+          "name": "performStop:com.elianfabian.localeeasy.ui.legacy.SampleActivity"
+        },
+        {
+          "ts": 251539445200,
+          "offset_ms": 23.73,
+          "dur_ms": 5.9,
+          "name": "performDestroy:com.elianfabian.localeeasy.ui.legacy.SampleActivity"
+        },
+        {
+          "ts": 251582723900,
+          "offset_ms": 67.009,
+          "dur_ms": 42.97,
+          "name": "performCreate:com.elianfabian.localeeasy.ui.legacy.SampleActivity"
+        },
+        {
+          "ts": 251626164900,
+          "offset_ms": 110.45,
+          "dur_ms": 0.699,
+          "name": "performStart:com.elianfabian.localeeasy.ui.legacy.SampleActivity"
+        },
+        {
+          "ts": 251627943300,
+          "offset_ms": 112.228,
+          "dur_ms": 1.627,
+          "name": "performResume:com.elianfabian.localeeasy.ui.legacy.SampleActivity"
+        }
+      ]
+    },
+    {
+      "capture": "flash-trace-hybrid",
+      "trace_sha256": "7e2c526a5f59bd60ba9fa3de252ddf7ec378a00ac78f7b79f86aea252ca0873e",
+      "state": {
+        "activity_locales": "fr,en-US",
+        "trigger_ns": 539470702200,
+        "local_relaunch": true,
+        "activity_replaced": true,
+        "decor_replaced": true,
+        "root_replaced": true,
+        "view_text": "Cha\u00c3\u00aene Localis\u00c3\u00a9e: Vert",
+        "preference": "AppLocales(locales=[fr])"
+      },
+      "environment": {
+        "serial": "emulator-5558",
+        "path": "framework",
+        "animations": "unchanged",
+        "local_relaunch": true,
+        "fingerprint": "google/sdk_gphone64_x86_64/emu64xa:16/BE2A.250530.026.D1/13818094:user/release-keys",
+        "original_scales": {
+          "window_animation_scale": "1.0",
+          "transition_animation_scale": "1.0",
+          "animator_duration_scale": "null"
+        },
+        "capture_scales": {
+          "window_animation_scale": "1.0",
+          "transition_animation_scale": "1.0",
+          "animator_duration_scale": "null"
+        },
+        "perfetto_pid": "6573",
+        "restored_scales": {
+          "window_animation_scale": "1.0",
+          "transition_animation_scale": "1.0",
+          "animator_duration_scale": "null"
+        }
+      },
+      "sample_count": 15,
+      "black_sample_count": 3,
+      "surface_gaps": [
+        {
+          "start_ns": 539604330300,
+          "end_ns": 539868393400,
+          "start_ms": 133.628,
+          "end_ms": 397.691,
+          "duration_ms": 264.063
+        }
+      ],
+      "surface_state_changes": [
+        {
+          "id": 61,
+          "ts": 539448704100,
+          "offset_ms": -21.998,
+          "app_layers": 1,
+          "visible_layers": "com.elianfabian.localeeasy/com.elianfabian.localeeasy.LocalRelaunchSampleActivity#207 | StatusBar#102 | Taskbar#85"
+        },
+        {
+          "id": 68,
+          "ts": 539604330300,
+          "offset_ms": 133.628,
+          "app_layers": 0,
+          "visible_layers": "StatusBar#102 | Taskbar#85"
+        },
+        {
+          "id": 77,
+          "ts": 539868393400,
+          "offset_ms": 397.691,
+          "app_layers": 1,
+          "visible_layers": "com.elianfabian.localeeasy/com.elianfabian.localeeasy.LocalRelaunchSampleActivity#217 | StatusBar#102 | Taskbar#85"
+        }
+      ],
+      "lifecycle_events": [
+        {
+          "ts": 539484149000,
+          "offset_ms": 13.447,
+          "dur_ms": 12.744,
+          "name": "LocaleEasy.change.framework"
+        },
+        {
+          "ts": 539515786200,
+          "offset_ms": 45.084,
+          "dur_ms": 1.511,
+          "name": "performPause:com.elianfabian.localeeasy.LocalRelaunchSampleActivity"
+        },
+        {
+          "ts": 539517772200,
+          "offset_ms": 47.07,
+          "dur_ms": 39.977,
+          "name": "performStop:com.elianfabian.localeeasy.LocalRelaunchSampleActivity"
+        },
+        {
+          "ts": 539559949100,
+          "offset_ms": 89.247,
+          "dur_ms": 4.845,
+          "name": "performDestroy:com.elianfabian.localeeasy.LocalRelaunchSampleActivity"
+        },
+        {
+          "ts": 539599031800,
+          "offset_ms": 128.33,
+          "dur_ms": 57.211,
+          "name": "performCreate:com.elianfabian.localeeasy.LocalRelaunchSampleActivity"
+        },
+        {
+          "ts": 539657412600,
+          "offset_ms": 186.71,
+          "dur_ms": 0.753,
+          "name": "performStart:com.elianfabian.localeeasy.LocalRelaunchSampleActivity"
+        },
+        {
+          "ts": 539658946400,
+          "offset_ms": 188.244,
+          "dur_ms": 0.965,
+          "name": "performResume:com.elianfabian.localeeasy.LocalRelaunchSampleActivity"
+        }
+      ]
+    },
+    {
+      "capture": "flash-trace-hybrid-gender",
+      "trace_sha256": "02dc11f9b1db6d5a8798930772be2cb63dc26441c0bdc3adcf52b8086cd98646",
+      "state": {
+        "activity_locales": "fr,en-US",
+        "trigger_ns": 634994822200,
+        "local_relaunch": true,
+        "activity_replaced": true,
+        "decor_replaced": true,
+        "root_replaced": true,
+        "view_text": "Cha\u00c3\u00aene Localis\u00c3\u00a9e: Vert",
+        "preference": "AppLocales(locales=[fr])"
+      },
+      "environment": {
+        "serial": "emulator-5558",
+        "path": "framework",
+        "animations": "unchanged",
+        "local_relaunch": true,
+        "fingerprint": "google/sdk_gphone64_x86_64/emu64xa:16/BE2A.250530.026.D1/13818094:user/release-keys",
+        "original_scales": {
+          "window_animation_scale": "1.0",
+          "transition_animation_scale": "1.0",
+          "animator_duration_scale": "null"
+        },
+        "capture_scales": {
+          "window_animation_scale": "1.0",
+          "transition_animation_scale": "1.0",
+          "animator_duration_scale": "null"
+        },
+        "perfetto_pid": "6943",
+        "restored_scales": {
+          "window_animation_scale": "1.0",
+          "transition_animation_scale": "1.0",
+          "animator_duration_scale": "null"
+        }
+      },
+      "sample_count": 13,
+      "black_sample_count": 1,
+      "surface_gaps": [
+        {
+          "start_ns": 635132420200,
+          "end_ns": 635287946400,
+          "start_ms": 137.598,
+          "end_ms": 293.124,
+          "duration_ms": 155.526
+        }
+      ],
+      "surface_state_changes": [
+        {
+          "id": 43,
+          "ts": 635054985100,
+          "offset_ms": 60.163,
+          "app_layers": 1,
+          "visible_layers": "com.elianfabian.localeeasy/com.elianfabian.localeeasy.LocalRelaunchSampleActivity#253 | StatusBar#102 | Taskbar#85"
+        },
+        {
+          "id": 44,
+          "ts": 635132420200,
+          "offset_ms": 137.598,
+          "app_layers": 0,
+          "visible_layers": "StatusBar#102 | Taskbar#85"
+        },
+        {
+          "id": 52,
+          "ts": 635287946400,
+          "offset_ms": 293.124,
+          "app_layers": 1,
+          "visible_layers": "com.elianfabian.localeeasy/com.elianfabian.localeeasy.LocalRelaunchSampleActivity#261 | StatusBar#102 | Taskbar#85"
+        }
+      ],
+      "lifecycle_events": [
+        {
+          "ts": 634995629500,
+          "offset_ms": 0.807,
+          "dur_ms": 7.641,
+          "name": "LocaleEasy.change.framework"
+        },
+        {
+          "ts": 635014181100,
+          "offset_ms": 19.359,
+          "dur_ms": 1.581,
+          "name": "performPause:com.elianfabian.localeeasy.LocalRelaunchSampleActivity"
+        },
+        {
+          "ts": 635016025500,
+          "offset_ms": 21.203,
+          "dur_ms": 4.04,
+          "name": "performStop:com.elianfabian.localeeasy.LocalRelaunchSampleActivity"
+        },
+        {
+          "ts": 635024598200,
+          "offset_ms": 29.776,
+          "dur_ms": 10.11,
+          "name": "performDestroy:com.elianfabian.localeeasy.LocalRelaunchSampleActivity"
+        },
+        {
+          "ts": 635084679200,
+          "offset_ms": 89.857,
+          "dur_ms": 35.045,
+          "name": "performCreate:com.elianfabian.localeeasy.LocalRelaunchSampleActivity"
+        },
+        {
+          "ts": 635120981400,
+          "offset_ms": 126.159,
+          "dur_ms": 0.662,
+          "name": "performStart:com.elianfabian.localeeasy.LocalRelaunchSampleActivity"
+        },
+        {
+          "ts": 635122199700,
+          "offset_ms": 127.377,
+          "dur_ms": 1.366,
+          "name": "performResume:com.elianfabian.localeeasy.LocalRelaunchSampleActivity"
+        }
+      ]
+    },
+    {
+      "capture": "flash-trace-hybrid-layout",
+      "trace_sha256": "5aced0eea40f4d8d762dadb93745029d3a39f2f12b592f715bca03cb20739371",
+      "state": {
+        "activity_locales": "fr,en-US",
+        "trigger_ns": 704577343800,
+        "local_relaunch": true,
+        "activity_replaced": true,
+        "decor_replaced": false,
+        "root_replaced": true,
+        "view_text": "Cha\u00c3\u00aene Localis\u00c3\u00a9e: Vert",
+        "preference": "AppLocales(locales=[fr])"
+      },
+      "environment": {
+        "serial": "emulator-5558",
+        "path": "framework",
+        "animations": "unchanged",
+        "local_relaunch": true,
+        "fingerprint": "google/sdk_gphone64_x86_64/emu64xa:16/BE2A.250530.026.D1/13818094:user/release-keys",
+        "original_scales": {
+          "window_animation_scale": "1.0",
+          "transition_animation_scale": "1.0",
+          "animator_duration_scale": "null"
+        },
+        "capture_scales": {
+          "window_animation_scale": "1.0",
+          "transition_animation_scale": "1.0",
+          "animator_duration_scale": "null"
+        },
+        "perfetto_pid": "7300",
+        "restored_scales": {
+          "window_animation_scale": "1.0",
+          "transition_animation_scale": "1.0",
+          "animator_duration_scale": "null"
+        }
+      },
+      "sample_count": 13,
+      "black_sample_count": 0,
+      "surface_gaps": [],
+      "surface_state_changes": [
+        {
+          "id": 48,
+          "ts": 704737863600,
+          "offset_ms": 160.52,
+          "app_layers": 1,
+          "visible_layers": "com.elianfabian.localeeasy/com.elianfabian.localeeasy.LocalRelaunchSampleActivity#296 | StatusBar#102 | Taskbar#85"
+        }
+      ],
+      "lifecycle_events": [
+        {
+          "ts": 704577663100,
+          "offset_ms": 0.319,
+          "dur_ms": 8.088,
+          "name": "LocaleEasy.change.framework"
+        },
+        {
+          "ts": 704600691200,
+          "offset_ms": 23.347,
+          "dur_ms": 0.436,
+          "name": "LocaleEasy.hybrid.configuration"
+        },
+        {
+          "ts": 704611442000,
+          "offset_ms": 34.098,
+          "dur_ms": 2.682,
+          "name": "performPause:com.elianfabian.localeeasy.LocalRelaunchSampleActivity"
+        },
+        {
+          "ts": 704614377300,
+          "offset_ms": 37.033,
+          "dur_ms": 1.915,
+          "name": "performStop:com.elianfabian.localeeasy.LocalRelaunchSampleActivity"
+        },
+        {
+          "ts": 704620794400,
+          "offset_ms": 43.451,
+          "dur_ms": 6.577,
+          "name": "performDestroy:com.elianfabian.localeeasy.LocalRelaunchSampleActivity"
+        },
+        {
+          "ts": 704636368000,
+          "offset_ms": 59.024,
+          "dur_ms": 65.417,
+          "name": "performCreate:com.elianfabian.localeeasy.LocalRelaunchSampleActivity"
+        },
+        {
+          "ts": 704703474600,
+          "offset_ms": 126.131,
+          "dur_ms": 1.712,
+          "name": "performStart:com.elianfabian.localeeasy.LocalRelaunchSampleActivity"
+        },
+        {
+          "ts": 704705997400,
+          "offset_ms": 128.654,
+          "dur_ms": 1.937,
+          "name": "performResume:com.elianfabian.localeeasy.LocalRelaunchSampleActivity"
+        },
+        {
+          "ts": 705555993800,
+          "offset_ms": 978.65,
+          "dur_ms": 1.592,
+          "name": "performPause:com.elianfabian.localeeasy.LocalRelaunchSampleActivity"
+        }
+      ]
+    },
+    {
+      "capture": "flash-trace-hybrid-repeat",
+      "trace_sha256": "4608591646090887dbd08d60edb5075a5358098858e7f3b4c800f27e52e4831c",
+      "state": {
+        "activity_locales": "fr,en-US",
+        "trigger_ns": 782441897600,
+        "local_relaunch": true,
+        "activity_replaced": true,
+        "decor_replaced": false,
+        "root_replaced": true,
+        "view_text": "Cha\u00c3\u00aene Localis\u00c3\u00a9e: Vert",
+        "preference": "AppLocales(locales=[fr])"
+      },
+      "environment": {
+        "serial": "emulator-5558",
+        "path": "framework",
+        "animations": "unchanged",
+        "local_relaunch": true,
+        "fingerprint": "google/sdk_gphone64_x86_64/emu64xa:16/BE2A.250530.026.D1/13818094:user/release-keys",
+        "original_scales": {
+          "window_animation_scale": "1.0",
+          "transition_animation_scale": "1.0",
+          "animator_duration_scale": "null"
+        },
+        "capture_scales": {
+          "window_animation_scale": "1.0",
+          "transition_animation_scale": "1.0",
+          "animator_duration_scale": "null"
+        },
+        "perfetto_pid": "7578",
+        "restored_scales": {
+          "window_animation_scale": "1.0",
+          "transition_animation_scale": "1.0",
+          "animator_duration_scale": "null"
+        }
+      },
+      "sample_count": 14,
+      "black_sample_count": 0,
+      "surface_gaps": [],
+      "surface_state_changes": [
+        {
+          "id": 49,
+          "ts": 782594324100,
+          "offset_ms": 152.427,
+          "app_layers": 1,
+          "visible_layers": "com.elianfabian.localeeasy/com.elianfabian.localeeasy.LocalRelaunchSampleActivity#334 | StatusBar#102 | Taskbar#85"
+        }
+      ],
+      "lifecycle_events": [
+        {
+          "ts": 782442333200,
+          "offset_ms": 0.436,
+          "dur_ms": 4.365,
+          "name": "LocaleEasy.change.framework"
+        },
+        {
+          "ts": 782459459800,
+          "offset_ms": 17.562,
+          "dur_ms": 0.822,
+          "name": "LocaleEasy.hybrid.configuration"
+        },
+        {
+          "ts": 782464446300,
+          "offset_ms": 22.549,
+          "dur_ms": 1.883,
+          "name": "performPause:com.elianfabian.localeeasy.LocalRelaunchSampleActivity"
+        },
+        {
+          "ts": 782466571600,
+          "offset_ms": 24.674,
+          "dur_ms": 1.693,
+          "name": "performStop:com.elianfabian.localeeasy.LocalRelaunchSampleActivity"
+        },
+        {
+          "ts": 782478475900,
+          "offset_ms": 36.578,
+          "dur_ms": 7.699,
+          "name": "performDestroy:com.elianfabian.localeeasy.LocalRelaunchSampleActivity"
+        },
+        {
+          "ts": 782500735200,
+          "offset_ms": 58.838,
+          "dur_ms": 44.611,
+          "name": "performCreate:com.elianfabian.localeeasy.LocalRelaunchSampleActivity"
+        },
+        {
+          "ts": 782546166000,
+          "offset_ms": 104.268,
+          "dur_ms": 1.308,
+          "name": "performStart:com.elianfabian.localeeasy.LocalRelaunchSampleActivity"
+        },
+        {
+          "ts": 782549580300,
+          "offset_ms": 107.683,
+          "dur_ms": 0.777,
+          "name": "performResume:com.elianfabian.localeeasy.LocalRelaunchSampleActivity"
+        },
+        {
+          "ts": 783418777200,
+          "offset_ms": 976.88,
+          "dur_ms": 1.89,
+          "name": "performPause:com.elianfabian.localeeasy.LocalRelaunchSampleActivity"
+        }
+      ]
+    },
+    {
+      "capture": "flash-trace-hybrid-final",
+      "trace_sha256": "a0afcd87091acdbb8d92989a1a53a8ab556a3449d55628699bf94ac197965392",
+      "state": {
+        "activity_locales": "fr,en-US",
+        "trigger_ns": 1095177800200,
+        "local_relaunch": true,
+        "activity_replaced": true,
+        "decor_replaced": false,
+        "root_replaced": true,
+        "view_text": "Cha\u00c3\u00aene Localis\u00c3\u00a9e: Vert",
+        "preference": "AppLocales(locales=[fr])",
+        "framework_backend": true,
+        "framework_locales": "fr",
+        "handled_config_mask": 8455
+      },
+      "environment": {
+        "serial": "emulator-5558",
+        "path": "framework",
+        "animations": "unchanged",
+        "local_relaunch": true,
+        "fingerprint": "google/sdk_gphone64_x86_64/emu64xa:16/BE2A.250530.026.D1/13818094:user/release-keys",
+        "original_scales": {
+          "window_animation_scale": "1.0",
+          "transition_animation_scale": "1.0",
+          "animator_duration_scale": "null"
+        },
+        "capture_scales": {
+          "window_animation_scale": "1.0",
+          "transition_animation_scale": "1.0",
+          "animator_duration_scale": "null"
+        },
+        "perfetto_pid": "8856",
+        "restored_scales": {
+          "window_animation_scale": "1.0",
+          "transition_animation_scale": "1.0",
+          "animator_duration_scale": "null"
+        }
+      },
+      "sample_count": 15,
+      "black_sample_count": 0,
+      "surface_gaps": [],
+      "surface_state_changes": [
+        {
+          "id": 50,
+          "ts": 1095077894700,
+          "offset_ms": -99.906,
+          "app_layers": 1,
+          "visible_layers": "com.elianfabian.localeeasy/com.elianfabian.localeeasy.LocalRelaunchSampleActivity#1207 | StatusBar#102 | Taskbar#85"
+        }
+      ],
+      "lifecycle_events": [
+        {
+          "ts": 1095178130500,
+          "offset_ms": 0.33,
+          "dur_ms": 6.588,
+          "name": "LocaleEasy.change.framework"
+        },
+        {
+          "ts": 1095195641300,
+          "offset_ms": 17.841,
+          "dur_ms": 0.786,
+          "name": "LocaleEasy.hybrid.configuration"
+        },
+        {
+          "ts": 1095202896200,
+          "offset_ms": 25.096,
+          "dur_ms": 2.41,
+          "name": "performPause:com.elianfabian.localeeasy.LocalRelaunchSampleActivity"
+        },
+        {
+          "ts": 1095205686600,
+          "offset_ms": 27.886,
+          "dur_ms": 5.227,
+          "name": "performStop:com.elianfabian.localeeasy.LocalRelaunchSampleActivity"
+        },
+        {
+          "ts": 1095216726100,
+          "offset_ms": 38.926,
+          "dur_ms": 7.456,
+          "name": "performDestroy:com.elianfabian.localeeasy.LocalRelaunchSampleActivity"
+        },
+        {
+          "ts": 1095236453000,
+          "offset_ms": 58.653,
+          "dur_ms": 33.615,
+          "name": "performCreate:com.elianfabian.localeeasy.LocalRelaunchSampleActivity"
+        },
+        {
+          "ts": 1095270927800,
+          "offset_ms": 93.128,
+          "dur_ms": 3.38,
+          "name": "performStart:com.elianfabian.localeeasy.LocalRelaunchSampleActivity"
+        },
+        {
+          "ts": 1095275443100,
+          "offset_ms": 97.643,
+          "dur_ms": 1.097,
+          "name": "performResume:com.elianfabian.localeeasy.LocalRelaunchSampleActivity"
+        }
+      ]
+    },
+    {
+      "capture": "flash-trace-manual-final",
+      "trace_sha256": "1323043a79c9ebabc0bef302563a875e8383a577e909f96e7eac883936699a28",
+      "state": {
+        "activity_locales": "fr",
+        "trigger_ns": 1565246528700,
+        "local_relaunch": false,
+        "activity_replaced": true,
+        "decor_replaced": false,
+        "root_replaced": true,
+        "view_text": "Cha\u00c3\u00aene Localis\u00c3\u00a9e: Vert",
+        "preference": "AppLocales(locales=[fr])",
+        "framework_backend": false,
+        "framework_locales": "",
+        "handled_config_mask": 3
+      },
+      "environment": {
+        "serial": "emulator-5558",
+        "path": "manual",
+        "animations": "unchanged",
+        "local_relaunch": false,
+        "api": 36,
+        "fingerprint": "google/sdk_gphone64_x86_64/emu64xa:16/BE2A.250530.026.D1/13818094:user/release-keys",
+        "original_scales": {
+          "window_animation_scale": "1.0",
+          "transition_animation_scale": "1.0",
+          "animator_duration_scale": "null"
+        },
+        "installed_apk_sha256": "12b7499b599301b0c3aaa604b2b04d655388f2c368973d487504280f4a7c2620",
+        "capture_scales": {
+          "window_animation_scale": "1.0",
+          "transition_animation_scale": "1.0",
+          "animator_duration_scale": "null"
+        },
+        "perfetto_pid": "9154",
+        "restored_scales": {
+          "window_animation_scale": "1.0",
+          "transition_animation_scale": "1.0",
+          "animator_duration_scale": "null"
+        }
+      },
+      "sample_count": 13,
+      "black_sample_count": 0,
+      "surface_gaps": [],
+      "surface_state_changes": [
+        {
+          "id": 49,
+          "ts": 1565216440000,
+          "offset_ms": -30.089,
+          "app_layers": 1,
+          "visible_layers": "com.elianfabian.localeeasy/com.elianfabian.localeeasy.ui.legacy.SampleActivity#1248 | StatusBar#102 | Taskbar#85"
+        }
+      ],
+      "lifecycle_events": [
+        {
+          "ts": 1565246786900,
+          "offset_ms": 0.258,
+          "dur_ms": 2.353,
+          "name": "LocaleEasy.change.manual"
+        },
+        {
+          "ts": 1565251186100,
+          "offset_ms": 4.657,
+          "dur_ms": 1.846,
+          "name": "performPause:com.elianfabian.localeeasy.ui.legacy.SampleActivity"
+        },
+        {
+          "ts": 1565253294900,
+          "offset_ms": 6.766,
+          "dur_ms": 0.5,
+          "name": "performStop:com.elianfabian.localeeasy.ui.legacy.SampleActivity"
+        },
+        {
+          "ts": 1565256403100,
+          "offset_ms": 9.874,
+          "dur_ms": 6.143,
+          "name": "performDestroy:com.elianfabian.localeeasy.ui.legacy.SampleActivity"
+        },
+        {
+          "ts": 1565278334200,
+          "offset_ms": 31.805,
+          "dur_ms": 48.343,
+          "name": "performCreate:com.elianfabian.localeeasy.ui.legacy.SampleActivity"
+        },
+        {
+          "ts": 1565327542700,
+          "offset_ms": 81.014,
+          "dur_ms": 1.105,
+          "name": "performStart:com.elianfabian.localeeasy.ui.legacy.SampleActivity"
+        },
+        {
+          "ts": 1565329189400,
+          "offset_ms": 82.661,
+          "dur_ms": 0.82,
+          "name": "performResume:com.elianfabian.localeeasy.ui.legacy.SampleActivity"
+        }
+      ]
+    }
+  ],
+  "api33_visual_check": {
+    "state": {
+      "activity_locales": "fr,en-US",
+      "trigger_ns": 296367084320,
+      "local_relaunch": true,
+      "activity_replaced": true,
+      "decor_replaced": false,
+      "root_replaced": true,
+      "view_text": "Cha\u00eene Localis\u00e9e: Vert",
+      "preference": "AppLocales(locales=[fr])",
+      "framework_backend": true,
+      "framework_locales": "fr",
+      "handled_config_mask": 8455
+    },
+    "sample_count": 15,
+    "black_sample_count": 0,
+    "surface_trace": false
+  },
+  "limits": "Diagnostic traces and screenshot sampling perturb timing. Snapshot intervals are not physical display blackout durations. Absence of sampled black frames alone is not proof; preserved decor, replaced root, and continuous visible app layers supplement the successful API-36 cases.",
+  "trace_decoder": "Official Perfetto trace_processor_shell v59.1, Windows AMD64; Python perfetto package"
+}
