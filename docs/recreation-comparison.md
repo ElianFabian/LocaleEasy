@@ -1,5 +1,7 @@
 # Compare recreation in the sample
 
+The home screen now groups the method selector, effective locale, and **Open State & Controls** button in one card, followed by the sample screens. Language choices highlight the selected override. The XML toolbar inset regression is fixed; the framework black flash has been reproduced and remains open. See [window findings and capture instructions](recreation-window-findings.md).
+
 Run the existing **app** module. There is no separate lab app or trial navigation.
 
 1. On the home screen, use **Recreation method** to choose **Manual — Activity.recreate()** or **Framework — app language change**.

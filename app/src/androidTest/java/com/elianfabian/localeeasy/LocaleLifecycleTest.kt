@@ -6,6 +6,9 @@ import android.os.Build
 import android.os.LocaleList
 import android.widget.EditText
 import android.widget.TextView
+import android.view.View
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -188,6 +191,54 @@ class LocaleLifecycleTest {
                 var ready = false
                 scenario.onActivity { ready = it.title.toString() == "Activité 1" && it.getString(R.string.string_resource_example) == translated("fr") }
                 ready
+            }
+        }
+    }
+
+    @Test fun xmlToolbarKeepsSystemBarInsetsAcrossLocaleRecreation() {
+        val modes = if (Build.VERSION.SDK_INT >= 33) listOf(false, true) else listOf(false)
+        for (framework in modes) {
+            main { api.useFrameworkLocaleRecreation = framework }
+            instrumentation.waitForIdleSync()
+            ActivityScenario.launch(SampleActivity::class.java).use { scenario ->
+                var original: SampleActivity? = null
+                var beforeTop = 0
+                var target = Locale.FRENCH
+                fun toolbarTop(activity: SampleActivity): Int {
+                    val toolbar = activity.findViewById<View>(R.id.toolbar)
+                    val location = IntArray(2)
+                    toolbar.getLocationInWindow(location)
+                    val bars = requireNotNull(ViewCompat.getRootWindowInsets(toolbar))
+                        .getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout())
+                    assertTrue("Toolbar overlaps system bars: framework=$framework y=${location[1]} inset=${bars.top}", location[1] >= bars.top)
+                    return location[1]
+                }
+                await {
+                    var laidOut = false
+                    scenario.onActivity { laidOut = it.findViewById<View>(R.id.toolbar).isLaidOut }
+                    laidOut
+                }
+                scenario.onActivity {
+                    original = it
+                    beforeTop = toolbarTop(it)
+                    target = if (api.effectiveLocales.value.first().language == "fr") Locale.ITALIAN else Locale.FRENCH
+                    api.setLocale(target)
+                }
+                await {
+                    var ready = false
+                    scenario.onActivity { ready = it !== original && it.findViewById<View>(R.id.toolbar).isLaidOut }
+                    ready
+                }
+                scenario.onActivity {
+                    assertEquals("Toolbar moved after recreation: framework=$framework", beforeTop, toolbarTop(it))
+                    assertEquals("XML content used a stale locale: framework=$framework", translated(target.language),
+                        it.findViewById<TextView>(R.id.textViewLocalized).text.toString())
+                    val expectedTitle = app.createConfigurationContext(Configuration(app.resources.configuration).apply { setLocale(target) })
+                        .getString(R.string.activity_title_1)
+                    assertEquals("Activity title used a stale locale: framework=$framework", expectedTitle, it.title.toString())
+                    assertEquals("Toolbar title used a stale locale: framework=$framework", expectedTitle,
+                        it.findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolbar).title.toString())
+                }
             }
         }
     }

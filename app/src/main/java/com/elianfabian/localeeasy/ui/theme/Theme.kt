@@ -37,7 +37,8 @@ private val LightColorScheme = lightColorScheme(
 fun LocaleEasyTheme(
 	darkTheme: Boolean = isSystemInDarkTheme(),
 	// Dynamic color is available on Android 12+
-	dynamicColor: Boolean = true,
+	// Keep the Compose surface and native window/toolbar palette consistent in this sample.
+	dynamicColor: Boolean = false,
 	content: @Composable () -> Unit
 ) {
 	val colorScheme = when {

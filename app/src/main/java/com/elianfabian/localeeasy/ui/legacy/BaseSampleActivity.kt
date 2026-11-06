@@ -25,9 +25,19 @@ abstract class BaseSampleActivity : AppCompatActivity() {
 	protected val viewModel: MainViewModel by viewModels()
 	private var showSettings by mutableStateOf(false)
 
+	override fun onCreate(savedInstanceState: Bundle?) {
+		super.onCreate(savedInstanceState)
+		showSettings = savedInstanceState?.getBoolean("settings_open") ?: false
+	}
+
+	override fun onSaveInstanceState(outState: Bundle) {
+		outState.putBoolean("settings_open", showSettings)
+		super.onSaveInstanceState(outState)
+	}
+
 	protected fun setupGlobalSettingsFab(composeView: ComposeView) {
 		composeView.setContent {
-			val sheetState = rememberModalBottomSheetState()
+			val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 			LocaleEasyTheme {
 				if (showSettings) {
 					LocaleSettingsSheet(

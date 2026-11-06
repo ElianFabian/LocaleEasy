@@ -1,4 +1,10 @@
 <resources>
+    <string name="sample_intro" translatable="false">Choose a recreation method, change language, and see how each screen responds.</string>
+    <string name="sample_screens" translatable="false">Explore the samples</string>
+    <string name="compose_description" translatable="false">Reactive text, formatting, and saved navigation</string>
+    <string name="activity_description" translatable="false">XML views, toolbar, and activity back stack</string>
+    <string name="fragment_description" translatable="false">Dialog content and fragment restoration</string>
+    <string name="webview_description" translatable="false">Native resources alongside local web content</string>
     <!-- Temporary diagnostic controls stay stable while sample content changes language. -->
     <string name="recreation_method" translatable="false">Recreation method</string>
     <string name="recreation_manual" translatable="false">Manual — Activity.recreate()</string>

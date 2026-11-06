@@ -4,6 +4,8 @@ Date: 2026-11-05; sample recreation selector verification updated 2026-11-06. Th
 
 ## Executed checks
 
+Window/UI follow-up on 2026-11-06: the toolbar overlap was reproduced (`y=0`, status inset 63 px) and fixed with explicit XML insets. Updated suites on API 32 and 36 discovered 20 tests each: 14 passed, 6 intentionally skipped, including the opt-in screen-capture diagnostic. A strengthened focused check also passed on API 36, asserting translated XML and both title values after each path. Sample lint passed with 0 errors and 19 warnings. The final home screen and captured native layouts were visually inspected. Frame sampling reproduced the framework black flash, which remains open; see [evidence and limits](recreation-window-findings.md).
+
 Current sample selector and temporary backend flag, verified 2026-11-06:
 
 | Check | Environment | Result |

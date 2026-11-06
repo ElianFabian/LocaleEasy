@@ -40,7 +40,7 @@ fun ComposeSampleScreen(
 	onBack: () -> Unit,
 ) {
 	var showSettings by rememberSaveable { mutableStateOf(false) }
-	val sheetState = rememberModalBottomSheetState()
+	val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
 	Scaffold(
 		modifier = Modifier.fillMaxSize(),

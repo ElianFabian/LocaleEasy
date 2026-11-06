@@ -7,8 +7,12 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Switch
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.ui.semantics.Role
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -47,7 +51,8 @@ fun LocaleSettingsSheet(
 	) {
 		Column(
 			modifier = Modifier
-				.padding(16.dp)
+				.verticalScroll(rememberScrollState())
+				.padding(horizontal = 24.dp, vertical = 16.dp)
 				.fillMaxWidth(),
 			verticalArrangement = Arrangement.spacedBy(16.dp)
 		) {
@@ -56,6 +61,16 @@ fun LocaleSettingsSheet(
 				style = MaterialTheme.typography.titleLarge,
 				color = TranslatedGreen
 			)
+
+			Row(modifier = Modifier.fillMaxWidth().toggleable(value = isFollowingSystem, role = Role.Switch,
+				onValueChange = { viewModel.sendAction(UiAction.SetFollowSystemLocale(it)) }), verticalAlignment = Alignment.CenterVertically,
+				horizontalArrangement = Arrangement.SpaceBetween) {
+				Text(text = stringResource(R.string.follow_system_locale), modifier = Modifier.weight(1f))
+				Switch(checked = isFollowingSystem, onCheckedChange = null)
+			}
+			LanguageButtons(selectedLocale = if (isFollowingSystem) null else appLocales.firstOrNull(),
+				onLanguageSelected = { viewModel.sendAction(UiAction.SetLocale(it)) })
+			HorizontalDivider()
 
 			Text(
 				text = stringResource(R.string.state_following_system, isFollowingSystem),
@@ -70,24 +85,13 @@ fun LocaleSettingsSheet(
 				color = TranslatedGreen
 			)
 
-			HorizontalDivider()
-
-			Row(verticalAlignment = Alignment.CenterVertically) {
-				Checkbox(
-					checked = isFollowingSystem,
-					onCheckedChange = { viewModel.sendAction(UiAction.SetFollowSystemLocale(it)) }
-				)
-				Text(text = stringResource(R.string.follow_system_locale), color = TranslatedGreen)
-			}
-
-			LanguageButtons(onLanguageSelected = { viewModel.sendAction(UiAction.SetLocale(it)) })
 		}
 	}
 }
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun LanguageButtons(onLanguageSelected: (Locale) -> Unit) {
+fun LanguageButtons(selectedLocale: Locale? = null, onLanguageSelected: (Locale) -> Unit) {
 	val languages = listOf(
 		"English" to Locale.ENGLISH,
 		"Spanish" to Locale.forLanguageTag("es"),
@@ -101,9 +105,8 @@ fun LanguageButtons(onLanguageSelected: (Locale) -> Unit) {
 		horizontalArrangement = Arrangement.spacedBy(8.dp)
 	) {
 		languages.forEach { (name, locale) ->
-			Button(onClick = { onLanguageSelected(locale) }) {
-				Text(text = name)
-			}
+			FilterChip(selected = selectedLocale?.language == locale.language,
+				onClick = { onLanguageSelected(locale) }, label = { Text(text = name) })
 		}
 	}
 }

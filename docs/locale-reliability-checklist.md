@@ -209,6 +209,8 @@ Verification — **Manual required:** open SampleFragment as a dialog, change la
 
 ## 11. Reproduce and isolate the activity/view recreation symptom
 
+**Window follow-up, 2026-11-06:** the sample's XML toolbar/status-bar overlap was reproduced and fixed with explicit system-bar insets. A separate framework-only black flash is now captured in the actual sample and remains unresolved; [window findings](recreation-window-findings.md) distinguish this visible evidence from activity/view identity checks. The updated sample UI exposes the existing comparison more clearly without changing the recreation paths.
+
 **Current status:** Controlled recreation now passes: fixture traces show different activity/view identities, changingConfigurations=true, restored state, and French XML; Compose navigation/translation also survives. This does not identify the original device-specific failure; reproduce on that device before closing the task.
 
 Follow-up: the separate [Recreation Lab](../recreation-lab/README.md) captures actual ART/framework call paths, heap class inventories, memory snapshots/timelines, and system traces. See [initial findings](recreation-lab-findings.md) for the executed comparison. The original-device acceptance checkbox remains open.
