@@ -213,6 +213,8 @@ Verification — **Manual required:** open SampleFragment as a dialog, change la
 
 Follow-up: the separate [Recreation Lab](../recreation-lab/README.md) captures actual ART/framework call paths, heap class inventories, memory snapshots/timelines, and system traces. See [initial findings](recreation-lab-findings.md) for the executed comparison. The original-device acceptance checkbox remains open.
 
+The lab also has [interactive controls](../recreation-lab/README.md#interactive-comparison): choose a language/workload, open either locale path, edit input, and apply the change on demand. Each trial starts in a fresh process; latest results show view/activity replacement, locale, restored input, frame-commit timing, and a memory snapshot difference. UI automation passed on API 32 and 36. Watch both transitions on the affected device to judge blanking and perceived responsiveness; automated identity/timing assertions do not close that manual check.
+
 The [longer headless run on 2026-11-06](headless-locale-comparison-2026-11-06.md) passed all 40 timing and 10 memory trials; manual recreation was faster to frame commit in that emulator workload. The reported manual-slower/visible-flash symptom remains unconfirmed, and no physical device was connected for that run.
 
 **Reported behavior; cause unconfirmed.** The author observed manual view rebuilding working where `recreate()` did not update the UI. Current MainActivity calls `createContentView()` from `onCreate()`. `triggerTrueConfigChangeRecreate()` currently only calls `ActivityCompat.recreate()`; its name does not establish that a framework locale change occurred.

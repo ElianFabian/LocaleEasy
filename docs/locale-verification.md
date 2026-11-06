@@ -1,6 +1,6 @@
 # LocaleEasy verification report
 
-Date: 2026-11-05. This report separates implementation verification from wider compatibility claims.
+Date: 2026-11-05; interactive lab verification updated 2026-11-06. This report separates implementation verification from wider compatibility claims.
 
 ## Executed checks
 
@@ -16,6 +16,13 @@ Date: 2026-11-05. This report separates implementation verification from wider c
 | Library lint | Debug | Passed: 0 errors, 2 warnings |
 | Sample lint | Debug | Passed: 0 errors, 25 warnings |
 | Sample / Android test APK builds | Debug | Passed |
+| Interactive lab UI | API 36 | 3 discovered: 2 passed, 1 API-specific skip; repeated manual → framework → manual trials use different trial PIDs and preserve edited input |
+| Interactive lab UI | API 32 | 3 discovered: 2 passed, 1 API-specific skip; framework disabled, manual and real rotation trials preserve edited input |
+| Lab Python analysis tools | Python unittest | 13 passed |
+| Lab CLI regression after adding UI | API 36 | Manual/framework locale trials both passed with the final APK |
+| Lab build and lint | Debug, JBR 21 | App/test APKs built; lint: 0 errors, 20 warnings |
+
+The lab now has launcher controls for manual/framework locale recreation, a rotation control, language/content-size selectors, and latest-run results. Static menu and workload layouts were visually inspected on API 36. See [interactive instructions](../recreation-lab/README.md#interactive-comparison). Behavioral tests do not assess perceived smoothness or visible blank frames; those still require watching transitions on the affected device.
 
 The minimum-SDK fixture is in the library's debug variant, independently of the sample's minSdk 23. Removing unused Material, AppCompat, and Navigation dependencies from the library removed an unintended API-23 dependency floor. AppCompat remains a sample dependency and is tested there.
 

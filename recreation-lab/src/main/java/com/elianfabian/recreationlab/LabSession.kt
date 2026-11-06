@@ -14,6 +14,7 @@ import android.widget.EditText
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
+import java.lang.ref.WeakReference
 import java.util.Locale
 import java.util.concurrent.ConcurrentLinkedQueue
 
@@ -23,10 +24,13 @@ internal object LabSession {
     lateinit var case: String
     lateinit var mode: String
     lateinit var directory: File
+    val isConfigured: Boolean get() = ::case.isInitialized && ::directory.isInitialized
     var rows = 200
     var targetLocale = Locale.FRENCH
     var overrideLocale = false
     var triggered = false
+    var interactive = false
+    var interactiveActivity: WeakReference<WorkloadActivity>? = null
     @Volatile private var finished = false
     private var tracing = false
     private var triggerNs = 0L
@@ -130,14 +134,16 @@ internal object LabSession {
         val shouldRecreate = case != "view_only"
         if ((initial.getInt("activity_id") != final.getInt("activity_id")) != shouldRecreate) errors.put("Unexpected activity identity")
         if (initial.getInt("root_id") == final.getInt("root_id")) errors.put("Content root was not replaced")
-        if (final.getString("input") != "typed fixture input") errors.put("User input was not preserved")
+        if (final.getString("input") != initial.getString("input")) errors.put("User input was not preserved")
         if (case == "rotation" && final.getInt("orientation") != Configuration.ORIENTATION_LANDSCAPE) errors.put("Rotation did not reach landscape")
         if (case in setOf("manual_locale", "framework_locale", "localeeasy", "view_only") &&
             !final.getString("view_locales").startsWith(targetLocale.toLanguageTag())) errors.put("Target view locale not applied")
-        write(JSONObject().put("status", if (errors.length() == 0) "PASS" else "FAIL").put("errors", errors)
+        val result = JSONObject().put("status", if (errors.length() == 0) "PASS" else "FAIL").put("errors", errors)
             .put("before", before).put("after", after).put("initial_view", initial).put("final_view", final)
             .put("first_draw_callback_ms", (drawNs - triggerNs) / 1_000_000.0)
-            .put("first_frame_commit_ms", (commitNs - triggerNs) / 1_000_000.0))
+            .put("first_frame_commit_ms", (commitNs - triggerNs) / 1_000_000.0)
+        write(result)
+        if (interactive) activity.showInteractiveResult(result)
     }
 
     fun fail(message: String) {
@@ -145,11 +151,14 @@ internal object LabSession {
         stopMemorySampler()
         if (tracing) { Debug.stopMethodTracing(); tracing = false }
         if (triggerNs > 0 && commitNs == 0L) Trace.endAsyncSection("Lab.transition.$case", 1)
-        write(JSONObject().put("status", "FAIL").put("error", message))
+        val result = JSONObject().put("status", "FAIL").put("error", message)
+        write(result)
+        if (interactive) interactiveActivity?.get()?.showInteractiveResult(result)
     }
 
     private fun write(result: JSONObject) {
         result.put("schema_version", 1).put("case", case).put("mode", mode).put("rows", rows).put("pid", Process.myPid())
+            .put("interactive", interactive)
             .put("api", Build.VERSION.SDK_INT).put("device", Build.MODEL).put("fingerprint", Build.FINGERPRINT)
             .put("target_locale", targetLocale.toLanguageTag()).put("events", events).put("memory_samples", JSONArray(memorySamples.toList()))
             .put("timing_is_profiled", mode != "timing")

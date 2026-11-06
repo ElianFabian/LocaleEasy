@@ -19,15 +19,19 @@ import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
+import android.widget.Button
+import org.json.JSONObject
 import com.elianfabian.locale_easy.LocaleEasy
 import java.io.File
+import java.lang.ref.WeakReference
 import java.util.Locale
 
-class HarnessActivity : Activity() {
+open class HarnessActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         LabSession.case = intent.getStringExtra("case") ?: "recreate"
         LabSession.mode = intent.getStringExtra("mode") ?: "timing"
+        LabSession.interactive = intent.getBooleanExtra("interactive", false)
         require(LabSession.case in LabSession.cases)
         require(LabSession.mode in LabSession.modes)
         val runId = intent.getStringExtra("run_id") ?: "interactive"
@@ -37,6 +41,9 @@ class HarnessActivity : Activity() {
         val systemLocales = if (Build.VERSION.SDK_INT >= 33) getSystemService(LocaleManager::class.java).systemLocales
             else android.content.res.Resources.getSystem().configuration.locales
         LabSession.targetLocale = if (systemLocales[0].language == "fr") Locale.ENGLISH else Locale.FRENCH
+        intent.getStringExtra("target_locale")?.let { tag ->
+            LabSession.targetLocale = Locale.forLanguageTag(tag).also { require(it.language.isNotEmpty()) }
+        }
         if (LabSession.case == "framework_locale" && Build.VERSION.SDK_INT < 33) {
             LabSession.fail("framework_locale requires API 33+")
             finish()
@@ -47,39 +54,90 @@ class HarnessActivity : Activity() {
         if (LabSession.case == "localeeasy") { LocaleEasy.install(this); LocaleEasy.getInstance().followSystem() }
         setContentView(TextView(this).apply { text = "Preparing ${LabSession.case}" })
         Handler(Looper.getMainLooper()).postDelayed({
-            startActivity(Intent(this, WorkloadActivity::class.java))
+            val target = if (LabSession.interactive) InteractiveWorkloadActivity::class.java else WorkloadActivity::class.java
+            startActivity(Intent(this, target))
             finish()
         }, 500)
     }
 }
 
-class WorkloadActivity : Activity() {
+open class WorkloadActivity : Activity() {
     val instanceId = LabSession.instance()
     private lateinit var root: View
+    private var applyButton: Button? = null
+    private var resultView: TextView? = null
 
     override fun attachBaseContext(newBase: Context) {
-        val base = if (LabSession.case == "localeeasy") LocaleEasy.getInstance().localizedContext(newBase)
+        val base = if (!LabSession.isConfigured) newBase
+        else if (LabSession.case == "localeeasy") LocaleEasy.getInstance().localizedContext(newBase)
         else if (LabSession.overrideLocale) localized(newBase) else newBase
         super.attachBaseContext(base)
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) = traced("onCreate") {
-        LabSession.event("onCreate", instanceId, "restored=${savedInstanceState != null}")
-        super.onCreate(savedInstanceState)
-        installWorkload(this)
-        if (savedInstanceState == null) root.findViewById<EditText>(R.id.lab_input).setText("typed fixture input")
+    override fun onCreate(savedInstanceState: Bundle?) {
+        if (!LabSession.isConfigured) {
+            super.onCreate(null)
+            startActivity(Intent(this, ComparisonActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP))
+            finish()
+            return
+        }
+        traced("onCreate") {
+            LabSession.event("onCreate", instanceId, "restored=${savedInstanceState != null}")
+            super.onCreate(savedInstanceState)
+            if (LabSession.interactive) {
+                LabSession.interactiveActivity = WeakReference(this)
+                configureInteractiveWindow()
+            }
+            installWorkload(this)
+            if (savedInstanceState == null) root.findViewById<EditText>(R.id.lab_input).setText("typed fixture input")
+        }
     }
 
     private fun installWorkload(context: Context) = traced("buildContent") {
         val column = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
+            if (LabSession.interactive) {
+                val padding = (20 * resources.displayMetrics.density).toInt()
+                setPadding(padding, padding, padding, padding)
+                addView(TextView(context).apply {
+                    text = if (LabSession.case == "rotation") caseTitle(LabSession.case)
+                        else getString(R.string.ui_trial_title, caseTitle(LabSession.case), LabSession.targetLocale.getDisplayLanguage(Locale.ENGLISH))
+                    textSize = 18f
+                })
+                addView(Button(context).apply {
+                    id = R.id.ui_apply
+                    text = if (LabSession.case == "rotation") getString(R.string.ui_apply_rotation)
+                        else getString(R.string.ui_apply, LabSession.targetLocale.getDisplayLanguage(Locale.ENGLISH))
+                    isEnabled = false
+                    setOnClickListener {
+                        isEnabled = false
+                        LabSession.prepare(this@WorkloadActivity, root)
+                    }
+                    applyButton = this
+                })
+                addView(Button(context).apply {
+                    id = R.id.ui_back
+                    setText(R.string.ui_back)
+                    setOnClickListener { finish() }
+                })
+                addView(TextView(context).apply {
+                    id = R.id.ui_trial_result
+                    setText(if (LabSession.triggered) R.string.ui_measuring else R.string.ui_ready)
+                    minLines = 4
+                    resultView = this
+                })
+            }
             addView(TextView(context).apply { text = context.getString(R.string.lab_title); textSize = 24f })
             addView(EditText(context).apply { id = R.id.lab_input; hint = context.getString(R.string.lab_hint); inputType = 1 })
             repeat(LabSession.rows) { index ->
                 addView(TextView(context).apply { text = "${context.getString(R.string.lab_row)} $index"; textSize = 16f })
             }
         }
-        root = ScrollView(context).apply { id = R.id.lab_root; addView(column) }
+        root = ScrollView(context).apply {
+            id = R.id.lab_root
+            addView(column)
+            if (LabSession.interactive) applySystemBarPadding()
+        }
         setContentView(root)
         val installedRoot = root
         var drawn = false
@@ -90,9 +148,15 @@ class WorkloadActivity : Activity() {
         })
         installedRoot.viewTreeObserver.registerFrameCommitCallback {
             if (!LabSession.triggered) {
-                Handler(Looper.getMainLooper()).postDelayed({ LabSession.prepare(this, installedRoot) }, 500)
+                if (LabSession.interactive) applyButton?.isEnabled = true
+                else Handler(Looper.getMainLooper()).postDelayed({ LabSession.prepare(this, installedRoot) }, 500)
             } else LabSession.committed(this, installedRoot)
         }
+    }
+
+    fun showInteractiveResult(result: JSONObject) {
+        resultView?.text = trialSummary(this, result)
+        applyButton?.setText(if (result.optString("status") == "PASS") R.string.ui_applied else R.string.ui_failed)
     }
 
     fun performCase() = traced("request.${LabSession.case}") {
@@ -130,3 +194,6 @@ class WorkloadActivity : Activity() {
         setLocale(LabSession.targetLocale)
     })
 }
+
+class InteractiveHarnessActivity : HarnessActivity()
+class InteractiveWorkloadActivity : WorkloadActivity()

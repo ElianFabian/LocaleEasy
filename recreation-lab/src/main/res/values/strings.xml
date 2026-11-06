@@ -4,4 +4,45 @@
     <string name="lab_hint">Saved user input</string>
     <item name="lab_root" type="id" />
     <item name="lab_input" type="id" />
+    <item name="ui_language" type="id" />
+    <item name="ui_rows" type="id" />
+    <item name="ui_manual" type="id" />
+    <item name="ui_framework" type="id" />
+    <item name="ui_rotation" type="id" />
+    <item name="ui_status" type="id" />
+    <item name="ui_apply" type="id" />
+    <item name="ui_back" type="id" />
+    <item name="ui_trial_result" type="id" />
+    <item name="ui_manual_result" type="id" />
+    <item name="ui_framework_result" type="id" />
+    <!-- Keep test controls stable while the workload itself changes language. -->
+    <string name="ui_title" translatable="false">Recreation Lab</string>
+    <string name="ui_intro" translatable="false">Compare the same content through two locale recreation paths. Open a trial, type something, then apply the change.</string>
+    <string name="ui_device" translatable="false">Android %1$s · API %2$d</string>
+    <string name="ui_language" translatable="false">Target language</string>
+    <string name="ui_workload" translatable="false">Content size</string>
+    <string name="ui_rows_label" translatable="false">%1$d text rows</string>
+    <string name="ui_manual" translatable="false">Test manual recreation</string>
+    <string name="ui_manual_detail" translatable="false">Apply a localized activity context, then call Activity.recreate().</string>
+    <string name="ui_framework" translatable="false">Test framework recreation</string>
+    <string name="ui_framework_detail" translatable="false">Change the app language with LocaleManager. Android delivers a real configuration change.</string>
+    <string name="ui_framework_unavailable" translatable="false">Requires Android 13 (API 33). Use rotation below as the natural configuration-change control on this device.</string>
+    <string name="ui_rotation" translatable="false">Test natural rotation</string>
+    <string name="ui_rotation_detail" translatable="false">Changes orientation instead of language. Screen geometry also changes.</string>
+    <string name="ui_latest" translatable="false">Latest completed runs</string>
+    <string name="ui_measurement_note" translatable="false">Each trial starts separately from the system languages. Frame commit is not display presentation. Memory is a snapshot, not a leak measurement.</string>
+    <string name="ui_no_result" translatable="false">No completed run yet.</string>
+    <string name="ui_preparing" translatable="false">Preparing a fresh trial…</string>
+    <string name="ui_same_language" translatable="false">Choose a language different from the primary system language to trigger a locale change.</string>
+    <string name="ui_start_hint" translatable="false">Choose a path above. Use Back to return after the trial.</string>
+    <string name="ui_reset_failed" translatable="false">The previous trial could not be stopped. Close the app and try again.</string>
+    <string name="ui_trial_title" translatable="false">%1$s → %2$s</string>
+    <string name="ui_apply" translatable="false">Apply %1$s</string>
+    <string name="ui_apply_rotation" translatable="false">Rotate to landscape</string>
+    <string name="ui_back" translatable="false">Back to tests</string>
+    <string name="ui_ready" translatable="false">Ready. Edit the input below, then apply the change.</string>
+    <string name="ui_measuring" translatable="false">Measuring the replacement frame…</string>
+    <string name="ui_applied" translatable="false">Change applied</string>
+    <string name="ui_failed" translatable="false">Trial failed</string>
+    <string name="ui_result_format" translatable="false">%1$s · %2$.1f ms to frame commit\nActivity replaced: %3$b · View replaced: %4$b\nLocale: %5$s · Input preserved: %6$b\nMemory snapshot: %7$+d KB PSS</string>
 </resources>

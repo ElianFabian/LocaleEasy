@@ -4,9 +4,34 @@ A separate Android app for comparing activity recreation, genuine configuration 
 
 Requires Android 10 / API 29+ for frame-commit callbacks. The framework-locale case requires API 33+. Raw cases disable the AndroidX Startup provider; only the `localeeasy` case explicitly installs LocaleEasy. The library is still present in the APK, so class verification/loading is not claimed to be identical to an APK with no library dependency.
 
+## Interactive comparison
+
+Run the **recreation-lab** module in Android Studio, or install its debug APK and open **Recreation Lab** from the launcher.
+
+1. Select a target language different from the primary system language, and choose 50, 200, or 500 text rows.
+2. Tap **Test manual recreation** or **Test framework recreation**.
+3. Optionally edit the saved-input field. Close the keyboard if you want to observe the transition without an IME animation, then tap **Apply**.
+4. Watch the transition and read the result: activity/view replacement, preserved input, applied locale, time to frame commit, and PSS snapshot difference.
+5. Tap **Back to tests**, then try the other path. The menu retains the latest completed result for each locale path.
+
+Both locale paths require API 33+ for a direct comparison. On API 29–32, manual recreation and the natural rotation control remain available; framework locale recreation is disabled with an explanation. Selecting the primary system language disables locale trials to avoid measuring a no-op.
+
+The controls stay in the main process. Each interactive workload runs in a fresh `:trial` process, resetting this lab's framework locale override before displaying the baseline. The menu survives these resets. Results remain under `files/runs/ui_*/result.json`; the controls and remembered results are local to this test app.
+
+Interactive trials wait for your Apply action and include additional controls. Their timings are **not directly comparable** to the automated workload below. Frame commit is submission, not physical presentation; PSS differences are snapshots, not leak measurements. Manual observation is still required to judge visible blanking, animation quality, and perceived responsiveness on the device of interest.
+
+To run the UI checks on an explicitly selected emulator:
+
+```powershell
+$env:ANDROID_SERIAL = 'emulator-5558'
+./gradlew.bat :recreation-lab:connectedDebugAndroidTest --no-configuration-cache
+```
+
+The tests exercise repeated manual/framework trials with edited input on API 33+, manual/rotation on older supported APIs, and the no-op language guard. The original explicit `HarnessActivity` entry point and CLI runner remain available.
+
 ## Cases
 
-All cases render the same hierarchy: a title, an EditText containing saved user input, and a configurable number of localized text rows. Default: 200 rows. The soft keyboard is kept hidden to avoid introducing an IME transition. Every trial starts a fresh process, waits for the initial frame to commit, then waits 500 ms before recording a baseline and triggering its operation.
+All automated cases render the same hierarchy: a title, an EditText containing saved user input, and a configurable number of localized text rows. Default: 200 rows. The soft keyboard is kept hidden to avoid introducing an IME transition. Every automated trial starts a fresh process, waits for the initial frame to commit, then waits 500 ms before recording a baseline and triggering its operation.
 
 | Case | Trigger | Expected result | Important difference |
 | --- | --- | --- | --- |
