@@ -18,6 +18,39 @@ def hprof(names):
 
 
 class ArtifactTests(unittest.TestCase):
+    def analyze_events(self, events):
+        text = b"*version\n3\nclock=dual\n*threads\n1\tmain\n*methods\n0x4\texample/Activity\touter\t()V\n0x8\texample/Activity\tchild\t()V\n*end\n"
+        binary = b"SLOW" + struct.pack("<HHQH", 3, 18, 0, 14)
+        for method, cpu, wall in events:
+            binary += struct.pack("<HIII", 1, method, cpu, wall)
+        with tempfile.TemporaryDirectory(dir=TEST_ROOT) as directory:
+            path = Path(directory) / "timing.trace"
+            path.write_bytes(text + binary)
+            return method_trace(path)
+
+    def test_nested_call_self_time_excludes_child_time(self):
+        result = self.analyze_events([(4, 0, 0), (8, 20, 40), (9, 50, 100), (5, 100, 200)])
+        rows = {row["method"]: row for row in result["main_thread_timings"]}
+        outer = rows["example.Activity.outer()V"]
+        self.assertEqual(100, outer["inclusive_cpu_us"])
+        self.assertEqual(70, outer["exclusive_cpu_us"])
+        self.assertEqual(200, outer["inclusive_wall_us"])
+        self.assertEqual(140, outer["exclusive_wall_us"])
+        self.assertEqual(2, result["timing_coverage"]["completed_calls"])
+
+    def test_open_child_does_not_inflate_parent_self_time(self):
+        result = self.analyze_events([(4, 0, 0), (8, 20, 40), (5, 100, 200)])
+        row = result["main_thread_timings"][0]
+        self.assertEqual(100, row["inclusive_cpu_us"])
+        self.assertNotIn("exclusive_cpu_us", row)
+        self.assertEqual(1, row["incomplete_children_calls"])
+        self.assertEqual(1, result["timing_coverage"]["open_or_discarded_frames"])
+
+    def test_clock_wraparound(self):
+        result = self.analyze_events([(4, 0xfffffff0, 0xfffffff0), (5, 16, 32)])
+        self.assertEqual(32, result["main_thread_timings"][0]["inclusive_cpu_us"])
+        self.assertEqual(48, result["main_thread_timings"][0]["inclusive_wall_us"])
+
     def test_class_names_and_added_removed_sets(self):
         with tempfile.TemporaryDirectory(dir=TEST_ROOT) as directory:
             before, after = Path(directory) / "before", Path(directory) / "after"

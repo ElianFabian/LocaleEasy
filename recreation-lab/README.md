@@ -105,6 +105,20 @@ python recreation-lab/tools/analyze_artifacts.py --before PATH/before.hprof --af
 
 For exact chronological class loading/unloading, or a complete native/system-server call graph, this lab would need an additional JVMTI/native profiling setup or an instrumented AOSP build. It does not infer those events from heap membership or a loaded-class counter.
 
+### Summarizing separate passes
+
+The comparison tool validates matching APK hashes, fingerprint, display, workload, and locale stimulus for timing/memory passes, and keeps profiled timings out of the primary latency distribution:
+
+```powershell
+python recreation-lab/tools/summarize_comparison.py --timing-dir build/recreation-lab/locale-timing --memory-dir build/recreation-lab/memory --methods-dir build/recreation-lab/methods --out build/recreation-lab/comparison.json
+```
+
+Supply directories that contain both locale cases; the earlier memory command uses recreation/rotation, so use `--cases manual_locale framework_locale` for this comparison. The method pass may use fewer rows; it is described separately. `p95` uses linear interpolation at `(n - 1) * .95`, not a confidence interval. Phase medians describe request → replacement `onCreate`, `onCreate` → `onStart`, and `onStart` → frame commit. They are wall-clock intervals, not pure CPU stages, and their medians do not sum to the overall median.
+
+Method analysis now also reports `main_thread_timings` in microseconds using ART v1–v3 CPU/wall clock fields, plus `timing_coverage`. Inclusive timings require matching entry/exit records; self timings additionally require complete child intervals. Open or unmatched frames are reported rather than assigned invented durations. An overflow-free file can still contain open frames at recording boundaries. Summed inclusive times double-count nesting, and all these method timings include profiling overhead. Short-call CPU/wall totals can also be distorted by clock precision and recorder overhead. See the [ART writer format](https://android.googlesource.com/platform/art/+/5c4f3e5e8b1031ab112e273620e2b2cb89432d57/runtime/trace.cc) for the record layout.
+
+The [longer headless comparison](../docs/headless-locale-comparison-2026-11-06.md) records 20 timing trials and five memory trials per path on one emulator.
+
 ## Experimental controls
 
 - Use one device/API and the same workload/mode/settings for a comparison. Keep system language, display geometry, power/thermal state, animation settings, and background work consistent.

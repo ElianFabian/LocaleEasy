@@ -1,0 +1,506 @@
+{
+  "schema_version": 1,
+  "environment": {
+    "serial": "emulator-5558",
+    "api": 36,
+    "seed": 42,
+    "mode": "timing",
+    "rows": 200,
+    "iterations": 20,
+    "perfetto": false,
+    "skipped_cases": [],
+    "fingerprint": "google/sdk_gphone64_x86_64/emu64xa:16/BE2A.250530.026.D1/13818094:user/release-keys",
+    "installed_apk_sha256": "850153386d502f920bfad371df71a32b5f45d56e5fa34a9a2be6dfeb7b6b2ffc",
+    "display_size": "Physical size: 1080x2400",
+    "display_density": "Physical density: 420"
+  },
+  "cases": {
+    "manual_locale": {
+      "frame_commit_ms": {
+        "n": 20,
+        "min": 72.8032,
+        "median": 134.5256,
+        "p95": 228.07118000000008,
+        "max": 334.7007
+      },
+      "phases_ms": {
+        "request_to_onCreate_ms": {
+          "n": 20,
+          "min": 9.7297,
+          "median": 15.62885,
+          "p95": 25.388665,
+          "max": 27.7497
+        },
+        "onCreate_to_onStart_ms": {
+          "n": 20,
+          "min": 25.134,
+          "median": 38.723,
+          "p95": 98.22077000000002,
+          "max": 132.8059
+        },
+        "onStart_to_frame_commit_ms": {
+          "n": 20,
+          "min": 28.9226,
+          "median": 76.03705,
+          "p95": 116.22211000000004,
+          "max": 181.9756
+        }
+      },
+      "timing_pss_delta_kb": {
+        "n": 20,
+        "min": 3307,
+        "median": 5876.5,
+        "p95": 6573.2,
+        "max": 6729
+      },
+      "timing_loaded_class_delta": {
+        "n": 20,
+        "min": 0,
+        "median": 0.0,
+        "p95": 0.0,
+        "max": 0
+      },
+      "decor_preserved_trials": 20,
+      "gc_counter_increments": 0,
+      "gc_counter_trials_available": 25,
+      "memory_profile": {
+        "n": 5,
+        "pss_delta_kb": {
+          "n": 5,
+          "min": 4337,
+          "median": 4498,
+          "p95": 4659.2,
+          "max": 4681
+        },
+        "sampled_java_peak_delta_bytes": {
+          "n": 5,
+          "min": 834976,
+          "median": 961952,
+          "p95": 1017657.6,
+          "max": 1023392
+        },
+        "sampled_native_peak_delta_bytes": {
+          "n": 5,
+          "min": 717040,
+          "median": 792736,
+          "p95": 1185968.0,
+          "max": 1264208
+        },
+        "samples_during_transition": [
+          3,
+          3,
+          3,
+          3,
+          3
+        ]
+      }
+    },
+    "framework_locale": {
+      "frame_commit_ms": {
+        "n": 20,
+        "min": 105.3024,
+        "median": 216.42735,
+        "p95": 502.723515,
+        "max": 503.8296
+      },
+      "phases_ms": {
+        "request_to_onCreate_ms": {
+          "n": 20,
+          "min": 31.7685,
+          "median": 52.82915,
+          "p95": 101.59406000000003,
+          "max": 124.0608
+        },
+        "onCreate_to_onStart_ms": {
+          "n": 20,
+          "min": 30.1257,
+          "median": 52.6717,
+          "p95": 156.70754000000005,
+          "max": 193.9426
+        },
+        "onStart_to_frame_commit_ms": {
+          "n": 20,
+          "min": 39.4591,
+          "median": 97.9897,
+          "p95": 210.156245,
+          "max": 223.8276
+        }
+      },
+      "timing_pss_delta_kb": {
+        "n": 20,
+        "min": 3500,
+        "median": 4883.5,
+        "p95": 7714.3,
+        "max": 8385
+      },
+      "timing_loaded_class_delta": {
+        "n": 20,
+        "min": 0,
+        "median": 0.0,
+        "p95": 0.0,
+        "max": 0
+      },
+      "decor_preserved_trials": 0,
+      "gc_counter_increments": 0,
+      "gc_counter_trials_available": 25,
+      "memory_profile": {
+        "n": 5,
+        "pss_delta_kb": {
+          "n": 5,
+          "min": 4119,
+          "median": 4453,
+          "p95": 4611.6,
+          "max": 4643
+        },
+        "sampled_java_peak_delta_bytes": {
+          "n": 5,
+          "min": 1128400,
+          "median": 1161232,
+          "p95": 1194000.0,
+          "max": 1194000
+        },
+        "sampled_native_peak_delta_bytes": {
+          "n": 5,
+          "min": 1767776,
+          "median": 1954784,
+          "p95": 2007360.0,
+          "max": 2010400
+        },
+        "samples_during_transition": [
+          5,
+          5,
+          4,
+          5,
+          5
+        ]
+      }
+    }
+  },
+  "initial_view_locales": "en-US",
+  "target_locale": "fr",
+  "source_results_sha256": {
+    "timing": "f6fe5bde4ceb60ec098042b4aa0543d5dd06776cb98c5a7a34381d27a43b84f0",
+    "memory": "c96129fa411032586699f00e7c597e632f89013e7817b96af1a8ef2524f2a743"
+  },
+  "limits": [
+    "Emulator debug-build observations; not a physical-device performance guarantee",
+    "Frame commit is not display presentation or a blank-frame detector",
+    "Memory deltas/observed sample maxima are not retained sizes or leak evidence",
+    "Phase medians do not sum to the overall median"
+  ],
+  "observed_median_difference_ms": 81.90174999999999,
+  "method_pass": {
+    "mode": "methods",
+    "rows": 20,
+    "runs": [
+      {
+        "case": "framework_locale",
+        "buffer_overflow": false,
+        "coverage": {
+          "completed_calls": 92761,
+          "incomplete_self_time_calls": 0,
+          "open_or_discarded_frames": 85,
+          "unmatched_exit_events": 0
+        },
+        "selected_timings_us": [],
+        "framework_paths": [
+          {
+            "thread": "main",
+            "method": "android.app.ActivityThread.performLaunchActivity(Landroid/app/ActivityThread$ActivityClientRecord;Landroid/content/Intent;)Landroid/app/Activity;",
+            "path": [
+              "com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run()V",
+              "java.lang.reflect.Method.invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;",
+              "android.app.ActivityThread.main([Ljava/lang/String;)V",
+              "android.os.Looper.loop()V",
+              "android.os.Looper.loopOnce(Landroid/os/Looper;JI)Z",
+              "android.os.Handler.dispatchMessage(Landroid/os/Message;)V",
+              "android.app.ActivityThread$H.handleMessage(Landroid/os/Message;)V",
+              "android.app.servertransaction.TransactionExecutor.execute(Landroid/app/servertransaction/ClientTransaction;)V",
+              "android.app.servertransaction.TransactionExecutor.executeTransactionItems(Landroid/app/servertransaction/ClientTransaction;)V",
+              "android.app.servertransaction.TransactionExecutor.executeNonLifecycleItem(Landroid/app/servertransaction/ClientTransaction;Landroid/app/servertransaction/ClientTransactionItem;Z)V",
+              "android.app.servertransaction.ActivityTransactionItem.execute(Landroid/app/ClientTransactionHandler;Landroid/app/servertransaction/PendingTransactionActions;)V",
+              "android.app.servertransaction.ActivityRelaunchItem.execute(Landroid/app/ClientTransactionHandler;Landroid/app/ActivityThread$ActivityClientRecord;Landroid/app/servertransaction/PendingTransactionActions;)V",
+              "android.app.ActivityThread.handleRelaunchActivity(Landroid/app/ActivityThread$ActivityClientRecord;Landroid/app/servertransaction/PendingTransactionActions;)V",
+              "android.app.ActivityThread.handleRelaunchActivityInner(Landroid/app/ActivityThread$ActivityClientRecord;Ljava/util/List;Ljava/util/List;Landroid/app/servertransaction/PendingTransactionActions;ZLandroid/content/res/Configuration;Landroid/window/ActivityWindowInfo;Ljava/lang/String;)V",
+              "android.app.ActivityThread.handleLaunchActivity(Landroid/app/ActivityThread$ActivityClientRecord;Landroid/app/servertransaction/PendingTransactionActions;ILandroid/content/Intent;)Landroid/app/Activity;",
+              "android.app.ActivityThread.performLaunchActivity(Landroid/app/ActivityThread$ActivityClientRecord;Landroid/content/Intent;)Landroid/app/Activity;"
+            ]
+          }
+        ],
+        "framework_evidence": {
+          "android.app.LocaleManager.setApplicationLocales(Landroid/os/LocaleList;)V": 1,
+          "android.app.LocaleManager.setApplicationLocales(Ljava/lang/String;Landroid/os/LocaleList;Z)V": 1,
+          "android.app.ActivityThread.handleConfigurationChanged(Landroid/content/res/Configuration;I)V": 2,
+          "android.app.servertransaction.ActivityRelaunchItem.execute(Landroid/app/ClientTransactionHandler;Landroid/app/ActivityThread$ActivityClientRecord;Landroid/app/servertransaction/PendingTransactionActions;)V": 1,
+          "android.app.ActivityThread.handleRelaunchActivity(Landroid/app/ActivityThread$ActivityClientRecord;Landroid/app/servertransaction/PendingTransactionActions;)V": 1,
+          "android.app.ActivityThread.handleRelaunchActivityInner(Landroid/app/ActivityThread$ActivityClientRecord;Ljava/util/List;Ljava/util/List;Landroid/app/servertransaction/PendingTransactionActions;ZLandroid/content/res/Configuration;Landroid/window/ActivityWindowInfo;Ljava/lang/String;)V": 1,
+          "android.app.ActivityThread.performLaunchActivity(Landroid/app/ActivityThread$ActivityClientRecord;Landroid/content/Intent;)Landroid/app/Activity;": 1,
+          "android.app.servertransaction.ActivityRelaunchItem$1.createFromParcel(Landroid/os/Parcel;)Ljava/lang/Object;": 1,
+          "android.app.servertransaction.ActivityRelaunchItem$1.createFromParcel(Landroid/os/Parcel;)Landroid/app/servertransaction/ActivityRelaunchItem;": 1,
+          "android.app.servertransaction.ActivityRelaunchItem.<init>(Landroid/os/Parcel;Landroid/app/servertransaction/ActivityRelaunchItem-IA;)V": 1,
+          "android.app.servertransaction.ActivityRelaunchItem.<init>(Landroid/os/Parcel;)V": 1,
+          "android.app.servertransaction.ActivityRelaunchItem.preExecute(Landroid/app/ClientTransactionHandler;)V": 1
+        },
+        "classes_with_observed_entries": 469
+      },
+      {
+        "case": "framework_locale",
+        "buffer_overflow": false,
+        "coverage": {
+          "completed_calls": 92827,
+          "incomplete_self_time_calls": 0,
+          "open_or_discarded_frames": 93,
+          "unmatched_exit_events": 0
+        },
+        "selected_timings_us": [],
+        "framework_paths": [
+          {
+            "thread": "main",
+            "method": "android.app.ActivityThread.performLaunchActivity(Landroid/app/ActivityThread$ActivityClientRecord;Landroid/content/Intent;)Landroid/app/Activity;",
+            "path": [
+              "com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run()V",
+              "java.lang.reflect.Method.invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;",
+              "android.app.ActivityThread.main([Ljava/lang/String;)V",
+              "android.os.Looper.loop()V",
+              "android.os.Looper.loopOnce(Landroid/os/Looper;JI)Z",
+              "android.os.Handler.dispatchMessage(Landroid/os/Message;)V",
+              "android.app.ActivityThread$H.handleMessage(Landroid/os/Message;)V",
+              "android.app.servertransaction.TransactionExecutor.execute(Landroid/app/servertransaction/ClientTransaction;)V",
+              "android.app.servertransaction.TransactionExecutor.executeTransactionItems(Landroid/app/servertransaction/ClientTransaction;)V",
+              "android.app.servertransaction.TransactionExecutor.executeNonLifecycleItem(Landroid/app/servertransaction/ClientTransaction;Landroid/app/servertransaction/ClientTransactionItem;Z)V",
+              "android.app.servertransaction.ActivityTransactionItem.execute(Landroid/app/ClientTransactionHandler;Landroid/app/servertransaction/PendingTransactionActions;)V",
+              "android.app.servertransaction.ActivityRelaunchItem.execute(Landroid/app/ClientTransactionHandler;Landroid/app/ActivityThread$ActivityClientRecord;Landroid/app/servertransaction/PendingTransactionActions;)V",
+              "android.app.ActivityThread.handleRelaunchActivity(Landroid/app/ActivityThread$ActivityClientRecord;Landroid/app/servertransaction/PendingTransactionActions;)V",
+              "android.app.ActivityThread.handleRelaunchActivityInner(Landroid/app/ActivityThread$ActivityClientRecord;Ljava/util/List;Ljava/util/List;Landroid/app/servertransaction/PendingTransactionActions;ZLandroid/content/res/Configuration;Landroid/window/ActivityWindowInfo;Ljava/lang/String;)V",
+              "android.app.ActivityThread.handleLaunchActivity(Landroid/app/ActivityThread$ActivityClientRecord;Landroid/app/servertransaction/PendingTransactionActions;ILandroid/content/Intent;)Landroid/app/Activity;",
+              "android.app.ActivityThread.performLaunchActivity(Landroid/app/ActivityThread$ActivityClientRecord;Landroid/content/Intent;)Landroid/app/Activity;"
+            ]
+          }
+        ],
+        "framework_evidence": {
+          "android.app.LocaleManager.setApplicationLocales(Landroid/os/LocaleList;)V": 1,
+          "android.app.LocaleManager.setApplicationLocales(Ljava/lang/String;Landroid/os/LocaleList;Z)V": 1,
+          "android.app.ActivityThread.handleConfigurationChanged(Landroid/content/res/Configuration;I)V": 2,
+          "android.app.servertransaction.ActivityRelaunchItem.execute(Landroid/app/ClientTransactionHandler;Landroid/app/ActivityThread$ActivityClientRecord;Landroid/app/servertransaction/PendingTransactionActions;)V": 1,
+          "android.app.ActivityThread.handleRelaunchActivity(Landroid/app/ActivityThread$ActivityClientRecord;Landroid/app/servertransaction/PendingTransactionActions;)V": 1,
+          "android.app.ActivityThread.handleRelaunchActivityInner(Landroid/app/ActivityThread$ActivityClientRecord;Ljava/util/List;Ljava/util/List;Landroid/app/servertransaction/PendingTransactionActions;ZLandroid/content/res/Configuration;Landroid/window/ActivityWindowInfo;Ljava/lang/String;)V": 1,
+          "android.app.ActivityThread.performLaunchActivity(Landroid/app/ActivityThread$ActivityClientRecord;Landroid/content/Intent;)Landroid/app/Activity;": 1,
+          "android.app.servertransaction.ActivityRelaunchItem$1.createFromParcel(Landroid/os/Parcel;)Ljava/lang/Object;": 1,
+          "android.app.servertransaction.ActivityRelaunchItem$1.createFromParcel(Landroid/os/Parcel;)Landroid/app/servertransaction/ActivityRelaunchItem;": 1,
+          "android.app.servertransaction.ActivityRelaunchItem.<init>(Landroid/os/Parcel;Landroid/app/servertransaction/ActivityRelaunchItem-IA;)V": 1,
+          "android.app.servertransaction.ActivityRelaunchItem.<init>(Landroid/os/Parcel;)V": 1,
+          "android.app.servertransaction.ActivityRelaunchItem.preExecute(Landroid/app/ClientTransactionHandler;)V": 1
+        },
+        "classes_with_observed_entries": 628
+      },
+      {
+        "case": "manual_locale",
+        "buffer_overflow": false,
+        "coverage": {
+          "completed_calls": 93359,
+          "incomplete_self_time_calls": 0,
+          "open_or_discarded_frames": 98,
+          "unmatched_exit_events": 0
+        },
+        "selected_timings_us": [
+          {
+            "thread": "main",
+            "method": "com.elianfabian.recreationlab.WorkloadActivity.installWorkload(Landroid/content/Context;)V",
+            "completed_calls": 1,
+            "inclusive_cpu_us": 99307,
+            "exclusive_cpu_us": 235,
+            "inclusive_wall_us": 111314,
+            "exclusive_wall_us": 520,
+            "complete_children_calls": 1
+          },
+          {
+            "thread": "main",
+            "method": "android.app.ActivityThread.performLaunchActivity(Landroid/app/ActivityThread$ActivityClientRecord;Landroid/content/Intent;)Landroid/app/Activity;",
+            "completed_calls": 1,
+            "inclusive_cpu_us": 108345,
+            "exclusive_cpu_us": 32,
+            "inclusive_wall_us": 126937,
+            "exclusive_wall_us": 42,
+            "complete_children_calls": 1
+          },
+          {
+            "thread": "main",
+            "method": "com.elianfabian.recreationlab.WorkloadActivity.onCreate(Landroid/os/Bundle;)V",
+            "completed_calls": 1,
+            "inclusive_cpu_us": 100321,
+            "exclusive_cpu_us": 27,
+            "inclusive_wall_us": 112461,
+            "exclusive_wall_us": 36,
+            "complete_children_calls": 1
+          },
+          {
+            "thread": "main",
+            "method": "android.app.ActivityThread.handleRelaunchActivityInner(Landroid/app/ActivityThread$ActivityClientRecord;Ljava/util/List;Ljava/util/List;Landroid/app/servertransaction/PendingTransactionActions;ZLandroid/content/res/Configuration;Landroid/window/ActivityWindowInfo;Ljava/lang/String;)V",
+            "completed_calls": 1,
+            "inclusive_cpu_us": 126051,
+            "exclusive_cpu_us": 10,
+            "inclusive_wall_us": 143594,
+            "exclusive_wall_us": 25,
+            "complete_children_calls": 1
+          }
+        ],
+        "framework_paths": [
+          {
+            "thread": "main",
+            "method": "android.app.ActivityThread.handleRelaunchActivityLocally(Landroid/os/IBinder;)V",
+            "path": [
+              "com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run()V",
+              "java.lang.reflect.Method.invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;",
+              "android.app.ActivityThread.main([Ljava/lang/String;)V",
+              "android.os.Looper.loop()V",
+              "android.os.Looper.loopOnce(Landroid/os/Looper;JI)Z",
+              "android.os.Handler.dispatchMessage(Landroid/os/Message;)V",
+              "android.app.ActivityThread$H.handleMessage(Landroid/os/Message;)V",
+              "android.app.ActivityThread.handleRelaunchActivityLocally(Landroid/os/IBinder;)V"
+            ]
+          },
+          {
+            "thread": "main",
+            "method": "android.app.ActivityThread.performLaunchActivity(Landroid/app/ActivityThread$ActivityClientRecord;Landroid/content/Intent;)Landroid/app/Activity;",
+            "path": [
+              "com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run()V",
+              "java.lang.reflect.Method.invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;",
+              "android.app.ActivityThread.main([Ljava/lang/String;)V",
+              "android.os.Looper.loop()V",
+              "android.os.Looper.loopOnce(Landroid/os/Looper;JI)Z",
+              "android.os.Handler.dispatchMessage(Landroid/os/Message;)V",
+              "android.app.ActivityThread$H.handleMessage(Landroid/os/Message;)V",
+              "android.app.ActivityThread.handleRelaunchActivityLocally(Landroid/os/IBinder;)V",
+              "android.app.ClientTransactionHandler.executeTransaction(Landroid/app/servertransaction/ClientTransaction;)V",
+              "android.app.servertransaction.TransactionExecutor.execute(Landroid/app/servertransaction/ClientTransaction;)V",
+              "android.app.servertransaction.TransactionExecutor.executeTransactionItems(Landroid/app/servertransaction/ClientTransaction;)V",
+              "android.app.servertransaction.TransactionExecutor.executeNonLifecycleItem(Landroid/app/servertransaction/ClientTransaction;Landroid/app/servertransaction/ClientTransactionItem;Z)V",
+              "android.app.servertransaction.ActivityTransactionItem.execute(Landroid/app/ClientTransactionHandler;Landroid/app/servertransaction/PendingTransactionActions;)V",
+              "android.app.servertransaction.ActivityRelaunchItem.execute(Landroid/app/ClientTransactionHandler;Landroid/app/ActivityThread$ActivityClientRecord;Landroid/app/servertransaction/PendingTransactionActions;)V",
+              "android.app.ActivityThread.handleRelaunchActivity(Landroid/app/ActivityThread$ActivityClientRecord;Landroid/app/servertransaction/PendingTransactionActions;)V",
+              "android.app.ActivityThread.handleRelaunchActivityInner(Landroid/app/ActivityThread$ActivityClientRecord;Ljava/util/List;Ljava/util/List;Landroid/app/servertransaction/PendingTransactionActions;ZLandroid/content/res/Configuration;Landroid/window/ActivityWindowInfo;Ljava/lang/String;)V",
+              "android.app.ActivityThread.handleLaunchActivity(Landroid/app/ActivityThread$ActivityClientRecord;Landroid/app/servertransaction/PendingTransactionActions;ILandroid/content/Intent;)Landroid/app/Activity;",
+              "android.app.ActivityThread.performLaunchActivity(Landroid/app/ActivityThread$ActivityClientRecord;Landroid/content/Intent;)Landroid/app/Activity;"
+            ]
+          }
+        ],
+        "framework_evidence": {
+          "android.app.Activity.recreate()V": 1,
+          "android.app.ActivityThread.handleRelaunchActivityLocally(Landroid/os/IBinder;)V": 1,
+          "android.app.servertransaction.ActivityRelaunchItem.<init>(Landroid/os/IBinder;Ljava/util/List;Ljava/util/List;ILandroid/util/MergedConfiguration;ZLandroid/window/ActivityWindowInfo;)V": 1,
+          "android.app.servertransaction.ActivityRelaunchItem.preExecute(Landroid/app/ClientTransactionHandler;)V": 1,
+          "android.app.servertransaction.ActivityRelaunchItem.execute(Landroid/app/ClientTransactionHandler;Landroid/app/ActivityThread$ActivityClientRecord;Landroid/app/servertransaction/PendingTransactionActions;)V": 1,
+          "android.app.ActivityThread.handleRelaunchActivity(Landroid/app/ActivityThread$ActivityClientRecord;Landroid/app/servertransaction/PendingTransactionActions;)V": 1,
+          "android.app.ActivityThread.handleRelaunchActivityInner(Landroid/app/ActivityThread$ActivityClientRecord;Ljava/util/List;Ljava/util/List;Landroid/app/servertransaction/PendingTransactionActions;ZLandroid/content/res/Configuration;Landroid/window/ActivityWindowInfo;Ljava/lang/String;)V": 1,
+          "android.app.ActivityThread.performLaunchActivity(Landroid/app/ActivityThread$ActivityClientRecord;Landroid/content/Intent;)Landroid/app/Activity;": 1,
+          "android.app.servertransaction.ActivityRelaunchItem.postExecute(Landroid/app/ClientTransactionHandler;Landroid/app/servertransaction/PendingTransactionActions;)V": 1
+        },
+        "classes_with_observed_entries": 665
+      },
+      {
+        "case": "manual_locale",
+        "buffer_overflow": false,
+        "coverage": {
+          "completed_calls": 88686,
+          "incomplete_self_time_calls": 0,
+          "open_or_discarded_frames": 99,
+          "unmatched_exit_events": 0
+        },
+        "selected_timings_us": [
+          {
+            "thread": "main",
+            "method": "com.elianfabian.recreationlab.WorkloadActivity.installWorkload(Landroid/content/Context;)V",
+            "completed_calls": 1,
+            "inclusive_cpu_us": 108928,
+            "exclusive_cpu_us": 188,
+            "inclusive_wall_us": 109647,
+            "exclusive_wall_us": 540,
+            "complete_children_calls": 1
+          },
+          {
+            "thread": "main",
+            "method": "android.app.ActivityThread.performLaunchActivity(Landroid/app/ActivityThread$ActivityClientRecord;Landroid/content/Intent;)Landroid/app/Activity;",
+            "completed_calls": 1,
+            "inclusive_cpu_us": 114734,
+            "exclusive_cpu_us": 41,
+            "inclusive_wall_us": 123761,
+            "exclusive_wall_us": 38,
+            "complete_children_calls": 1
+          },
+          {
+            "thread": "main",
+            "method": "android.app.ActivityThread.handleRelaunchActivityInner(Landroid/app/ActivityThread$ActivityClientRecord;Ljava/util/List;Ljava/util/List;Landroid/app/servertransaction/PendingTransactionActions;ZLandroid/content/res/Configuration;Landroid/window/ActivityWindowInfo;Ljava/lang/String;)V",
+            "completed_calls": 1,
+            "inclusive_cpu_us": 132213,
+            "exclusive_cpu_us": 33,
+            "inclusive_wall_us": 141320,
+            "exclusive_wall_us": 44,
+            "complete_children_calls": 1
+          },
+          {
+            "thread": "main",
+            "method": "com.elianfabian.recreationlab.WorkloadActivity.onCreate(Landroid/os/Bundle;)V",
+            "completed_calls": 1,
+            "inclusive_cpu_us": 109682,
+            "exclusive_cpu_us": 17,
+            "inclusive_wall_us": 110403,
+            "exclusive_wall_us": 20,
+            "complete_children_calls": 1
+          }
+        ],
+        "framework_paths": [
+          {
+            "thread": "main",
+            "method": "android.app.ActivityThread.handleRelaunchActivityLocally(Landroid/os/IBinder;)V",
+            "path": [
+              "com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run()V",
+              "java.lang.reflect.Method.invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;",
+              "android.app.ActivityThread.main([Ljava/lang/String;)V",
+              "android.os.Looper.loop()V",
+              "android.os.Looper.loopOnce(Landroid/os/Looper;JI)Z",
+              "android.os.Handler.dispatchMessage(Landroid/os/Message;)V",
+              "android.app.ActivityThread$H.handleMessage(Landroid/os/Message;)V",
+              "android.app.ActivityThread.handleRelaunchActivityLocally(Landroid/os/IBinder;)V"
+            ]
+          },
+          {
+            "thread": "main",
+            "method": "android.app.ActivityThread.performLaunchActivity(Landroid/app/ActivityThread$ActivityClientRecord;Landroid/content/Intent;)Landroid/app/Activity;",
+            "path": [
+              "com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run()V",
+              "java.lang.reflect.Method.invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;",
+              "android.app.ActivityThread.main([Ljava/lang/String;)V",
+              "android.os.Looper.loop()V",
+              "android.os.Looper.loopOnce(Landroid/os/Looper;JI)Z",
+              "android.os.Handler.dispatchMessage(Landroid/os/Message;)V",
+              "android.app.ActivityThread$H.handleMessage(Landroid/os/Message;)V",
+              "android.app.ActivityThread.handleRelaunchActivityLocally(Landroid/os/IBinder;)V",
+              "android.app.ClientTransactionHandler.executeTransaction(Landroid/app/servertransaction/ClientTransaction;)V",
+              "android.app.servertransaction.TransactionExecutor.execute(Landroid/app/servertransaction/ClientTransaction;)V",
+              "android.app.servertransaction.TransactionExecutor.executeTransactionItems(Landroid/app/servertransaction/ClientTransaction;)V",
+              "android.app.servertransaction.TransactionExecutor.executeNonLifecycleItem(Landroid/app/servertransaction/ClientTransaction;Landroid/app/servertransaction/ClientTransactionItem;Z)V",
+              "android.app.servertransaction.ActivityTransactionItem.execute(Landroid/app/ClientTransactionHandler;Landroid/app/servertransaction/PendingTransactionActions;)V",
+              "android.app.servertransaction.ActivityRelaunchItem.execute(Landroid/app/ClientTransactionHandler;Landroid/app/ActivityThread$ActivityClientRecord;Landroid/app/servertransaction/PendingTransactionActions;)V",
+              "android.app.ActivityThread.handleRelaunchActivity(Landroid/app/ActivityThread$ActivityClientRecord;Landroid/app/servertransaction/PendingTransactionActions;)V",
+              "android.app.ActivityThread.handleRelaunchActivityInner(Landroid/app/ActivityThread$ActivityClientRecord;Ljava/util/List;Ljava/util/List;Landroid/app/servertransaction/PendingTransactionActions;ZLandroid/content/res/Configuration;Landroid/window/ActivityWindowInfo;Ljava/lang/String;)V",
+              "android.app.ActivityThread.handleLaunchActivity(Landroid/app/ActivityThread$ActivityClientRecord;Landroid/app/servertransaction/PendingTransactionActions;ILandroid/content/Intent;)Landroid/app/Activity;",
+              "android.app.ActivityThread.performLaunchActivity(Landroid/app/ActivityThread$ActivityClientRecord;Landroid/content/Intent;)Landroid/app/Activity;"
+            ]
+          }
+        ],
+        "framework_evidence": {
+          "android.app.Activity.recreate()V": 1,
+          "android.app.ActivityThread.handleRelaunchActivityLocally(Landroid/os/IBinder;)V": 1,
+          "android.app.servertransaction.ActivityRelaunchItem.<init>(Landroid/os/IBinder;Ljava/util/List;Ljava/util/List;ILandroid/util/MergedConfiguration;ZLandroid/window/ActivityWindowInfo;)V": 1,
+          "android.app.servertransaction.ActivityRelaunchItem.preExecute(Landroid/app/ClientTransactionHandler;)V": 1,
+          "android.app.servertransaction.ActivityRelaunchItem.execute(Landroid/app/ClientTransactionHandler;Landroid/app/ActivityThread$ActivityClientRecord;Landroid/app/servertransaction/PendingTransactionActions;)V": 1,
+          "android.app.ActivityThread.handleRelaunchActivity(Landroid/app/ActivityThread$ActivityClientRecord;Landroid/app/servertransaction/PendingTransactionActions;)V": 1,
+          "android.app.ActivityThread.handleRelaunchActivityInner(Landroid/app/ActivityThread$ActivityClientRecord;Ljava/util/List;Ljava/util/List;Landroid/app/servertransaction/PendingTransactionActions;ZLandroid/content/res/Configuration;Landroid/window/ActivityWindowInfo;Ljava/lang/String;)V": 1,
+          "android.app.ActivityThread.performLaunchActivity(Landroid/app/ActivityThread$ActivityClientRecord;Landroid/content/Intent;)Landroid/app/Activity;": 1,
+          "android.app.servertransaction.ActivityRelaunchItem.postExecute(Landroid/app/ClientTransactionHandler;Landroid/app/servertransaction/PendingTransactionActions;)V": 1
+        },
+        "classes_with_observed_entries": 631
+      }
+    ]
+  }
+}

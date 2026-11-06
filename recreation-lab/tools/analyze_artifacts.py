@@ -96,6 +96,12 @@ def method_trace(path):
     if (len(raw) - position) % record_size:
         raise ValueError("Truncated ART records")
     stacks, entries, paths = defaultdict(list), Counter(), Counter()
+    timing_stacks = defaultdict(list)
+    timings = defaultdict(Counter)
+    discarded_frames = unmatched_exits = 0
+    clock = metadata.get("clock", "unknown")
+    if clock == "dual" and record_size < (13 if version == 1 else 14):
+        raise ValueError("Dual-clock trace record is too small")
     framework_paths = {}
     needles = ["ActivityThread.handleRelaunch", "ActivityThread.performLaunchActivity", "Activity.recreate",
                "ActivityThread.handleConfigurationChanged", "ActivityRelaunchItem", "LocaleManager.setApplicationLocales"]
@@ -104,10 +110,16 @@ def method_trace(path):
         thread = raw[position] if version == 1 else struct.unpack_from("<H", raw, position)[0]
         value = struct.unpack_from("<I", raw, position + (1 if version == 1 else 2))[0]
         action, method = value & 3, value & ~3
+        clock_position = position + (5 if version == 1 else 6)
+        first_clock = struct.unpack_from("<I", raw, clock_position)[0]
+        cpu = first_clock if clock in {"dual", "thread-cpu"} else None
+        wall = struct.unpack_from("<I", raw, clock_position + 4)[0] if clock == "dual" else first_clock if clock == "wall" else None
         name = methods.get(method, f"unknown:{method:x}")
         stack = stacks[thread]
+        timing_stack = timing_stacks[thread]
         if action == 0:
             stack.append(name)
+            timing_stack.append({"name": name, "cpu": cpu, "wall": wall, "child_cpu": 0, "child_wall": 0, "incomplete": False})
             entries[name] += 1
             if any(key in name for key in needles):
                 framework_paths.setdefault((thread, name), list(stack))
@@ -116,12 +128,47 @@ def method_trace(path):
         elif action in (1, 2):
             # A capture can begin/end inside a call; preserve only matching observed frames.
             if name in stack:
-                del stack[len(stack) - 1 - stack[::-1].index(name):]
+                index = len(stack) - 1 - stack[::-1].index(name)
+                frame = timing_stack[index]
+                if index != len(stack) - 1:
+                    discarded_frames += len(stack) - index - 1
+                    frame["incomplete"] = True
+                if clock != "unknown":
+                    row = timings[(thread, name)]
+                    row["completed_calls"] += 1
+                    # ART v1-v3 clocks are microseconds in uint32 fields; allow wraparound.
+                    for label, current in (("cpu", cpu), ("wall", wall)):
+                        if current is not None:
+                            elapsed = (current - frame[label]) & 0xffffffff
+                            row[f"inclusive_{label}_us"] += elapsed
+                            if not frame["incomplete"]:
+                                row[f"exclusive_{label}_us"] += max(0, elapsed - frame[f"child_{label}"])
+                            if index:
+                                timing_stack[index - 1][f"child_{label}"] += elapsed
+                    row["incomplete_children_calls" if frame["incomplete"] else "complete_children_calls"] += 1
+                else:
+                    discarded_frames += 1
+                    if index:
+                        timing_stack[index - 1]["incomplete"] = True
+                del stack[index:]
+                del timing_stack[index:]
+            else:
+                unmatched_exits += 1
         else:
             raise ValueError("Unsupported ART method action")
         record_count += 1
         position += record_size
+    timing_rows = [{"thread": threads.get(thread, str(thread)), "method": name, **row}
+                   for (thread, name), row in timings.items()]
+    main_timings = sorted((row for row in timing_rows if row["thread"] == "main"),
+                          key=lambda row: row.get("exclusive_cpu_us", row.get("exclusive_wall_us", 0)), reverse=True)
     return {"meaning": "Observed method entry transitions and reconstructed main-thread paths; sampling is not an exact call count",
+            "timing_clock": clock, "timings_include_profiler_overhead": True,
+            "timing_coverage": {"completed_calls": sum(row["completed_calls"] for row in timing_rows),
+                                "incomplete_self_time_calls": sum(row.get("incomplete_children_calls", 0) for row in timing_rows),
+                                "open_or_discarded_frames": discarded_frames + sum(map(len, timing_stacks.values())),
+                                "unmatched_exit_events": unmatched_exits},
+            "main_thread_timings": main_timings,
             "buffer_overflow": metadata.get("data-file-overflow") == "true",
             "version": version, "metadata": metadata, "record_count": record_count, "threads": threads,
             "framework_evidence": {name: count for name, count in entries.items() if any(key in name for key in needles)},

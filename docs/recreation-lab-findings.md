@@ -2,6 +2,8 @@
 
 Date: 2026-11-05. The [isolated lab](../recreation-lab/README.md) is implemented and executable. These are harness-validation observations from debug builds on disposable emulators, not a production performance ranking or a reproduction of the original device-specific failure.
 
+Follow-up: the [2026-11-06 headless comparison](headless-locale-comparison-2026-11-06.md) completed 20 timing trials and five memory trials per locale path on one API-36 emulator, plus fresh method captures.
+
 ## What was verified
 
 - Final APK build and lint passed; lint reports 0 errors and 11 warnings. Parser unit tests: 3 passed.
