@@ -78,6 +78,27 @@ Generated reports, screenshots, emulator logs, and traces are under `build/qa/` 
 
 ## Reproducing the checks
 
+### Build recovery after moving the checkout
+
+A reported `:app:mergeLibDexDebug` failure referenced a class under the old `Documents\@GitHub\LocaleEasy` path while the transform root was `Documents\GitHub\LocaleEasy`. This indicates stale incremental dexing metadata containing the previous absolute path. No library source change was needed. The initial clean also encountered a locked lint JAR; stopping the Gradle daemon released it.
+
+Recovery, executed successfully on 2026-11-06:
+
+```powershell
+./gradlew.bat --stop
+./gradlew.bat clean :app:assembleDebug --offline --no-build-cache --no-configuration-cache
+```
+
+The clean build passed. A subsequent Android Studio-style build also passed, including `bundleLibRuntimeToDirDebug` and `mergeLibDexDebug`, with configuration caching enabled and the API-24 dexing parameters from the original error:
+
+```powershell
+./gradlew.bat :app:assembleDebug --offline '-Pandroid.injected.invoked.from.ide=true' '-Pandroid.injected.build.api=24'
+```
+
+Quote dotted `-P` arguments in PowerShell. Continue using the current checkout path in Android Studio; the commands above regenerate build outputs rather than changing the locale implementation.
+
+### Test commands
+
 Use a compatible JDK (JBR 21 was used). Run from the repository root on Windows:
 
 ```powershell
