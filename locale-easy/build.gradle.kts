@@ -30,6 +30,7 @@ android {
 }
 
 dependencies {
+	api(libs.kotlinxCoroutinesCore)
 	implementation(libs.androidx.startupRuntime)
 	implementation(libs.kotlinxCoroutinesAndroid)
 

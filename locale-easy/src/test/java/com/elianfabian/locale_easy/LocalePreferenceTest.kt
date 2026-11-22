@@ -15,6 +15,19 @@ class LocalePreferenceTest {
 		assertTrue(runCatching { LocalePreference.AppLocales(listOf(Locale.ROOT)) }.exceptionOrNull() is IllegalArgumentException)
 	}
 
+	@Test fun appLocalesRejectsLanguagesThatCannotRoundTrip() {
+		assertTrue(runCatching {
+			LocalePreference.AppLocales(listOf(Locale("fr-CA")))
+		}.exceptionOrNull() is IllegalArgumentException)
+	}
+
+	@Test fun duplicatesCollapseToFirstOccurrenceWhenAppliedOrRestored() {
+		val frenchCanadian = Locale.forLanguageTag("fr-CA")
+		val expected = LocalePreference.AppLocales(listOf(Locale.FRENCH, frenchCanadian))
+		assertEquals(expected, LocalePreference.AppLocales(listOf(Locale.FRENCH, Locale.FRENCH, frenchCanadian)).immutableCopy())
+		assertEquals(expected, restoreLocalePreference(false, "fr,fr,fr-CA"))
+	}
+
 	@Test fun immutableCopyProtectsInputAndComparesByOrderedValue() {
 		val source = mutableListOf(Locale.FRENCH, Locale.ENGLISH)
 		val preference = LocalePreference.AppLocales(source).immutableCopy() as LocalePreference.AppLocales
@@ -48,7 +61,7 @@ class LocalePreferenceTest {
 	}
 
 	@Test fun storedCustomRoundTripsRegionsScriptsAndOrder() {
-		val locales = listOf("zh-Hant-TW", "pt-BR", "en-US").map(Locale::forLanguageTag)
+		val locales = listOf("zh-Hant-TW", "pt-BR", "en-US-u-nu-arab").map(Locale::forLanguageTag)
 		val stored = locales.joinToString(",") { it.toLanguageTag() }
 		assertEquals(LocalePreference.AppLocales(locales), restoreLocalePreference(false, stored))
 	}

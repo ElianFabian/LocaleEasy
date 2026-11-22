@@ -2,6 +2,8 @@
 
 Reviewed: 2026-11-05. Scope: `locale-easy` library and `app` sample.
 
+For current implementation order and acceptance tests, use the [2026-11-22 library roadmap](library-roadmap.md). New API 24 probes reproduced a startup crash with persisted duplicate locales and a nested setter that left preference and resources in different languages. The original review below tracks the history of the earlier fixes.
+
 The numbered findings below describe the initial source review. Progress and executed verification are recorded here; an implemented fix is not automatically a completed device check.
 
 ## Progress

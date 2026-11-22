@@ -4,6 +4,20 @@ Date: 2026-11-05; sample recreation selector verification updated 2026-11-06. Th
 
 ## Executed checks
 
+The 2026-11-22 reliability update verified the library build, sample build, instrumentation APKs and lint for both modules. All 11 preference unit tests passed. A minimal Android app assembled while reading the public flows with only the LocaleEasy project dependency.
+
+| Environment | Result |
+| --- | --- |
+| API 21 library-only fixture | Both tests passed, covering localized lookup and plain-activity recreation. |
+| API 24 isolated sample | 27 cases, five API-dependent skips, zero failures. Separate seed and verify processes repaired stored `fr,fr,fr-CA` and rendered French on the first launch. |
+| API 36 isolated sample | 27 cases, one API-dependent skip, zero failures on rerun. A retained French context received the new night qualifier and kept its translation. The WebView initialization and repeat-switch tests ran with Google WebView 151.0.7922.199. |
+
+Separate API 36 process pairs covered both platform ownership cases. A marked legacy experiment imported its French platform choice over stale Spanish local storage and cleared the platform override. An independent Italian platform choice survived startup with local French and also survived switching the wrapped activity to follow-system.
+
+The API 36 local-recreation screenshot probe observed a replacement activity and root, preserved decor and French XML. The 13 sampled frames included no black app-content frame. The first and last frames had clear separation between the toolbar and the status bar. Screenshot sampling can miss short transitions.
+
+The API 36 rerun followed a System UI ANR that stole window focus from the initial run. The retained-context regression waits for configuration delivery to both the activity and the wrapper. The repeat-switch test asserts that the outgoing activity keeps its translation while the next activity inflates in the selected language. It exercises the repair helper and does not reproduce the original provider's configuration mutation. System font-scale propagation, RTL, multi-window and physical-device transition appearance remain open.
+
 Current manual-default/color-marker update, 2026-11-06: local recreation now starts enabled on every API/process; the sample framework selector is removed. API-36 instrumentation: 20 discovered, 17 passed, 3 intentional skips. API-32 instrumentation: 20 discovered, 14 passed, 6 intentional skips. The normal modern-Android tests now exercise local recreation for stopped activities, identical-language mode changes, native back stacks/titles, dialogs, and Compose navigation. Framework investigations explicitly opt in for that process and clean up to manual mode.
 
 Separate seed/verify processes passed on API 36 for four cases: saved manual French, an obsolete persisted framework switch with French, an OS-only framework selection without LocaleEasy storage, and a French framework preference newer than an old Spanish library snapshot. Verification preserved the authoritative French selection, disabled framework recreation, removed the obsolete switch, and left framework app locales empty. Preference unit tests: 9 passed. Library lint: 0 errors/2 warnings; sample lint: 0 errors/20 warnings. The initial device-test install hit the temporary API-36 session's storage reserve; lowering that session's reserve allowed the suite to run.

@@ -7,6 +7,7 @@ val localeEasy = LocaleEasy.getInstance()
 
 localeEasy.followSystem()
 localeEasy.setLocale(Locale.FRENCH)
+localeEasy.setLanguageTag("fr-CA")
 localeEasy.setLocales(listOf(Locale.forLanguageTag("fr-CA"), Locale.ENGLISH))
 
 // Equivalent explicit selection:
@@ -21,13 +22,15 @@ localeEasy.preference.collect { preference ->
     }
 }
 
-// Observe languages to use for formatting or localized contexts:
-localeEasy.effectiveLocales.collect { locales -> /* update dependent state */ }
+// Read the preference and its resolution together in a settings UI:
+localeEasy.state.collect { state ->
+    println("${state.preference} resolves to ${state.effectiveLocales}")
+}
 ```
 
-`AppLocales` is a data class with generated value equality, `copy()`, and destructuring. It requires a nonempty ordered list whose locales have a language; validation also runs through `copy()`. Treat the supplied list as immutable: data-class copying is shallow. LocaleEasy uses its internal `immutableCopy()` helper when applying the preference so later mutations to the input list cannot change published state. Empty lists and `Locale.ROOT` are rejected before preferences or resources change. Use `FollowSystem` to reset the choice. Passing the same preference again does not request another refresh.
+`AppLocales` is a data class with value equality, `copy()`, and destructuring. It requires a nonempty ordered list whose locales round-trip as BCP 47 tags with a language. LocaleEasy copies the list when applying it and keeps the first occurrence of each locale. Use `setLanguageTag("fr-CA")` for input from a picker or a server. Use `FollowSystem` to reset the choice. Passing the same normalized preference again leaves the existing activity in place.
 
-Startup restores the preference before exposing effective locales. Stored selections use BCP 47 language tags; common legacy underscore region tags are read for compatibility. Missing or invalid saved overrides recover to follow-system. Selecting follow-system clears the stored override; there is no remembered custom selection to restore.
+Startup restores the preference before exposing effective locales. Storage uses BCP 47 language tags and accepts legacy underscore region tags on read. Startup normalizes previously stored duplicates and recovers from missing or invalid overrides by following the system. A reset clears the stored override.
 
 Existing consumer calls remain available:
 
@@ -40,7 +43,7 @@ Existing consumer calls remain available:
 | `followSystemLocale = true` | Select `FollowSystem` |
 | `followSystemLocale = false` | If following system, freeze current effective locales as `AppLocales`; otherwise keep the app selection |
 
-The flows represent individual observable values; reading multiple flows is not an atomic snapshot. Observe `preference` to determine the selected mode rather than inferring it from the effective list. This change adds interface members, so custom implementations of `LocaleEasy` must implement the new preference operations and effective flow.
+Use `state` for a single coherent read of preference, system locales, and effective locales. The existing flows project individual values from this snapshot. Custom implementations of `LocaleEasy` must also expose a `StateFlow<LocaleState>`.
 
 ## Android integration
 
@@ -59,7 +62,7 @@ AndroidX Startup now installs LocaleEasy automatically. Calling `install()` agai
 </manifest>
 ```
 
-Installation, locale mutations, and `fixWebViewLocale()` must run on the main thread. Calls from worker threads fail before changing state. Locale changes are synchronous requests; view recreation remains asynchronous.
+Installation, locale mutations, and `fixWebViewLocale()` must run on the main thread. A state emission represents an applied preference. View recreation and the first translated frame follow asynchronously. A request made from a collector while another change is being published is applied after that change, before the outer setter returns. Preferences are written to disk asynchronously.
 
 LocaleEasy currently uses **local activity recreation on every supported API**, including API 33+. It owns the persisted preference, updates application resources, and supplies localized activity contexts. Automatic framework locale recreation exposed a gap with no visible app surface in the tested configuration; [the investigation](framework-window-handoff-investigation.md) documents the evidence and a promising hybrid that has not been promoted into the normal backend. This does not mean every use of LocaleManager must flash.
 
@@ -75,11 +78,31 @@ This works with plain `Activity`, `ComponentActivity`, and `AppCompatActivity`; 
 
 Android owns recreation for system configuration events. Apps that opt out through `configChanges` remain responsible for updating their own views for those events. Use one locale owner; independently changing AppCompatDelegate or framework app locales can conflict with LocaleEasy's current context strategy. Bundle needed translations or arrange their download before selecting them in language-split app bundles.
 
-Android's per-app language Settings do not control the current manual backend. On first installation without an existing LocaleEasy preference, or when migrating an old persisted framework-owner switch, the current framework selection is imported before its override is cleared. This also respects an OS reset when migrating from framework ownership. Saved LocaleEasy preferences take priority afterward. The stale comparison switch is removed at startup, and normal language changes do not write `LocaleManager.applicationLocales`. LocaleManager is still used on API 33+ to read the real system locales and clear a previous framework override.
+Local mode owns its selection inside the app. The sample exposes its language choices in **Open State & Controls**. On API 33+, local mode preserves independently configured Android app locales and reads the system's actual locale list. If a stored marker identifies an earlier LocaleEasy framework experiment, startup imports that experiment's platform choice and clears the override and marker.
 
 `ViewCreatorComponent` is deprecated and is not called. LocaleEasy does not detach fragments, replace activity content, or reset runtime titles. Normal activity/fragment saved-state contracts apply. The sample gives its programmatic ComposeView a stable ID to support saved navigation state.
 
-`fixWebViewLocale()` only reapplies native application/participating-activity resources in manual mode; it does not construct another WebView. It does not translate HTML, reload web content, or reinflate native views. It is a no-op while framework recreation is enabled. The sample loads deterministic local HTML so website preferences/network behavior do not obscure native locale behavior.
+`fixWebViewLocale()` repairs the application resource locale in local mode if it differs from LocaleEasy's selection. Wrapped activities keep their own resource scope across relaunch and WebView manages its own web content. The sample loads deterministic local HTML for testing.
+
+## API and implementation review
+
+The [library roadmap](library-roadmap.md) updates implementation priority with the API 24 input, cold-start and re-entrant collector results. It includes acceptance checks for the API behavior described below.
+
+Reviewed on 2026-11-22 against the checked-out library and the upstream APIs below. LocaleEasy's core use case is an in-app language picker that exposes the selected preference as state and refreshes participating Android activities. Its ordered preferences and lifecycle-aware refresh already cover more of that workflow than a resource-only locale setter.
+
+| Reference | What it adds to the comparison |
+| --- | --- |
+| [Lingver source](https://raw.githubusercontent.com/YarikSOffice/lingver/master/library/src/main/java/com/yariksoffice/lingver/Lingver.kt) | Accepts a first-launch locale and a custom `LocaleStore`. Its public setters use a single locale and the caller refreshes already-fetched locale-dependent content. LocaleEasy has ordered preferences, reactive state, and activity refresh. |
+| [Akexorcist Localization](https://github.com/akexorcist/Localization) | The archived library offers a first-launch language, locale-change hooks, and examples for services and broadcast receivers. Its activity delegate also defers back-stack refresh until the activity returns. LocaleEasy's equivalent resource lookup already uses `localizedContext()`. |
+| [AndroidX AppCompat and Android per-app languages](https://developer.android.com/guide/topics/resources/app-languages) | Integrates the system language picker with app preferences on API 33+ and supports Android's language splits and backup integration. [AppCompat's legacy setter](https://developer.android.com/reference/androidx/appcompat/app/AppCompatDelegate#setApplicationLocales(androidx.core.os.LocaleListCompat)) applies through the delegate on older Android releases. LocaleEasy gives a plain activity the same explicit integration as an AppCompat activity and keeps local recreation as its default. |
+| [Localazy SDK](https://localazy.com/docs/android/localazy-android-library) | Exposes a catalog of locales and a resolved locale for its translation dataset. It also supports dynamically delivered translations. These are useful reference points for a language picker, while translation delivery can stay with the application or provider. |
+
+### Priorities
+
+1. **Verify the published dependency metadata.** A minimal Android consumer assembled with `implementation(project(":locale-easy"))` once the library exported `kotlinx-coroutines-core` with `api`. Repeat the check against the published artifact when publication is configured. [Gradle dependency visibility](https://docs.gradle.org/current/userguide/java_library_plugin.html#sec:java_library_separation)
+2. **Keep a host-owned language catalog.** Distinguish supported choices, installed translations, and the preferred ordered locale list. On a Play language-split build, arrange delivery before selecting a language whose resources are absent. On API 21–23, LocaleEasy stores the full preference list and applies the first locale to Android resources. [Android language delivery](https://developer.android.com/guide/playcore/feature-delivery/on-demand#lang_resources)
+3. **Keep resource lookup close to where text is built.** When creating a notification or a worker result, use `LocaleEasy.getInstance().localizedContext(context).getString(R.string.description)`. A custom wrapper keeps the selection it was created with. Obtain a fresh wrapper after a later selection. The preference store and flows are scoped to one app process.
+4. **Wait for concrete consumers before expanding persistence or refresh.** Profile-backed storage would need an initialization contract across AndroidX Startup and synchronous `attachBaseContext()`. Validate any in-place refresh on a screen that owns all its localized content and state before exposing a library API. The Pixel factory experiment built content twice and lost editor state. [View-factory comparison](recreation-comparison.md)
 
 ## Verification
 

@@ -23,6 +23,9 @@ public interface LocaleEasy {
 	@set:MainThread
 	public var useFrameworkLocaleRecreation: Boolean
 
+	/** The applied language selection and its resolution, available in one read. */
+	public val state: StateFlow<LocaleState>
+
 	/** The user's selection. This is not a signal that activity recreation has completed. */
 	public val preference: StateFlow<LocalePreference>
 
@@ -41,6 +44,12 @@ public interface LocaleEasy {
 
 	@MainThread
 	public fun setLocale(locale: Locale) { setLocales(listOf(locale)) }
+
+	/** Select a language using a well-formed BCP 47 tag such as `fr-CA`. */
+	@MainThread
+	public fun setLanguageTag(tag: String) {
+		setLocale(requireNotNull(parseLocaleTag(tag)) { "Expected a BCP 47 tag with a language" })
+	}
 
 	@MainThread
 	public fun setLocales(locales: List<Locale>) { setPreference(LocalePreference.AppLocales(locales)) }
@@ -63,6 +72,7 @@ public interface LocaleEasy {
 	@MainThread
 	public fun setAppLocaleList(localeList: List<Locale>) { setLocales(localeList) }
 
+	/** Return a context for the current selection. Obtain a new one after a language change. */
 	public fun localizedContext(base: Context): Context
 
 	/**
@@ -90,9 +100,8 @@ public interface LocaleEasy {
 		}
 
 		/**
-		 * Reapply native resources in manual mode after a WebView provider changes configuration.
-		 * Does not translate websites, reload existing WebViews, or rebuild native views.
-		 * This is a no-op while framework locale recreation is enabled.
+		 * Repair application resources in local mode if a WebView provider changes their locales.
+		 * Activity resource scopes and existing WebViews retain their configurations.
 		 */
 		@MainThread
 		public fun fixWebViewLocale() {

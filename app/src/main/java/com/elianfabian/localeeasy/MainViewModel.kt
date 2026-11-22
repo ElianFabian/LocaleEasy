@@ -30,9 +30,7 @@ class MainViewModel : ViewModel() {
 		}
 	}
 
-	val preference = localeEasy.preference
-	val systemLocaleList = localeEasy.systemLocaleList
-	val effectiveLocales = localeEasy.effectiveLocales
+	val localeState = localeEasy.state
 
 	fun sendAction(action: UiAction) {
 		when (action) {
@@ -40,7 +38,7 @@ class MainViewModel : ViewModel() {
 			is UiAction.SetFollowSystemLocale -> if (action.follow) {
 				localeEasy.followSystem()
 			} else {
-				localeEasy.setPreference(LocalePreference.AppLocales(effectiveLocales.value))
+				localeEasy.setPreference(LocalePreference.AppLocales(localeState.value.effectiveLocales))
 			}
 			UiAction.FixWebViewLocale -> LocaleEasy.fixWebViewLocale()
 		}

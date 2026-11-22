@@ -1,6 +1,7 @@
 package com.elianfabian.localeeasy
 
 import android.app.LocaleManager
+import android.app.UiModeManager
 import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
@@ -18,6 +19,10 @@ import com.elianfabian.locale_easy.LocaleEasy
 import com.elianfabian.locale_easy.LocalePreference
 import com.elianfabian.localeeasy.ui.legacy.SampleFragment
 import com.elianfabian.localeeasy.ui.legacy.SampleActivity
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Assume.assumeTrue
@@ -68,9 +73,57 @@ class LocaleLifecycleTest {
         val before = prefs.all
         main {
             assertTrue(runCatching { api.setLocales(emptyList()) }.exceptionOrNull() is IllegalArgumentException)
+            assertTrue(runCatching { api.setLocale(Locale("fr-CA")) }.exceptionOrNull() is IllegalArgumentException)
+            assertTrue(runCatching { api.setLanguageTag("fr_CA") }.exceptionOrNull() is IllegalArgumentException)
             assertEquals(LocalePreference.FollowSystem, api.preference.value)
         }
         assertEquals(before, prefs.all)
+    }
+
+    @Test fun duplicateLocalesAreNormalizedBeforeUpdatingResources() {
+        main {
+            api.setLocales(listOf(Locale.FRENCH, Locale.FRENCH, Locale.CANADA_FRENCH))
+            assertEquals(listOf(Locale.FRENCH, Locale.CANADA_FRENCH), api.state.value.effectiveLocales)
+            assertEquals("fr,fr-CA", app.getSharedPreferences("locale_easy_prefs", 0).getString("KEY_LANGUAGES", null))
+            assertEquals(translated("fr"), api.localizedContext(app).getString(R.string.string_resource_example))
+        }
+    }
+
+    @Test fun selectionFromImmediateCollectorAppliesAfterCurrentChange() {
+        ActivityScenario.launch(LocaleFixtureActivity::class.java).use { scenario ->
+            val italian = LocalePreference.AppLocales(listOf(Locale.ITALIAN))
+            var observedFrench = false
+            main {
+                val scope = CoroutineScope(Dispatchers.Main.immediate)
+                try {
+                    scope.launch {
+                        api.preference.collect { preference ->
+                            if (preference == LocalePreference.AppLocales(listOf(Locale.FRENCH))) {
+                                assertEquals(listOf(Locale.FRENCH), api.effectiveLocales.value)
+                                assertEquals(translated("fr"), app.getString(R.string.string_resource_example))
+                                observedFrench = true
+                                api.setLanguageTag("it")
+                            }
+                        }
+                    }
+                    api.setLocale(Locale.FRENCH)
+                    assertTrue(observedFrench)
+                    assertEquals(italian, api.state.value.preference)
+                    assertEquals(italian.locales, api.state.value.effectiveLocales)
+                    assertEquals(italian.locales, api.effectiveLocales.value)
+                    assertEquals("it", app.getSharedPreferences("locale_easy_prefs", 0).getString("KEY_LANGUAGES", null))
+                    assertEquals(translated("it"), app.getString(R.string.string_resource_example))
+                    assertEquals(translated("it"), api.localizedContext(app).getString(R.string.string_resource_example))
+                } finally {
+                    scope.cancel()
+                }
+            }
+            await {
+                var ready = false
+                scenario.onActivity { ready = it.findViewById<TextView>(R.id.locale_fixture_label).text == translated("it") }
+                ready
+            }
+        }
     }
 
     @Test fun plainActivityRecreatesItsXmlViewAndRestoresUserInput() {
@@ -147,6 +200,37 @@ class LocaleLifecycleTest {
                 var ready = false
                 scenario.onActivity { ready = it.instanceId != initialId && it.findViewById<TextView>(R.id.locale_fixture_label).text == translated("fr") }
                 ready
+            }
+        }
+    }
+
+    @Test fun retainedLocalizedContextFollowsNightModeChanges() {
+        assumeTrue(Build.VERSION.SDK_INT >= 31)
+        val manager = app.getSystemService(UiModeManager::class.java)
+        fun nightMode(context: android.content.Context) =
+            context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+        val original = nightMode(app)
+        val target = if (original == Configuration.UI_MODE_NIGHT_YES) Configuration.UI_MODE_NIGHT_NO
+            else Configuration.UI_MODE_NIGHT_YES
+        main { api.setLocale(Locale.FRENCH) }
+        ActivityScenario.launch(LocaleFixtureActivity::class.java).use { scenario ->
+            val wrapped = api.localizedContext(app)
+            assertEquals(original, nightMode(wrapped))
+            try {
+                scenario.onActivity {
+                    manager.setApplicationNightMode(if (target == Configuration.UI_MODE_NIGHT_YES)
+                        UiModeManager.MODE_NIGHT_YES else UiModeManager.MODE_NIGHT_NO)
+                }
+                await {
+                    var ready = false
+                    scenario.onActivity {
+                        ready = nightMode(it) == target && nightMode(app) == target && nightMode(wrapped) == target
+                    }
+                    ready
+                }
+                assertEquals(translated("fr"), wrapped.getString(R.string.string_resource_example))
+            } finally {
+                main { manager.setApplicationNightMode(UiModeManager.MODE_NIGHT_AUTO) }
             }
         }
     }
@@ -347,6 +431,35 @@ class LocaleLifecycleTest {
                 assertEquals(LocalePreference.AppLocales(listOf(Locale.FRENCH)), api.preference.value)
                 assertEquals(translated("fr"), it.getString(R.string.string_resource_example))
                 webView.destroy()
+            }
+        }
+    }
+
+    @Test fun webViewRepairLeavesOutgoingActivityResourcesScopedAcrossSwitches() {
+        main { api.setLocale(Locale.FRENCH) }
+        ActivityScenario.launch(LocaleFixtureActivity::class.java).use { scenario ->
+            val french = "Chaîne Localisée: Vert"
+            val spanish = "Cadena Localizada: Verde"
+            var current = french
+            repeat(3) {
+                for ((locale, expected) in listOf(Locale.forLanguageTag("es") to spanish, Locale.FRENCH to french)) {
+                    var outgoingId = 0
+                    scenario.onActivity {
+                        outgoingId = it.instanceId
+                        api.setLocale(locale)
+                        LocaleEasy.fixWebViewLocale()
+                        assertEquals(current, it.getString(R.string.string_resource_example))
+                    }
+                    await {
+                        var ready = false
+                        scenario.onActivity {
+                            ready = it.instanceId != outgoingId &&
+                                it.findViewById<TextView>(R.id.locale_fixture_label).text == expected
+                        }
+                        ready
+                    }
+                    current = expected
+                }
             }
         }
     }

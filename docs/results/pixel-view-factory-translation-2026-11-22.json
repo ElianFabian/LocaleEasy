@@ -1,0 +1,2680 @@
+{
+  "isolated": [
+    {
+      "path": "rotation",
+      "reapplyOutgoingResources": false,
+      "language": "fr",
+      "events": [
+        {
+          "phase": "outgoing",
+          "builds": 1,
+          "inflater": "Localized String: Green",
+          "xml": "Localized String: Green",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "afterSelection",
+          "builds": 1,
+          "inflater": "Localized String: Green",
+          "xml": "Localized String: Green",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "onCreate",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "afterRestore",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "settled",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed fr",
+          "selection": "1,4"
+        }
+      ],
+      "compose": "Navigation LocaleEasy",
+      "translationPass": true,
+      "sameDecor": false,
+      "sameRoot": false,
+      "rootBuildsDuringChange": 1
+    },
+    {
+      "path": "rotation",
+      "reapplyOutgoingResources": false,
+      "language": "es",
+      "events": [
+        {
+          "phase": "outgoing",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "afterSelection",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "onCreate",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "afterRestore",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "settled",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed es",
+          "selection": "1,4"
+        }
+      ],
+      "compose": "Navegación LocaleEasy",
+      "translationPass": true,
+      "sameDecor": false,
+      "sameRoot": false,
+      "rootBuildsDuringChange": 1
+    },
+    {
+      "path": "recreate",
+      "reapplyOutgoingResources": false,
+      "language": "fr",
+      "events": [
+        {
+          "phase": "outgoing",
+          "builds": 1,
+          "inflater": "Localized String: Green",
+          "xml": "Localized String: Green",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "afterSelection",
+          "builds": 1,
+          "inflater": "Localized String: Green",
+          "xml": "Localized String: Green",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "onCreate",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "afterRestore",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "settled",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed fr",
+          "selection": "1,4"
+        }
+      ],
+      "compose": "Navigation LocaleEasy",
+      "translationPass": true,
+      "sameDecor": true,
+      "sameRoot": false,
+      "rootBuildsDuringChange": 1
+    },
+    {
+      "path": "recreate",
+      "reapplyOutgoingResources": false,
+      "language": "es",
+      "events": [
+        {
+          "phase": "outgoing",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "afterSelection",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "onCreate",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "afterRestore",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "settled",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed es",
+          "selection": "1,4"
+        }
+      ],
+      "compose": "Navegación LocaleEasy",
+      "translationPass": true,
+      "sameDecor": true,
+      "sameRoot": false,
+      "rootBuildsDuringChange": 1
+    },
+    {
+      "path": "forceBefore",
+      "reapplyOutgoingResources": false,
+      "language": "fr",
+      "events": [
+        {
+          "phase": "outgoing",
+          "builds": 1,
+          "inflater": "Localized String: Green",
+          "xml": "Localized String: Green",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "afterSelection",
+          "builds": 1,
+          "inflater": "Localized String: Green",
+          "xml": "Localized String: Green",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "forceBeforeRelaunch",
+          "builds": 2,
+          "inflater": "Localized String: Green",
+          "xml": "Localized String: Green",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "onCreate",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "afterRestore",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "settled",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "",
+          "selection": "0,0"
+        }
+      ],
+      "compose": "Navigation LocaleEasy",
+      "translationPass": true,
+      "sameDecor": true,
+      "sameRoot": false,
+      "rootBuildsDuringChange": 2
+    },
+    {
+      "path": "forceBefore",
+      "reapplyOutgoingResources": false,
+      "language": "es",
+      "events": [
+        {
+          "phase": "outgoing",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "afterSelection",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "forceBeforeRelaunch",
+          "builds": 2,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "onCreate",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "afterRestore",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "settled",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "",
+          "selection": "0,0"
+        }
+      ],
+      "compose": "Navegación LocaleEasy",
+      "translationPass": true,
+      "sameDecor": true,
+      "sameRoot": false,
+      "rootBuildsDuringChange": 2
+    },
+    {
+      "path": "forceAfter",
+      "reapplyOutgoingResources": false,
+      "language": "fr",
+      "events": [
+        {
+          "phase": "outgoing",
+          "builds": 1,
+          "inflater": "Localized String: Green",
+          "xml": "Localized String: Green",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "afterSelection",
+          "builds": 1,
+          "inflater": "Localized String: Green",
+          "xml": "Localized String: Green",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "onCreate",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "afterRestore",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "forceAfterRestore",
+          "builds": 2,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "settled",
+          "builds": 2,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "",
+          "selection": "0,0"
+        }
+      ],
+      "compose": "Navigation LocaleEasy",
+      "translationPass": true,
+      "sameDecor": true,
+      "sameRoot": false,
+      "rootBuildsDuringChange": 2
+    },
+    {
+      "path": "forceAfter",
+      "reapplyOutgoingResources": false,
+      "language": "es",
+      "events": [
+        {
+          "phase": "outgoing",
+          "builds": 2,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "afterSelection",
+          "builds": 2,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "onCreate",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "afterRestore",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "forceAfterRestore",
+          "builds": 2,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "settled",
+          "builds": 2,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "",
+          "selection": "0,0"
+        }
+      ],
+      "compose": "Navegación LocaleEasy",
+      "translationPass": true,
+      "sameDecor": true,
+      "sameRoot": false,
+      "rootBuildsDuringChange": 2
+    },
+    {
+      "path": "rotation",
+      "reapplyOutgoingResources": true,
+      "language": "fr",
+      "events": [
+        {
+          "phase": "outgoing",
+          "builds": 1,
+          "inflater": "Localized String: Green",
+          "xml": "Localized String: Green",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "afterSelection",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Localized String: Green",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "onCreate",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "afterRestore",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "settled",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed fr",
+          "selection": "1,4"
+        }
+      ],
+      "compose": "Navigation LocaleEasy",
+      "translationPass": true,
+      "sameDecor": false,
+      "sameRoot": false,
+      "rootBuildsDuringChange": 1
+    },
+    {
+      "path": "rotation",
+      "reapplyOutgoingResources": true,
+      "language": "es",
+      "events": [
+        {
+          "phase": "outgoing",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "afterSelection",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "onCreate",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "afterRestore",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "settled",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed es",
+          "selection": "1,4"
+        }
+      ],
+      "compose": "Navegación LocaleEasy",
+      "translationPass": true,
+      "sameDecor": false,
+      "sameRoot": false,
+      "rootBuildsDuringChange": 1
+    },
+    {
+      "path": "recreate",
+      "reapplyOutgoingResources": true,
+      "language": "fr",
+      "events": [
+        {
+          "phase": "outgoing",
+          "builds": 1,
+          "inflater": "Localized String: Green",
+          "xml": "Localized String: Green",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "afterSelection",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Localized String: Green",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "onCreate",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "afterRestore",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "settled",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed fr",
+          "selection": "1,4"
+        }
+      ],
+      "compose": "Navigation LocaleEasy",
+      "translationPass": true,
+      "sameDecor": true,
+      "sameRoot": false,
+      "rootBuildsDuringChange": 1
+    },
+    {
+      "path": "recreate",
+      "reapplyOutgoingResources": true,
+      "language": "es",
+      "events": [
+        {
+          "phase": "outgoing",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "afterSelection",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "onCreate",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "afterRestore",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "settled",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed es",
+          "selection": "1,4"
+        }
+      ],
+      "compose": "Navegación LocaleEasy",
+      "translationPass": true,
+      "sameDecor": true,
+      "sameRoot": false,
+      "rootBuildsDuringChange": 1
+    },
+    {
+      "path": "forceBefore",
+      "reapplyOutgoingResources": true,
+      "language": "fr",
+      "events": [
+        {
+          "phase": "outgoing",
+          "builds": 1,
+          "inflater": "Localized String: Green",
+          "xml": "Localized String: Green",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "afterSelection",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Localized String: Green",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "forceBeforeRelaunch",
+          "builds": 2,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "onCreate",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "afterRestore",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "settled",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "",
+          "selection": "0,0"
+        }
+      ],
+      "compose": "Navigation LocaleEasy",
+      "translationPass": true,
+      "sameDecor": true,
+      "sameRoot": false,
+      "rootBuildsDuringChange": 2
+    },
+    {
+      "path": "forceBefore",
+      "reapplyOutgoingResources": true,
+      "language": "es",
+      "events": [
+        {
+          "phase": "outgoing",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "afterSelection",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "forceBeforeRelaunch",
+          "builds": 2,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "onCreate",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "afterRestore",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "settled",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "",
+          "selection": "0,0"
+        }
+      ],
+      "compose": "Navegación LocaleEasy",
+      "translationPass": true,
+      "sameDecor": true,
+      "sameRoot": false,
+      "rootBuildsDuringChange": 2
+    },
+    {
+      "path": "forceAfter",
+      "reapplyOutgoingResources": true,
+      "language": "fr",
+      "events": [
+        {
+          "phase": "outgoing",
+          "builds": 1,
+          "inflater": "Localized String: Green",
+          "xml": "Localized String: Green",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "afterSelection",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Localized String: Green",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "onCreate",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "afterRestore",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "forceAfterRestore",
+          "builds": 2,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "settled",
+          "builds": 2,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "",
+          "selection": "0,0"
+        }
+      ],
+      "compose": "Navigation LocaleEasy",
+      "translationPass": true,
+      "sameDecor": true,
+      "sameRoot": false,
+      "rootBuildsDuringChange": 2
+    },
+    {
+      "path": "forceAfter",
+      "reapplyOutgoingResources": true,
+      "language": "es",
+      "events": [
+        {
+          "phase": "outgoing",
+          "builds": 2,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "afterSelection",
+          "builds": 2,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "onCreate",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "afterRestore",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "forceAfterRestore",
+          "builds": 2,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "settled",
+          "builds": 2,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "",
+          "selection": "0,0"
+        }
+      ],
+      "compose": "Navegación LocaleEasy",
+      "translationPass": true,
+      "sameDecor": true,
+      "sameRoot": false,
+      "rootBuildsDuringChange": 2
+    }
+  ],
+  "shared": [
+    {
+      "path": "rotation",
+      "reapplyOutgoingResources": false,
+      "language": "fr",
+      "events": [
+        {
+          "phase": "outgoing",
+          "builds": 1,
+          "inflater": "Localized String: Green",
+          "xml": "Localized String: Green",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "afterSelection",
+          "builds": 1,
+          "inflater": "Localized String: Green",
+          "xml": "Localized String: Green",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "onCreate",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "afterRestore",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "settled",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed fr",
+          "selection": "1,4"
+        }
+      ],
+      "compose": "Navigation LocaleEasy",
+      "translationPass": true,
+      "sameDecor": false,
+      "sameRoot": false,
+      "rootBuildsDuringChange": 1
+    },
+    {
+      "path": "rotation",
+      "reapplyOutgoingResources": false,
+      "language": "es",
+      "events": [
+        {
+          "phase": "outgoing",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "afterSelection",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "onCreate",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "afterRestore",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "settled",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed es",
+          "selection": "1,4"
+        }
+      ],
+      "compose": "Navegación LocaleEasy",
+      "translationPass": true,
+      "sameDecor": false,
+      "sameRoot": false,
+      "rootBuildsDuringChange": 1
+    },
+    {
+      "path": "recreate",
+      "reapplyOutgoingResources": false,
+      "language": "fr",
+      "events": [
+        {
+          "phase": "outgoing",
+          "builds": 1,
+          "inflater": "Localized String: Green",
+          "xml": "Localized String: Green",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "afterSelection",
+          "builds": 1,
+          "inflater": "Localized String: Green",
+          "xml": "Localized String: Green",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "onCreate",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "afterRestore",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "settled",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed fr",
+          "selection": "1,4"
+        }
+      ],
+      "compose": "Navigation LocaleEasy",
+      "translationPass": true,
+      "sameDecor": true,
+      "sameRoot": false,
+      "rootBuildsDuringChange": 1
+    },
+    {
+      "path": "recreate",
+      "reapplyOutgoingResources": false,
+      "language": "es",
+      "events": [
+        {
+          "phase": "outgoing",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "afterSelection",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "onCreate",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "afterRestore",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "settled",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed es",
+          "selection": "1,4"
+        }
+      ],
+      "compose": "Navegación LocaleEasy",
+      "translationPass": true,
+      "sameDecor": true,
+      "sameRoot": false,
+      "rootBuildsDuringChange": 1
+    },
+    {
+      "path": "forceBefore",
+      "reapplyOutgoingResources": false,
+      "language": "fr",
+      "events": [
+        {
+          "phase": "outgoing",
+          "builds": 1,
+          "inflater": "Localized String: Green",
+          "xml": "Localized String: Green",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "afterSelection",
+          "builds": 1,
+          "inflater": "Localized String: Green",
+          "xml": "Localized String: Green",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "forceBeforeRelaunch",
+          "builds": 2,
+          "inflater": "Localized String: Green",
+          "xml": "Localized String: Green",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "onCreate",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "afterRestore",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "settled",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "",
+          "selection": "0,0"
+        }
+      ],
+      "compose": "Navigation LocaleEasy",
+      "translationPass": true,
+      "sameDecor": true,
+      "sameRoot": false,
+      "rootBuildsDuringChange": 2
+    },
+    {
+      "path": "forceBefore",
+      "reapplyOutgoingResources": false,
+      "language": "es",
+      "events": [
+        {
+          "phase": "outgoing",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "afterSelection",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "forceBeforeRelaunch",
+          "builds": 2,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "onCreate",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "afterRestore",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "settled",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "",
+          "selection": "0,0"
+        }
+      ],
+      "compose": "Navegación LocaleEasy",
+      "translationPass": true,
+      "sameDecor": true,
+      "sameRoot": false,
+      "rootBuildsDuringChange": 2
+    },
+    {
+      "path": "forceAfter",
+      "reapplyOutgoingResources": false,
+      "language": "fr",
+      "events": [
+        {
+          "phase": "outgoing",
+          "builds": 1,
+          "inflater": "Localized String: Green",
+          "xml": "Localized String: Green",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "afterSelection",
+          "builds": 1,
+          "inflater": "Localized String: Green",
+          "xml": "Localized String: Green",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "onCreate",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "afterRestore",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "forceAfterRestore",
+          "builds": 2,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "settled",
+          "builds": 2,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "",
+          "selection": "0,0"
+        }
+      ],
+      "compose": "Navigation LocaleEasy",
+      "translationPass": true,
+      "sameDecor": true,
+      "sameRoot": false,
+      "rootBuildsDuringChange": 2
+    },
+    {
+      "path": "forceAfter",
+      "reapplyOutgoingResources": false,
+      "language": "es",
+      "events": [
+        {
+          "phase": "outgoing",
+          "builds": 2,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "afterSelection",
+          "builds": 2,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "onCreate",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "afterRestore",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "forceAfterRestore",
+          "builds": 2,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "settled",
+          "builds": 2,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "",
+          "selection": "0,0"
+        }
+      ],
+      "compose": "Navegación LocaleEasy",
+      "translationPass": true,
+      "sameDecor": true,
+      "sameRoot": false,
+      "rootBuildsDuringChange": 2
+    },
+    {
+      "path": "rotation",
+      "reapplyOutgoingResources": true,
+      "language": "fr",
+      "events": [
+        {
+          "phase": "outgoing",
+          "builds": 1,
+          "inflater": "Localized String: Green",
+          "xml": "Localized String: Green",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "afterSelection",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Localized String: Green",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "onCreate",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "afterRestore",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "settled",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed fr",
+          "selection": "1,4"
+        }
+      ],
+      "compose": "Navigation LocaleEasy",
+      "translationPass": true,
+      "sameDecor": false,
+      "sameRoot": false,
+      "rootBuildsDuringChange": 1
+    },
+    {
+      "path": "rotation",
+      "reapplyOutgoingResources": true,
+      "language": "es",
+      "events": [
+        {
+          "phase": "outgoing",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "afterSelection",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "onCreate",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "afterRestore",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "settled",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed es",
+          "selection": "1,4"
+        }
+      ],
+      "compose": "Navegación LocaleEasy",
+      "translationPass": true,
+      "sameDecor": false,
+      "sameRoot": false,
+      "rootBuildsDuringChange": 1
+    },
+    {
+      "path": "recreate",
+      "reapplyOutgoingResources": true,
+      "language": "fr",
+      "events": [
+        {
+          "phase": "outgoing",
+          "builds": 1,
+          "inflater": "Localized String: Green",
+          "xml": "Localized String: Green",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "afterSelection",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Localized String: Green",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "onCreate",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "afterRestore",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "settled",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed fr",
+          "selection": "1,4"
+        }
+      ],
+      "compose": "Navigation LocaleEasy",
+      "translationPass": true,
+      "sameDecor": true,
+      "sameRoot": false,
+      "rootBuildsDuringChange": 1
+    },
+    {
+      "path": "recreate",
+      "reapplyOutgoingResources": true,
+      "language": "es",
+      "events": [
+        {
+          "phase": "outgoing",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "afterSelection",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "onCreate",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "afterRestore",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "settled",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed es",
+          "selection": "1,4"
+        }
+      ],
+      "compose": "Navegación LocaleEasy",
+      "translationPass": true,
+      "sameDecor": true,
+      "sameRoot": false,
+      "rootBuildsDuringChange": 1
+    },
+    {
+      "path": "forceBefore",
+      "reapplyOutgoingResources": true,
+      "language": "fr",
+      "events": [
+        {
+          "phase": "outgoing",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "afterSelection",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "forceBeforeRelaunch",
+          "builds": 2,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "onCreate",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "afterRestore",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "settled",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "",
+          "selection": "0,0"
+        }
+      ],
+      "compose": "Navegación LocaleEasy",
+      "translationPass": false,
+      "sameDecor": true,
+      "sameRoot": false,
+      "rootBuildsDuringChange": 2
+    },
+    {
+      "path": "forceBefore",
+      "reapplyOutgoingResources": true,
+      "language": "es",
+      "events": [
+        {
+          "phase": "outgoing",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "afterSelection",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "forceBeforeRelaunch",
+          "builds": 2,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "onCreate",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "afterRestore",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "settled",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "",
+          "selection": "0,0"
+        }
+      ],
+      "compose": "Navegación LocaleEasy",
+      "translationPass": true,
+      "sameDecor": true,
+      "sameRoot": false,
+      "rootBuildsDuringChange": 2
+    },
+    {
+      "path": "forceAfter",
+      "reapplyOutgoingResources": true,
+      "language": "fr",
+      "events": [
+        {
+          "phase": "outgoing",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "afterSelection",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "onCreate",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "afterRestore",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "forceAfterRestore",
+          "builds": 2,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "settled",
+          "builds": 2,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "",
+          "selection": "0,0"
+        }
+      ],
+      "compose": "Navegación LocaleEasy",
+      "translationPass": false,
+      "sameDecor": true,
+      "sameRoot": false,
+      "rootBuildsDuringChange": 2
+    },
+    {
+      "path": "forceAfter",
+      "reapplyOutgoingResources": true,
+      "language": "es",
+      "events": [
+        {
+          "phase": "outgoing",
+          "builds": 2,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "afterSelection",
+          "builds": 2,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "onCreate",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "afterRestore",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "forceAfterRestore",
+          "builds": 2,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "settled",
+          "builds": 2,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "",
+          "selection": "0,0"
+        }
+      ],
+      "compose": "Navegación LocaleEasy",
+      "translationPass": true,
+      "sameDecor": true,
+      "sameRoot": false,
+      "rootBuildsDuringChange": 2
+    }
+  ],
+  "recreateOnly": [
+    {
+      "path": "recreate",
+      "reapplyOutgoingResources": false,
+      "language": "fr",
+      "trial": 1,
+      "effective": "fr",
+      "initialCompose": "LocaleEasy Navigation",
+      "events": [
+        {
+          "phase": "outgoing",
+          "builds": 1,
+          "inflater": "Localized String: Green",
+          "xml": "Localized String: Green",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "afterSelection",
+          "builds": 1,
+          "inflater": "Localized String: Green",
+          "xml": "Localized String: Green",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "onCreate",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "afterRestore",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "settled",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed fr",
+          "selection": "1,4"
+        }
+      ],
+      "compose": "Navigation LocaleEasy",
+      "translationPass": true,
+      "sameDecor": true,
+      "sameRoot": false,
+      "rootBuildsDuringChange": 1
+    },
+    {
+      "path": "recreate",
+      "reapplyOutgoingResources": false,
+      "language": "es",
+      "trial": 1,
+      "effective": "es",
+      "initialCompose": "LocaleEasy Navigation",
+      "events": [
+        {
+          "phase": "outgoing",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "afterSelection",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "onCreate",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "afterRestore",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "settled",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed es",
+          "selection": "1,4"
+        }
+      ],
+      "compose": "Navegación LocaleEasy",
+      "translationPass": true,
+      "sameDecor": true,
+      "sameRoot": false,
+      "rootBuildsDuringChange": 1
+    },
+    {
+      "path": "recreate",
+      "reapplyOutgoingResources": false,
+      "language": "fr",
+      "trial": 2,
+      "effective": "fr",
+      "initialCompose": "LocaleEasy Navigation",
+      "events": [
+        {
+          "phase": "outgoing",
+          "builds": 1,
+          "inflater": "Localized String: Green",
+          "xml": "Localized String: Green",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "afterSelection",
+          "builds": 1,
+          "inflater": "Localized String: Green",
+          "xml": "Localized String: Green",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "onCreate",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "afterRestore",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "settled",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed fr",
+          "selection": "1,4"
+        }
+      ],
+      "compose": "Navigation LocaleEasy",
+      "translationPass": true,
+      "sameDecor": true,
+      "sameRoot": false,
+      "rootBuildsDuringChange": 1
+    },
+    {
+      "path": "recreate",
+      "reapplyOutgoingResources": false,
+      "language": "es",
+      "trial": 2,
+      "effective": "es",
+      "initialCompose": "LocaleEasy Navigation",
+      "events": [
+        {
+          "phase": "outgoing",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "afterSelection",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "onCreate",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "afterRestore",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "settled",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed es",
+          "selection": "1,4"
+        }
+      ],
+      "compose": "Navegación LocaleEasy",
+      "translationPass": true,
+      "sameDecor": true,
+      "sameRoot": false,
+      "rootBuildsDuringChange": 1
+    },
+    {
+      "path": "recreate",
+      "reapplyOutgoingResources": false,
+      "language": "fr",
+      "trial": 3,
+      "effective": "fr",
+      "initialCompose": "LocaleEasy Navigation",
+      "events": [
+        {
+          "phase": "outgoing",
+          "builds": 1,
+          "inflater": "Localized String: Green",
+          "xml": "Localized String: Green",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "afterSelection",
+          "builds": 1,
+          "inflater": "Localized String: Green",
+          "xml": "Localized String: Green",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "onCreate",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "afterRestore",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "settled",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed fr",
+          "selection": "1,4"
+        }
+      ],
+      "compose": "Navigation LocaleEasy",
+      "translationPass": true,
+      "sameDecor": true,
+      "sameRoot": false,
+      "rootBuildsDuringChange": 1
+    },
+    {
+      "path": "recreate",
+      "reapplyOutgoingResources": false,
+      "language": "es",
+      "trial": 3,
+      "effective": "es",
+      "initialCompose": "LocaleEasy Navigation",
+      "events": [
+        {
+          "phase": "outgoing",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "afterSelection",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "onCreate",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "afterRestore",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "settled",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed es",
+          "selection": "1,4"
+        }
+      ],
+      "compose": "Navegación LocaleEasy",
+      "translationPass": true,
+      "sameDecor": true,
+      "sameRoot": false,
+      "rootBuildsDuringChange": 1
+    },
+    {
+      "path": "recreate",
+      "reapplyOutgoingResources": false,
+      "language": "fr",
+      "trial": 4,
+      "effective": "fr",
+      "initialCompose": "LocaleEasy Navigation",
+      "events": [
+        {
+          "phase": "outgoing",
+          "builds": 1,
+          "inflater": "Localized String: Green",
+          "xml": "Localized String: Green",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "afterSelection",
+          "builds": 1,
+          "inflater": "Localized String: Green",
+          "xml": "Localized String: Green",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "onCreate",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "afterRestore",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "settled",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed fr",
+          "selection": "1,4"
+        }
+      ],
+      "compose": "Navigation LocaleEasy",
+      "translationPass": true,
+      "sameDecor": true,
+      "sameRoot": false,
+      "rootBuildsDuringChange": 1
+    },
+    {
+      "path": "recreate",
+      "reapplyOutgoingResources": false,
+      "language": "es",
+      "trial": 4,
+      "effective": "es",
+      "initialCompose": "LocaleEasy Navigation",
+      "events": [
+        {
+          "phase": "outgoing",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "afterSelection",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "onCreate",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "afterRestore",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "settled",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed es",
+          "selection": "1,4"
+        }
+      ],
+      "compose": "Navegación LocaleEasy",
+      "translationPass": true,
+      "sameDecor": true,
+      "sameRoot": false,
+      "rootBuildsDuringChange": 1
+    },
+    {
+      "path": "recreate",
+      "reapplyOutgoingResources": true,
+      "language": "fr",
+      "trial": 1,
+      "effective": "fr",
+      "initialCompose": "LocaleEasy Navigation",
+      "events": [
+        {
+          "phase": "outgoing",
+          "builds": 1,
+          "inflater": "Localized String: Green",
+          "xml": "Localized String: Green",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "afterSelection",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Localized String: Green",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "onCreate",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "afterRestore",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "settled",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed fr",
+          "selection": "1,4"
+        }
+      ],
+      "compose": "Navigation LocaleEasy",
+      "translationPass": true,
+      "sameDecor": true,
+      "sameRoot": false,
+      "rootBuildsDuringChange": 1
+    },
+    {
+      "path": "recreate",
+      "reapplyOutgoingResources": true,
+      "language": "es",
+      "trial": 1,
+      "effective": "es",
+      "initialCompose": "LocaleEasy Navigation",
+      "events": [
+        {
+          "phase": "outgoing",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "afterSelection",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "onCreate",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "afterRestore",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "settled",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed es",
+          "selection": "1,4"
+        }
+      ],
+      "compose": "Navegación LocaleEasy",
+      "translationPass": true,
+      "sameDecor": true,
+      "sameRoot": false,
+      "rootBuildsDuringChange": 1
+    },
+    {
+      "path": "recreate",
+      "reapplyOutgoingResources": true,
+      "language": "fr",
+      "trial": 2,
+      "effective": "fr",
+      "initialCompose": "Navigation LocaleEasy",
+      "events": [
+        {
+          "phase": "outgoing",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "afterSelection",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "onCreate",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "afterRestore",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "settled",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed fr",
+          "selection": "1,4"
+        }
+      ],
+      "compose": "Navegación LocaleEasy",
+      "translationPass": false,
+      "sameDecor": true,
+      "sameRoot": false,
+      "rootBuildsDuringChange": 1
+    },
+    {
+      "path": "recreate",
+      "reapplyOutgoingResources": true,
+      "language": "es",
+      "trial": 2,
+      "effective": "es",
+      "initialCompose": "Navigation LocaleEasy",
+      "events": [
+        {
+          "phase": "outgoing",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "afterSelection",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "onCreate",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "afterRestore",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "settled",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed es",
+          "selection": "1,4"
+        }
+      ],
+      "compose": "Navegación LocaleEasy",
+      "translationPass": true,
+      "sameDecor": true,
+      "sameRoot": false,
+      "rootBuildsDuringChange": 1
+    },
+    {
+      "path": "recreate",
+      "reapplyOutgoingResources": true,
+      "language": "fr",
+      "trial": 3,
+      "effective": "fr",
+      "initialCompose": "Navigation LocaleEasy",
+      "events": [
+        {
+          "phase": "outgoing",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "afterSelection",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "onCreate",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "afterRestore",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "settled",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed fr",
+          "selection": "1,4"
+        }
+      ],
+      "compose": "Navegación LocaleEasy",
+      "translationPass": false,
+      "sameDecor": true,
+      "sameRoot": false,
+      "rootBuildsDuringChange": 1
+    },
+    {
+      "path": "recreate",
+      "reapplyOutgoingResources": true,
+      "language": "es",
+      "trial": 3,
+      "effective": "es",
+      "initialCompose": "Navigation LocaleEasy",
+      "events": [
+        {
+          "phase": "outgoing",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "afterSelection",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "onCreate",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "afterRestore",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "settled",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed es",
+          "selection": "1,4"
+        }
+      ],
+      "compose": "Navegación LocaleEasy",
+      "translationPass": true,
+      "sameDecor": true,
+      "sameRoot": false,
+      "rootBuildsDuringChange": 1
+    },
+    {
+      "path": "recreate",
+      "reapplyOutgoingResources": true,
+      "language": "fr",
+      "trial": 4,
+      "effective": "fr",
+      "initialCompose": "Navigation LocaleEasy",
+      "events": [
+        {
+          "phase": "outgoing",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "afterSelection",
+          "builds": 1,
+          "inflater": "Chaîne Localisée: Vert",
+          "xml": "Chaîne Localisée: Vert",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "onCreate",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "afterRestore",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed fr",
+          "selection": "1,4"
+        },
+        {
+          "phase": "settled",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed fr",
+          "selection": "1,4"
+        }
+      ],
+      "compose": "Navegación LocaleEasy",
+      "translationPass": false,
+      "sameDecor": true,
+      "sameRoot": false,
+      "rootBuildsDuringChange": 1
+    },
+    {
+      "path": "recreate",
+      "reapplyOutgoingResources": true,
+      "language": "es",
+      "trial": 4,
+      "effective": "es",
+      "initialCompose": "Navigation LocaleEasy",
+      "events": [
+        {
+          "phase": "outgoing",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "afterSelection",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "onCreate",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "",
+          "selection": "0,0"
+        },
+        {
+          "phase": "afterRestore",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed es",
+          "selection": "1,4"
+        },
+        {
+          "phase": "settled",
+          "builds": 1,
+          "inflater": "Cadena Localizada: Verde",
+          "xml": "Cadena Localizada: Verde",
+          "input": "typed es",
+          "selection": "1,4"
+        }
+      ],
+      "compose": "Navegación LocaleEasy",
+      "translationPass": true,
+      "sameDecor": true,
+      "sameRoot": false,
+      "rootBuildsDuringChange": 1
+    }
+  ]
+}

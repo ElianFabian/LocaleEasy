@@ -22,8 +22,12 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.edit
 import androidx.core.content.ContextCompat
 import androidx.core.os.ConfigurationCompat
+import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import java.util.Collections
 import java.util.IdentityHashMap
 import java.util.Locale
@@ -34,21 +38,21 @@ internal class AndroidLocaleEasy(
 	private val preferences = application.getSharedPreferences(LOCALE_SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
 	private val handler = Handler(Looper.getMainLooper())
 	private val activities = IdentityHashMap<Activity, ActivityState>()
+	private val pendingUpdates = ArrayDeque<() -> Unit>()
+	private var applyingUpdates = false
 	// Use localized contexts + a local relaunch on every API for now. In our API-36
 	// captures, automatic LocaleManager recreation removed the old app surface before
 	// the new one appeared, exposing black frames. The config-callback/local-relaunch
 	// prototype avoided that gap, but still needs a consumer integration contract and
 	// wider coverage. Keep framework recreation as an explicit, process-local diagnostic
 	// opt-in only. See docs/framework-window-handoff-investigation.md in the repository.
-	private var frameworkRecreation = false
-	private val _systemLocaleList = MutableStateFlow(readSystemLocales())
-	override val systemLocaleList = _systemLocaleList.asStateFlow()
-	private val _preference = MutableStateFlow(readInitialPreference())
-	override val preference = _preference.asStateFlow()
-	private val _effectiveLocales = MutableStateFlow(preference.value.resolveLocales(systemLocaleList.value))
-	override val effectiveLocales = _effectiveLocales.asStateFlow()
-	private val _isFollowingSystemLocale = MutableStateFlow(preference.value == LocalePreference.FollowSystem)
-	override val isFollowingSystemLocale = _isFollowingSystemLocale.asStateFlow()
+	@Volatile private var frameworkRecreation = false
+	private val localeState = MutableStateFlow(LocaleState(readInitialPreference(), readSystemLocales()))
+	override val state = localeState.asStateFlow()
+	override val systemLocaleList = state.project { it.systemLocales }
+	override val preference = state.project { it.preference }
+	override val effectiveLocales = state.project { it.effectiveLocales }
+	override val isFollowingSystemLocale = state.project { it.preference == LocalePreference.FollowSystem }
 	private val localeReceiver = object : BroadcastReceiver() {
 		override fun onReceive(context: Context, intent: Intent) {
 			// Preference can change without a resource diff, e.g. explicitly selecting
@@ -61,13 +65,12 @@ internal class AndroidLocaleEasy(
 		checkMainThread()
 		// Retire the old persisted comparison switch; an earlier experiment must not
 		// silently enable framework recreation on the next process start.
-		preferences.edit { remove(KEY_FRAMEWORK_RECREATION) }
 		persist(preference.value)
-		// Clear a previous framework override only when present, so it cannot compete
-		// with our wrapped contexts. Normal startup/language updates do not set it.
-		if (Build.VERSION.SDK_INT >= 33 && Api33.readPreference(application) != LocalePreference.FollowSystem) {
+		// Only clear an override left by a LocaleEasy framework experiment.
+		if (Build.VERSION.SDK_INT >= 33 && ownsFrameworkOverride()) {
 			Api33.setPreference(application, LocalePreference.FollowSystem)
 		}
+		clearFrameworkOwnership()
 		updateResources(application, effectiveLocales.value)
 		application.registerActivityLifecycleCallbacks(this)
 		application.registerComponentCallbacks(this)
@@ -81,53 +84,82 @@ internal class AndroidLocaleEasy(
 		set(value) {
 			checkMainThread()
 			require(!value || Build.VERSION.SDK_INT >= 33) { "Framework locale recreation requires API 33+" }
-			if (frameworkRecreation == value) return
-			frameworkRecreation = value
-			if (Build.VERSION.SDK_INT >= 33 && value) {
-				Api33.setPreference(application, preference.value)
-			} else {
-				if (Build.VERSION.SDK_INT >= 33) Api33.setPreference(application, LocalePreference.FollowSystem)
-				updateResources(application, effectiveLocales.value)
+			applyUpdate {
+				if (frameworkRecreation == value) return@applyUpdate
+				val current = state.value
+				if (Build.VERSION.SDK_INT >= 33 && value) {
+					Api33.setPreference(application, current.preference)
+					preferences.edit { putBoolean(KEY_FRAMEWORK_DIAGNOSTIC_OWNER, true) }
+				} else {
+					if (Build.VERSION.SDK_INT >= 33) Api33.setPreference(application, LocalePreference.FollowSystem)
+					clearFrameworkOwnership()
+					updateResources(application, current.effectiveLocales)
+				}
+				frameworkRecreation = value
+				// Backend changes also replace wrapped contexts, even if the language is unchanged.
+				activities.forEach { (activity, state) -> scheduleRefresh(activity, state) }
 			}
-			// Backend changes also replace wrapped contexts, even if the language is unchanged.
-			activities.forEach { (activity, state) -> scheduleRefresh(activity, state) }
 		}
 
 	override var followSystemLocale: Boolean
 		get() = preference.value == LocalePreference.FollowSystem
 		set(value) {
 			checkMainThread()
-			if (value) followSystem() else if (followSystemLocale) setLocales(effectiveLocales.value)
+			applyUpdate {
+				val current = state.value
+				if (value) applyPreference(LocalePreference.FollowSystem)
+				else if (current.preference == LocalePreference.FollowSystem) {
+					applyPreference(LocalePreference.AppLocales(current.effectiveLocales))
+				}
+			}
 		}
 
 	override fun setPreference(preference: LocalePreference) {
 		checkMainThread()
 		val selection = preference.immutableCopy()
-		if (selection == this.preference.value) return
-		persist(selection)
-		publish(selection, readSystemLocales())
+		applyUpdate { applyPreference(selection) }
+	}
+
+	private fun applyPreference(selection: LocalePreference) {
+		if (selection == state.value.preference) return
+		val next = LocaleState(selection, readSystemLocales())
 		if (Build.VERSION.SDK_INT >= 33 && frameworkRecreation) {
 			// The framework owns configuration delivery and activity recreation on Android 13+.
-			Api33.setPreference(application, selection)
+			Api33.setPreference(application, next.preference)
 		} else {
-			updateResources(application, effectiveLocales.value)
-			activities.forEach { (activity, state) -> scheduleRefresh(activity, state) }
+			updateResources(application, next.effectiveLocales)
 		}
+		persist(next.preference)
+		localeState.value = next
+		if (!frameworkRecreation) activities.forEach { (activity, state) -> scheduleRefresh(activity, state) }
 	}
 
 	override fun localizedContext(base: Context): Context {
-		val locales = effectiveLocales.value
-		val localized = if (frameworkRecreation || preference.value == LocalePreference.FollowSystem) base
-		else base.createConfigurationContext(configurationFor(base, locales))
-		return LocaleEasyContextWrapper(localized, locales, preference.value, frameworkRecreation)
+		val current = state.value
+		val framework = frameworkRecreation
+		// A host's platform override can coexist with locally wrapped activities.
+		// Explicitly apply system locales for FollowSystem when the platform base differs.
+		val useBase = framework || current.preference == LocalePreference.FollowSystem &&
+			(Build.VERSION.SDK_INT < 33 || !Api33.hasOverride(application))
+		val localized = if (useBase) base else base.createConfigurationContext(Configuration().apply {
+			// A fresh Configuration defaults to font scale 1 on older Android releases.
+			fontScale = 0f
+			applyLocales(current.effectiveLocales)
+		})
+		return LocaleEasyContextWrapper(localized, current.effectiveLocales, current.preference, framework)
 	}
 
-	private fun publish(selection: LocalePreference, system: List<Locale>) {
-		// State is resolved from user preference, never from mutable process defaults.
-		_systemLocaleList.value = system
-		_preference.value = selection
-		_isFollowingSystemLocale.value = selection == LocalePreference.FollowSystem
-		_effectiveLocales.value = selection.resolveLocales(system)
+	private fun applyUpdate(update: () -> Unit) {
+		pendingUpdates.addLast(update)
+		if (applyingUpdates) return
+		// A collector on the main thread can request another change during publication.
+		applyingUpdates = true
+		try {
+			while (pendingUpdates.isNotEmpty()) pendingUpdates.removeFirst().invoke()
+		} finally {
+			pendingUpdates.clear()
+			applyingUpdates = false
+		}
 	}
 
 	private fun persist(selection: LocalePreference) {
@@ -144,13 +176,20 @@ internal class AndroidLocaleEasy(
 		val saved = restoreLocalePreference(
 			preferences.getBoolean(KEY_FOLLOW_SYSTEM_LOCALE, true), preferences.getString(KEY_LANGUAGES, null),
 		)
-		if (Build.VERSION.SDK_INT < 33) return saved
-		// A previous framework owner may have changed in Android Settings while our
-		// process was absent. Import that authoritative selection (including reset),
-		// or a first-install OS selection, before clearing the override and old switch.
-		val wasFrameworkOwner = preferences.getBoolean(KEY_FRAMEWORK_RECREATION, false)
-		return if (!wasFrameworkOwner && preferences.contains(KEY_FOLLOW_SYSTEM_LOCALE)) saved
-		else Api33.readPreference(application)
+		return if (Build.VERSION.SDK_INT >= 33 && ownsFrameworkOverride()) Api33.readPreference(application) else saved
+	}
+
+	private fun ownsFrameworkOverride(): Boolean =
+		preferences.getBoolean(KEY_FRAMEWORK_RECREATION, false) ||
+			preferences.getBoolean(KEY_FRAMEWORK_DIAGNOSTIC_OWNER, false)
+
+	private fun clearFrameworkOwnership() {
+		if (ownsFrameworkOverride()) {
+			preferences.edit {
+				remove(KEY_FRAMEWORK_RECREATION)
+				remove(KEY_FRAMEWORK_DIAGNOSTIC_OWNER)
+			}
+		}
 	}
 
 	private fun readSystemLocales(): List<Locale> = if (Build.VERSION.SDK_INT >= 33) {
@@ -158,16 +197,18 @@ internal class AndroidLocaleEasy(
 	} else configurationLocales(Resources.getSystem().configuration)
 
 	override fun onConfigurationChanged(newConfig: Configuration) {
-		val system = readSystemLocales()
-		if (Build.VERSION.SDK_INT >= 33 && frameworkRecreation) {
-			val selection = Api33.readPreference(application)
-			persist(selection)
-			publish(selection, system)
-		} else {
-			// Android owns recreation for system configuration changes. Do not request a
-			// second recreation here. Custom wrapped contexts retain their locale override.
-			publish(preference.value, system)
-			updateResources(application, effectiveLocales.value)
+		applyUpdate {
+			val current = state.value
+			val system = readSystemLocales()
+			val next = if (Build.VERSION.SDK_INT >= 33 && frameworkRecreation) {
+				val selection = Api33.readPreference(application)
+				if (selection != current.preference) persist(selection)
+				LocaleState(selection, system)
+			} else {
+				// Android owns recreation for system configuration changes.
+				LocaleState(current.preference, system).also { updateResources(application, it.effectiveLocales) }
+			}
+			localeState.value = next
 		}
 	}
 
@@ -191,13 +232,14 @@ internal class AndroidLocaleEasy(
 	}
 
 	override fun onActivityStarted(activity: Activity) {
-		activities[activity]?.let { state ->
-			state.started = true
-			if (state.selection == preference.value && preference.value == LocalePreference.FollowSystem &&
-				configurationLocales(activity.resources.configuration) == effectiveLocales.value) {
-				state.locales = effectiveLocales.value
+		activities[activity]?.let { activityState ->
+			val current = state.value
+			activityState.started = true
+			if (activityState.selection == LocalePreference.FollowSystem && current.preference == LocalePreference.FollowSystem &&
+				configurationLocales(activity.resources.configuration) == current.effectiveLocales) {
+				activityState.locales = current.effectiveLocales
 			}
-			if (!frameworkRecreation || state.framework != frameworkRecreation) scheduleRefresh(activity, state)
+			if (!frameworkRecreation || activityState.framework != frameworkRecreation) scheduleRefresh(activity, activityState)
 		}
 	}
 
@@ -209,12 +251,18 @@ internal class AndroidLocaleEasy(
 	@Deprecated("Deprecated in Android")
 	override fun onLowMemory() = Unit
 
-	/** Reapply native resources after a demonstrated WebView-provider configuration mutation. */
+	/** Repair the legacy application resources after a WebView-provider configuration mutation. */
 	fun reapplyResources() {
 		checkMainThread()
-		if (frameworkRecreation) return
-		updateResources(application, effectiveLocales.value)
-		activities.keys.forEach { updateResources(it, effectiveLocales.value) }
+		applyUpdate {
+			if (frameworkRecreation) return@applyUpdate
+			val locales = state.value.effectiveLocales
+			val applied = if (Build.VERSION.SDK_INT >= 24) locales else locales.take(1)
+			if (configurationLocales(application.resources.configuration) != applied) {
+				updateResources(application, locales)
+			}
+			// Scoped activity resources belong to their original selection until relaunch.
+		}
 	}
 
 	@Suppress("DEPRECATION")
@@ -222,14 +270,14 @@ internal class AndroidLocaleEasy(
 		if (Build.VERSION.SDK_INT >= 24) LocaleList.setDefault(LocaleList(*locales.toTypedArray()))
 		else Locale.setDefault(locales.first())
 		val resources = context.resources
-		resources.updateConfiguration(configurationFor(context, locales), resources.displayMetrics)
+		val configuration = Configuration(resources.configuration).apply { applyLocales(locales) }
+		resources.updateConfiguration(configuration, resources.displayMetrics)
 	}
 
-	private fun configurationFor(context: Context, locales: List<Locale>): Configuration =
-		Configuration(context.resources.configuration).apply {
-			if (Build.VERSION.SDK_INT >= 24) setLocales(LocaleList(*locales.toTypedArray()))
-			else setLocale(locales.first())
-		}
+	private fun Configuration.applyLocales(locales: List<Locale>) {
+		if (Build.VERSION.SDK_INT >= 24) setLocales(LocaleList(*locales.toTypedArray()))
+		else setLocale(locales.first())
+	}
 
 	private fun Context.localeEasyWrapper(): LocaleEasyContextWrapper? {
 		var current: Context? = this
@@ -247,8 +295,10 @@ internal class AndroidLocaleEasy(
 			if (name == LAYOUT_INFLATER_SERVICE) inflater else super.getSystemService(name)
 	}
 
-	private fun ActivityState.matchesSelection(): Boolean = framework == frameworkRecreation &&
-		selection == preference.value && locales == effectiveLocales.value
+	private fun ActivityState.matchesSelection(): Boolean {
+		val current = state.value
+		return framework == frameworkRecreation && selection == current.preference && locales == current.effectiveLocales
+	}
 
 	private class ActivityState(var locales: List<Locale>, val selection: LocalePreference, val framework: Boolean, var started: Boolean = false,
 		var pending: Boolean = false, var recreating: Boolean = false)
@@ -257,6 +307,7 @@ internal class AndroidLocaleEasy(
 	private object Api33 {
 		private fun manager(context: Context): LocaleManager = context.getSystemService(LocaleManager::class.java)
 		fun systemLocales(context: Context): List<Locale> = manager(context).systemLocales.toList()
+		fun hasOverride(context: Context): Boolean = !manager(context).applicationLocales.isEmpty
 		fun readPreference(context: Context): LocalePreference {
 			val locales = manager(context).applicationLocales.toList()
 			return if (locales.isEmpty()) LocalePreference.FollowSystem else LocalePreference.AppLocales(locales).immutableCopy()
@@ -273,9 +324,24 @@ internal class AndroidLocaleEasy(
 		const val KEY_FOLLOW_SYSTEM_LOCALE = "KEY_FOLLOW_SYSTEM_LOCALE"
 		const val KEY_LANGUAGES = "KEY_LANGUAGES"
 		private const val KEY_FRAMEWORK_RECREATION = "KEY_FRAMEWORK_RECREATION"
+		private const val KEY_FRAMEWORK_DIAGNOSTIC_OWNER = "KEY_FRAMEWORK_DIAGNOSTIC_OWNER"
 		private fun configurationLocales(configuration: Configuration): List<Locale> {
 			val locales = ConfigurationCompat.getLocales(configuration)
 			return Collections.unmodifiableList(List(locales.size()) { requireNotNull(locales[it]) })
+		}
+	}
+}
+
+private fun <T, R> StateFlow<T>.project(transform: (T) -> R): StateFlow<R> {
+	val source = this
+	val changes = map(transform).distinctUntilChanged()
+	return object : StateFlow<R> {
+		override val value: R get() = transform(source.value)
+		override val replayCache: List<R> get() = listOf(value)
+
+		override suspend fun collect(collector: FlowCollector<R>): Nothing {
+			changes.collect(collector)
+			error("StateFlow collection completed")
 		}
 	}
 }
