@@ -4,6 +4,10 @@ Date: 2026-11-05; sample recreation selector verification updated 2026-11-06. Th
 
 ## Executed checks
 
+The 2026-11-23 initial-language change passed all 11 unit tests, both modules' lint, and the sample and test APK builds. On API 24 and API 36, separate process runs verified that `setInitialLocale()` applies before the first activity inflates, preserves a subsequent user choice, and respects an explicit follow-system choice even when the app already followed the system. The sample exercised automatic startup with its redundant `Application` initializer removed.
+
+The API 24 lifecycle, Compose and settings suites passed with five API-dependent skips across 27 cases. On API 36, separate seed and verify processes also passed for a marked legacy framework override and for stored duplicate locales.
+
 The 2026-11-22 reliability update verified the library build, sample build, instrumentation APKs and lint for both modules. All 11 preference unit tests passed. A minimal Android app assembled while reading the public flows with only the LocaleEasy project dependency.
 
 | Environment | Result |

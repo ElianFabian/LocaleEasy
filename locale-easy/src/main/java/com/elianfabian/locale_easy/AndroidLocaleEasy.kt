@@ -63,11 +63,11 @@ internal class AndroidLocaleEasy(
 
 	init {
 		checkMainThread()
-		// Retire the old persisted comparison switch; an earlier experiment must not
-		// silently enable framework recreation on the next process start.
-		persist(preference.value)
+		val migrateFrameworkOverride = ownsFrameworkOverride()
+		// Normalize existing storage without recording the fresh-install system default as a choice.
+		if (hasSavedPreference() || migrateFrameworkOverride) persist(preference.value)
 		// Only clear an override left by a LocaleEasy framework experiment.
-		if (Build.VERSION.SDK_INT >= 33 && ownsFrameworkOverride()) {
+		if (Build.VERSION.SDK_INT >= 33 && migrateFrameworkOverride) {
 			Api33.setPreference(application, LocalePreference.FollowSystem)
 		}
 		clearFrameworkOwnership()
@@ -120,8 +120,20 @@ internal class AndroidLocaleEasy(
 		applyUpdate { applyPreference(selection) }
 	}
 
+	override fun setInitialLocale(locale: Locale) {
+		checkMainThread()
+		val selection = LocalePreference.AppLocales(listOf(locale))
+		applyUpdate {
+			if (!hasSavedPreference()) applyPreference(selection)
+		}
+	}
+
 	private fun applyPreference(selection: LocalePreference) {
-		if (selection == state.value.preference) return
+		if (selection == state.value.preference) {
+			// Selecting FollowSystem explicitly must survive a later initial-locale request.
+			if (!hasSavedPreference()) persist(selection)
+			return
+		}
 		val next = LocaleState(selection, readSystemLocales())
 		if (Build.VERSION.SDK_INT >= 33 && frameworkRecreation) {
 			// The framework owns configuration delivery and activity recreation on Android 13+.
@@ -171,6 +183,9 @@ internal class AndroidLocaleEasy(
 			}
 		}
 	}
+
+	private fun hasSavedPreference(): Boolean =
+		preferences.contains(KEY_FOLLOW_SYSTEM_LOCALE) || preferences.contains(KEY_LANGUAGES)
 
 	private fun readInitialPreference(): LocalePreference {
 		val saved = restoreLocalePreference(

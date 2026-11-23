@@ -11,6 +11,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.elianfabian.locale_easy.LocaleEasy
 import com.elianfabian.locale_easy.LocalePreference
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Assume.assumeTrue
 import org.junit.Test
@@ -20,6 +21,50 @@ import java.util.Locale
 /** Run seed and verify in separate instrumentation processes, with force-stop in between. */
 @RunWith(AndroidJUnit4::class)
 class PersistedLocaleTest {
+    @Test fun initialLocaleRespectsSavedPreferences() {
+        val phase = InstrumentationRegistry.getArguments().getString("initialLocalePhase")
+        assumeTrue(phase in listOf("seed", "verify", "verifyUser", "seedSystem", "verifySystem"))
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val app = instrumentation.targetContext
+        val api = LocaleEasy.getInstance()
+        val prefs = app.getSharedPreferences("locale_easy_prefs", 0)
+        val french = LocalePreference.AppLocales(listOf(Locale.FRENCH))
+        val spanish = LocalePreference.AppLocales(listOf(Locale.forLanguageTag("es")))
+        val expected = when (phase) {
+            "seedSystem", "verifySystem" -> LocalePreference.FollowSystem
+            "verifyUser" -> spanish
+            else -> french
+        }
+
+        instrumentation.runOnMainSync {
+            if (phase == "seed" || phase == "seedSystem") {
+                assertEquals(LocalePreference.FollowSystem, api.preference.value)
+                assertFalse(prefs.contains("KEY_FOLLOW_SYSTEM_LOCALE"))
+                if (phase == "seed") api.setInitialLocale(Locale.FRENCH) else api.followSystem()
+            }
+            api.setInitialLocale(Locale.ITALIAN)
+            assertEquals(expected, api.preference.value)
+            assertTrue(prefs.contains("KEY_FOLLOW_SYSTEM_LOCALE"))
+        }
+
+        ActivityScenario.launch(LocaleFixtureActivity::class.java).use { scenario ->
+            val expectedText = when (expected) {
+                french -> "Chaîne Localisée: Vert"
+                spanish -> "Cadena Localizada: Verde"
+                else -> api.localizedContext(app).getString(R.string.string_resource_example)
+            }
+            scenario.onActivity {
+                assertEquals(expectedText, it.findViewById<TextView>(R.id.locale_fixture_label).text.toString())
+            }
+        }
+
+        if (phase == "verify") {
+            instrumentation.runOnMainSync { api.setPreference(spanish) }
+        }
+        assertTrue(prefs.edit().commit())
+        Log.i("LocaleEasyFixture", "initial locale phase=$phase process=${android.os.Process.myPid()}")
+    }
+
     @Test fun preferenceSurvivesProcessRestart() {
         val phase = InstrumentationRegistry.getArguments().getString("localePhase")
         assumeTrue(phase == "seed" || phase == "verify")

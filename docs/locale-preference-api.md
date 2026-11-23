@@ -64,6 +64,20 @@ AndroidX Startup now installs LocaleEasy automatically. Calling `install()` agai
 
 Installation, locale mutations, and `fixWebViewLocale()` must run on the main thread. A state emission represents an applied preference. View recreation and the first translated frame follow asynchronously. A request made from a collector while another change is being published is applied after that change, before the outer setter returns. Preferences are written to disk asynchronously.
 
+### Optional initial language
+
+With automatic initialization, an app that wants French on its first launch can make this call from `Application.onCreate()`, before its first activity opens.
+
+```kotlin
+LocaleEasy.getInstance().setInitialLocale(Locale.FRENCH)
+```
+
+The call applies and saves French if there is no saved preference. It is safe to repeat on each launch. A saved language and an explicit `followSystem()` choice both take precedence, including preferences written by earlier LocaleEasy versions. Without an initial language or a saved preference, LocaleEasy follows the system.
+
+Custom implementations of `LocaleEasy` implement `setInitialLocale()` against their own preference storage.
+
+### Activity integration
+
 LocaleEasy currently uses **local activity recreation on every supported API**, including API 33+. It owns the persisted preference, updates application resources, and supplies localized activity contexts. Automatic framework locale recreation exposed a gap with no visible app surface in the tested configuration; [the investigation](framework-window-handoff-investigation.md) documents the evidence and a promising hybrid that has not been promoted into the normal backend. This does not mean every use of LocaleManager must flash.
 
 On **all API levels**, participating activities wrap their base context before inflation:

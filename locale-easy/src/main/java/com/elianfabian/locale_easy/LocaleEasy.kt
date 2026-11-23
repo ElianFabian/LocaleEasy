@@ -45,6 +45,14 @@ public interface LocaleEasy {
 	@MainThread
 	public fun setLocale(locale: Locale) { setLocales(listOf(locale)) }
 
+	/**
+	 * Apply and save [locale] if the app has no saved preference. An explicit [followSystem]
+	 * choice also counts as a saved preference. Call from Application.onCreate() to apply the
+	 * initial locale before the first activity opens.
+	 */
+	@MainThread
+	public fun setInitialLocale(locale: Locale)
+
 	/** Select a language using a well-formed BCP 47 tag such as `fr-CA`. */
 	@MainThread
 	public fun setLanguageTag(tag: String) {
