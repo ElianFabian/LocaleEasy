@@ -109,6 +109,15 @@ While following the system, LocaleEasy keeps the system locales that match the c
 
 The repository includes the plugin build through `pluginManagement.includeBuild("locale-easy-gradle")`. To test it in another project, publish it locally with `./gradlew -p locale-easy-gradle publishToMavenLocal`. Add `mavenLocal()` to the consumer's `pluginManagement.repositories` and use plugin version `0.1.0`. The plugin is verified with the project's AGP version.
 
+An app can also supply the catalog directly as `src/main/res/xml/locale_easy_catalog.xml`. The default locale is included in the supported list automatically. List the other languages the app wants to offer.
+
+```xml
+<locale-catalog defaultLocale="en">
+    <locale tag="fr" />
+    <locale tag="it" />
+</locale-catalog>
+```
+
 ### Activity integration
 
 LocaleEasy currently uses **local activity recreation on every supported API**, including API 33+. It owns the persisted preference, updates application resources, and supplies localized activity contexts. Automatic framework locale recreation exposed a gap with no visible app surface in the tested configuration; [the investigation](framework-window-handoff-investigation.md) documents the evidence and a promising hybrid that has not been promoted into the normal backend. This does not mean every use of LocaleManager must flash.

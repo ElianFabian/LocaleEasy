@@ -4,6 +4,21 @@ Date: 2026-11-05; sample recreation selector verification updated 2026-11-06. Th
 
 ## Executed checks
 
+### Runtime discovery with a default language only
+
+An API 24 probe appended the declared English default to the device-language candidates in a scoped Android configuration. It read the resulting locale order and both an app string and an AppCompat string from the same resource context. Inspection of the packaged APK confirmed that the app string has French, Spanish, Italian, and Portuguese versions. The German version of the AppCompat string is packaged alongside it.
+
+| Candidates passed to Android | First locale after resource matching | Sample text |
+| --- | --- | --- |
+| Faroese, English | English | English |
+| Faroese, French, English | French | French |
+| German, English | German | English |
+| German, French, English | German | English |
+
+The app and AppCompat strings had the same asset cookie. AppCompat's German resources were enough to make the configuration retain German ahead of French. Reading the resulting configuration therefore cannot implement an app-only language catalog from the default locale alone. LocaleEasy kept its explicit catalog for this behavior. [Android resource matching source](https://raw.githubusercontent.com/aosp-mirror/platform_frameworks_base/master/core/java/android/content/res/ResourcesImpl.java)
+
+### Catalog and lifecycle checks
+
 The generated fallback catalog was tested on API 24 with German as the only system language. The sample rendered English in follow-system mode, and the library-only fixture kept German with an empty catalog. Its required default getter threw while its nullable getter returned null. The fixtures also checked script-aware matching, ordered system matches, an explicit override, and a saved French initial locale alongside an English fallback across process restarts. The sample suite ran 29 cases with five API-dependent skips and zero failures. Adding French after German in Android Settings changed the running sample from English to French in the same process. Unit tests, lint, and debug and release catalog generation passed.
 
 The companion Gradle plugin passed qualifier parsing tests and plugin validation. Both sample variants generated `en, es, fr, it, pt`. The sample's picker and settings suite passed on API 24 with one API-dependent skip across eight cases. A separate app resolved the plugin from a local Maven repository. Adding and removing a Portuguese resource changed only the corresponding flavor's catalog, including with the configuration cache enabled. The app's existing custom BuildConfig field was also preserved.
