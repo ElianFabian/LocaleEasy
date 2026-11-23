@@ -23,6 +23,9 @@ public interface LocaleEasy {
 	@set:MainThread
 	public var useFrameworkLocaleRecreation: Boolean
 
+	/** The app's generated language catalog. Its default is optional. */
+	public val localeCatalog: LocaleCatalog get() = LocaleCatalog.Empty
+
 	/** The applied language selection and its resolution, available in one read. */
 	public val state: StateFlow<LocaleState>
 

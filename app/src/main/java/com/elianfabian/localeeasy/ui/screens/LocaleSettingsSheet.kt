@@ -21,14 +21,13 @@ import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.elianfabian.locale_easy.LocalePreference
-import com.elianfabian.localeeasy.BuildConfig
+import com.elianfabian.locale_easy.LocaleEasy
 import com.elianfabian.localeeasy.MainViewModel
 import com.elianfabian.localeeasy.R
 import com.elianfabian.localeeasy.UiAction
@@ -96,7 +95,7 @@ fun LocaleSettingsSheet(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun LanguageButtons(selectedLocale: Locale? = null, onLanguageSelected: (Locale) -> Unit) {
-	val languages = remember { BuildConfig.SUPPORTED_LANGUAGES.map(Locale::forLanguageTag) }
+	val languages = LocaleEasy.getInstance().localeCatalog.supportedLocales
 	val selectedLanguage = selectedLocale?.let { selected ->
 		languages.firstOrNull { it == selected } ?: Locale.forLanguageTag(selected.language)
 	}

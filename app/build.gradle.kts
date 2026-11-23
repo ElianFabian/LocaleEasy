@@ -5,7 +5,7 @@ plugins {
 }
 
 localeEasyLocales {
-	defaultLanguage.set("en")
+	generateFallbackCatalog.set(true)
 }
 
 android {

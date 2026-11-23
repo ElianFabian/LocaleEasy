@@ -28,6 +28,28 @@ class LegacyLocaleTest {
         }
     }
 
+    @Test fun missingCatalogKeepsFollowSystemAndOnlyRequiredDefaultThrows() {
+        assertTrue(api.localeCatalog.supportedLocales.isEmpty())
+        assertNull(api.localeCatalog.defaultLocaleOrNull)
+        assertTrue(runCatching { api.localeCatalog.defaultLocale }.exceptionOrNull() is IllegalStateException)
+        assertEquals(api.state.value.systemLocales, api.state.value.effectiveLocales)
+    }
+
+    @Test fun catalogPreservesMatchingLocaleOrderAndScripts() {
+        val traditional = Locale.forLanguageTag("zh-Hant")
+        val catalog = LocaleCatalog(Locale.ENGLISH, listOf(Locale.FRENCH, traditional, Locale.ENGLISH))
+        val unsupported = Locale.GERMAN
+        assertEquals(listOf(Locale.ENGLISH, Locale.FRENCH, traditional), catalog.supportedLocales)
+        val system = listOf(unsupported, Locale.CANADA_FRENCH, traditional)
+        val following = LocaleState(LocalePreference.FollowSystem, system, catalog)
+        assertEquals(system, following.systemLocales)
+        assertEquals(listOf(Locale.CANADA_FRENCH, traditional), following.effectiveLocales)
+        assertEquals(listOf(Locale.ENGLISH),
+            LocaleState(LocalePreference.FollowSystem, listOf(Locale.SIMPLIFIED_CHINESE), catalog).effectiveLocales)
+        assertEquals(listOf(unsupported),
+            LocaleState(LocalePreference.AppLocales(listOf(unsupported)), system, catalog).effectiveLocales)
+    }
+
     @Test fun plainActivityRecreationAppliesFrench() {
         ActivityScenario.launch(LegacyLocaleFixtureActivity::class.java).use { scenario ->
             var original: LegacyLocaleFixtureActivity? = null

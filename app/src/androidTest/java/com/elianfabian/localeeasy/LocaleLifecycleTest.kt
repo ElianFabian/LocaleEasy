@@ -62,6 +62,32 @@ class LocaleLifecycleTest {
         assertSame(before, api)
     }
 
+    @Test fun runtimeCatalogMatchesTheGeneratedBuildConfig() {
+        val catalog = api.localeCatalog
+        assertEquals(BuildConfig.DEFAULT_LANGUAGE, catalog.defaultLocale.toLanguageTag())
+        assertEquals(BuildConfig.SUPPORTED_LANGUAGES.toList(), catalog.supportedLocales.map { it.toLanguageTag() })
+        assertEquals(LocalePreference.FollowSystem, api.preference.value)
+        main { api.setLocale(Locale.GERMAN) }
+        assertEquals(listOf(Locale.GERMAN), api.effectiveLocales.value)
+        assertEquals(Locale.ENGLISH, catalog.defaultLocale)
+    }
+
+    @Test fun followSystemResolvesAnEmulatorLanguageThroughTheCatalog() {
+        val expectedSystem = InstrumentationRegistry.getArguments().getString("catalogSystemLanguage")
+        assumeTrue(expectedSystem == "de" || expectedSystem == "fr")
+        val expected = if (expectedSystem == "fr") Locale.FRENCH else Locale.ENGLISH
+        val snapshot = api.state.value
+        assertEquals(expectedSystem, snapshot.systemLocales.single().language)
+        assertEquals(LocalePreference.FollowSystem, snapshot.preference)
+        assertEquals(expected.language, snapshot.effectiveLocales.single().language)
+        ActivityScenario.launch(LocaleFixtureActivity::class.java).use { scenario ->
+            scenario.onActivity {
+                assertEquals(expected.language, it.resources.configuration.locales[0].language)
+                assertEquals(translated(expected.language), it.findViewById<TextView>(R.id.locale_fixture_label).text)
+            }
+        }
+    }
+
     @Test fun backgroundMutationFailsWithoutChangingSelection() {
         val before = api.preference.value
         assertTrue(runCatching { api.setLocale(Locale.FRENCH) }.exceptionOrNull() is IllegalStateException)

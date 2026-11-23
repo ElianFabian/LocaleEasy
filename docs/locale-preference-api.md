@@ -91,7 +91,21 @@ localeEasyLocales {
 }
 ```
 
-`BuildConfig.DEFAULT_LANGUAGE` contains the declared tag. `BuildConfig.SUPPORTED_LANGUAGES` starts with that tag and adds the distinct tags found in the app variant's static `values-*` directories. The sample uses the array for its picker. An app can also use the tags to decide whether to call `setInitialLocale()`. The catalog describes app source resources. Translation coverage, resource filters, and installed Play language splits determine what Android can resolve on a device.
+`BuildConfig.DEFAULT_LANGUAGE` contains the declared tag. `BuildConfig.SUPPORTED_LANGUAGES` starts with that tag and adds the distinct tags found in the app variant's static `values-*` directories. The catalog describes app source resources. Translation coverage, resource filters, and installed Play language splits determine what Android can resolve on a device.
+
+#### Use the catalog for Follow system
+
+Set `unqualifiedResLocale=en` in `src/main/res/resources.properties` and enable XML catalog generation in the app module:
+
+```kotlin
+localeEasyLocales {
+    generateFallbackCatalog.set(true)
+}
+```
+
+LocaleEasy loads the generated resource at startup. The sample picker reads `LocaleEasy.getInstance().localeCatalog.supportedLocales`. This catalog is always available. Without generated XML, the list is empty and `defaultLocaleOrNull` returns null. Reading `defaultLocale` then throws an `IllegalStateException`.
+
+While following the system, LocaleEasy keeps the system locales that match the catalog by language and script, in system preference order. It uses `defaultLocale` when none match. The stored preference stays `FollowSystem`, and subsequent system changes can select another language. Explicit app choices still apply. For example, an app with English fallback resources can call `setInitialLocale(Locale.FRENCH)` to save French on its first launch. A later explicit `followSystem()` uses English whenever the device has no supported language.
 
 The repository includes the plugin build through `pluginManagement.includeBuild("locale-easy-gradle")`. To test it in another project, publish it locally with `./gradlew -p locale-easy-gradle publishToMavenLocal`. Add `mavenLocal()` to the consumer's `pluginManagement.repositories` and use plugin version `0.1.0`. The plugin is verified with the project's AGP version.
 

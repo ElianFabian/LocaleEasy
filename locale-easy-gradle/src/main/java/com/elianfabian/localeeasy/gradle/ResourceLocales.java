@@ -1,11 +1,14 @@
 package com.elianfabian.localeeasy.gradle;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.IllformedLocaleException;
 import java.util.List;
 import java.util.Locale;
+import java.util.Properties;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 import org.gradle.api.GradleException;
@@ -39,7 +42,24 @@ final class ResourceLocales {
         } catch (IllformedLocaleException ignored) {
             // Report an actionable Gradle error for invalid input.
         }
-        throw new GradleException("Set localeEasyLocales.defaultLanguage to a BCP 47 tag such as en or pt-BR.");
+        throw new GradleException("Set unqualifiedResLocale in res/resources.properties or "
+                + "localeEasyLocales.defaultLanguage to a BCP 47 tag such as en or pt-BR.");
+    }
+
+    static String readDefaultLanguage(List<File> roots) {
+        for (File root : roots) {
+            File file = new File(root, "resources.properties");
+            if (!file.isFile()) continue;
+            Properties properties = new Properties();
+            try (var reader = Files.newBufferedReader(file.toPath())) {
+                properties.load(reader);
+            } catch (IOException error) {
+                throw new GradleException("Unable to read " + file, error);
+            }
+            String language = properties.getProperty("unqualifiedResLocale");
+            if (language != null) return language.trim();
+        }
+        return "";
     }
 
     private static boolean hasValuesFile(File directory) {

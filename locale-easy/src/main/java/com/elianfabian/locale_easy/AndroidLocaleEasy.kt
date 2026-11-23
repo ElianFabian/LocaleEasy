@@ -47,7 +47,8 @@ internal class AndroidLocaleEasy(
 	// wider coverage. Keep framework recreation as an explicit, process-local diagnostic
 	// opt-in only. See docs/framework-window-handoff-investigation.md in the repository.
 	@Volatile private var frameworkRecreation = false
-	private val localeState = MutableStateFlow(LocaleState(readInitialPreference(), readSystemLocales()))
+	override val localeCatalog = LocaleCatalog.read(application)
+	private val localeState = MutableStateFlow(resolveState(readInitialPreference(), readSystemLocales()))
 	override val state = localeState.asStateFlow()
 	override val systemLocaleList = state.project { it.systemLocales }
 	override val preference = state.project { it.preference }
@@ -87,15 +88,17 @@ internal class AndroidLocaleEasy(
 			applyUpdate {
 				if (frameworkRecreation == value) return@applyUpdate
 				val current = state.value
+				val next = resolveState(current.preference, readSystemLocales(), value)
 				if (Build.VERSION.SDK_INT >= 33 && value) {
 					Api33.setPreference(application, current.preference)
 					preferences.edit { putBoolean(KEY_FRAMEWORK_DIAGNOSTIC_OWNER, true) }
 				} else {
 					if (Build.VERSION.SDK_INT >= 33) Api33.setPreference(application, LocalePreference.FollowSystem)
 					clearFrameworkOwnership()
-					updateResources(application, current.effectiveLocales)
+					updateResources(application, next.effectiveLocales)
 				}
 				frameworkRecreation = value
+				localeState.value = next
 				// Backend changes also replace wrapped contexts, even if the language is unchanged.
 				activities.forEach { (activity, state) -> scheduleRefresh(activity, state) }
 			}
@@ -134,7 +137,7 @@ internal class AndroidLocaleEasy(
 			if (!hasSavedPreference()) persist(selection)
 			return
 		}
-		val next = LocaleState(selection, readSystemLocales())
+		val next = resolveState(selection, readSystemLocales())
 		if (Build.VERSION.SDK_INT >= 33 && frameworkRecreation) {
 			// The framework owns configuration delivery and activity recreation on Android 13+.
 			Api33.setPreference(application, next.preference)
@@ -152,6 +155,7 @@ internal class AndroidLocaleEasy(
 		// A host's platform override can coexist with locally wrapped activities.
 		// Explicitly apply system locales for FollowSystem when the platform base differs.
 		val useBase = framework || current.preference == LocalePreference.FollowSystem &&
+			localeCatalog.defaultLocaleOrNull == null &&
 			(Build.VERSION.SDK_INT < 33 || !Api33.hasOverride(application))
 		val localized = if (useBase) base else base.createConfigurationContext(Configuration().apply {
 			// A fresh Configuration defaults to font scale 1 on older Android releases.
@@ -211,6 +215,9 @@ internal class AndroidLocaleEasy(
 		Api33.systemLocales(application)
 	} else configurationLocales(Resources.getSystem().configuration)
 
+	private fun resolveState(selection: LocalePreference, system: List<Locale>, framework: Boolean = frameworkRecreation): LocaleState =
+		LocaleState(selection, system, if (framework) LocaleCatalog.Empty else localeCatalog)
+
 	override fun onConfigurationChanged(newConfig: Configuration) {
 		applyUpdate {
 			val current = state.value
@@ -221,9 +228,13 @@ internal class AndroidLocaleEasy(
 				LocaleState(selection, system)
 			} else {
 				// Android owns recreation for system configuration changes.
-				LocaleState(current.preference, system).also { updateResources(application, it.effectiveLocales) }
+				resolveState(current.preference, system).also { updateResources(application, it.effectiveLocales) }
 			}
 			localeState.value = next
+			if (!frameworkRecreation && localeCatalog.defaultLocaleOrNull != null &&
+				current.effectiveLocales != next.effectiveLocales) {
+				activities.forEach { (activity, activityState) -> scheduleRefresh(activity, activityState) }
+			}
 		}
 	}
 
@@ -251,6 +262,7 @@ internal class AndroidLocaleEasy(
 			val current = state.value
 			activityState.started = true
 			if (activityState.selection == LocalePreference.FollowSystem && current.preference == LocalePreference.FollowSystem &&
+				localeCatalog.defaultLocaleOrNull == null &&
 				configurationLocales(activity.resources.configuration) == current.effectiveLocales) {
 				activityState.locales = current.effectiveLocales
 			}
