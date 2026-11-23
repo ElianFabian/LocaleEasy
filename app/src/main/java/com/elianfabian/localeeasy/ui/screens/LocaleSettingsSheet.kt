@@ -21,12 +21,14 @@ import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.elianfabian.locale_easy.LocalePreference
+import com.elianfabian.localeeasy.BuildConfig
 import com.elianfabian.localeeasy.MainViewModel
 import com.elianfabian.localeeasy.R
 import com.elianfabian.localeeasy.UiAction
@@ -94,21 +96,21 @@ fun LocaleSettingsSheet(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun LanguageButtons(selectedLocale: Locale? = null, onLanguageSelected: (Locale) -> Unit) {
-	val languages = listOf(
-		"English" to Locale.ENGLISH,
-		"Spanish" to Locale.forLanguageTag("es"),
-		"French" to Locale.FRENCH,
-		"Portuguese" to Locale.forLanguageTag("pt"),
-		"Italian" to Locale.ITALIAN,
-	)
+	val languages = remember { BuildConfig.SUPPORTED_LANGUAGES.map(Locale::forLanguageTag) }
+	val selectedLanguage = selectedLocale?.let { selected ->
+		languages.firstOrNull { it == selected } ?: Locale.forLanguageTag(selected.language)
+	}
 
 	FlowRow(
 		modifier = Modifier.fillMaxWidth(),
 		horizontalArrangement = Arrangement.spacedBy(8.dp)
 	) {
-		languages.forEach { (name, locale) ->
-			FilterChip(selected = selectedLocale?.language == locale.language,
-				onClick = { onLanguageSelected(locale) }, label = { Text(text = name, color = EnglishOnlyColor) })
+		languages.forEach { locale ->
+			FilterChip(
+				selected = selectedLanguage == locale,
+				onClick = { onLanguageSelected(locale) },
+				label = { Text(text = locale.getDisplayName(Locale.ENGLISH), color = EnglishOnlyColor) },
+			)
 		}
 	}
 }

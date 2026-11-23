@@ -1,6 +1,11 @@
 plugins {
 	alias(libs.plugins.android.application)
 	alias(libs.plugins.kotlin.compose)
+	id("com.elianfabian.localeeasy.locales")
+}
+
+localeEasyLocales {
+	defaultLanguage.set("en")
 }
 
 android {

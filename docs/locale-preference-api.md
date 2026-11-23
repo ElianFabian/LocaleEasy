@@ -76,6 +76,25 @@ The call applies and saves French if there is no saved preference. It is safe to
 
 Custom implementations of `LocaleEasy` implement `setInitialLocale()` against their own preference storage.
 
+### Optional Gradle language catalog
+
+The companion plugin generates BCP 47 language tags in the app's `BuildConfig`. Apply it in the Android application module and declare the language of the unqualified `res/values` resources.
+
+```kotlin
+plugins {
+    id("com.android.application")
+    id("com.elianfabian.localeeasy.locales")
+}
+
+localeEasyLocales {
+    defaultLanguage.set("en")
+}
+```
+
+`BuildConfig.DEFAULT_LANGUAGE` contains the declared tag. `BuildConfig.SUPPORTED_LANGUAGES` starts with that tag and adds the distinct tags found in the app variant's static `values-*` directories. The sample uses the array for its picker. An app can also use the tags to decide whether to call `setInitialLocale()`. The catalog describes app source resources. Translation coverage, resource filters, and installed Play language splits determine what Android can resolve on a device.
+
+The repository includes the plugin build through `pluginManagement.includeBuild("locale-easy-gradle")`. To test it in another project, publish it locally with `./gradlew -p locale-easy-gradle publishToMavenLocal`. Add `mavenLocal()` to the consumer's `pluginManagement.repositories` and use plugin version `0.1.0`. The plugin is verified with the project's AGP version.
+
 ### Activity integration
 
 LocaleEasy currently uses **local activity recreation on every supported API**, including API 33+. It owns the persisted preference, updates application resources, and supplies localized activity contexts. Automatic framework locale recreation exposed a gap with no visible app surface in the tested configuration; [the investigation](framework-window-handoff-investigation.md) documents the evidence and a promising hybrid that has not been promoted into the normal backend. This does not mean every use of LocaleManager must flash.

@@ -4,6 +4,8 @@ Date: 2026-11-05; sample recreation selector verification updated 2026-11-06. Th
 
 ## Executed checks
 
+The companion Gradle plugin passed qualifier parsing tests and plugin validation. Both sample variants generated `en, es, fr, it, pt`. The sample's picker and settings suite passed on API 24 with one API-dependent skip across eight cases. A separate app resolved the plugin from a local Maven repository. Adding and removing a Portuguese resource changed only the corresponding flavor's catalog, including with the configuration cache enabled. The app's existing custom BuildConfig field was also preserved.
+
 The 2026-11-23 initial-language change passed all 11 unit tests, both modules' lint, and the sample and test APK builds. On API 24 and API 36, separate process runs verified that `setInitialLocale()` applies before the first activity inflates, preserves a subsequent user choice, and respects an explicit follow-system choice even when the app already followed the system. The sample exercised automatic startup with its redundant `Application` initializer removed.
 
 The API 24 lifecycle, Compose and settings suites passed with five API-dependent skips across 27 cases. On API 36, separate seed and verify processes also passed for a marked legacy framework override and for stored duplicate locales.

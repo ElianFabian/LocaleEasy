@@ -1,4 +1,5 @@
 pluginManagement {
+	includeBuild("locale-easy-gradle")
 	repositories {
 		google {
 			content {
