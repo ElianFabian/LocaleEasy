@@ -10,14 +10,12 @@ import kotlinx.coroutines.flow.StateFlow
 import java.util.Locale
 
 public interface LocaleEasy {
+
 	/** The app's language catalog, read once at startup. Its default is optional. */
 	public val localeCatalog: LocaleCatalog get() = LocaleCatalog.Empty
 
 	/** The locale first applied by [setInitialLocale], or null if none was recorded. */
 	public val initialAppLocale: Locale?
-
-	/** Languages offered in Android Settings. Refreshed on activity resume and configuration changes. */
-	public val androidSupportedLocaleList: StateFlow<AndroidSupportedLocales>
 
 	/** The user's selection. This is not a signal that activity recreation has completed. */
 	public val preference: StateFlow<LocalePreference>
@@ -33,6 +31,9 @@ public interface LocaleEasy {
 
 	/** The primary app language saved by Android. Null when unset or before Android 13. */
 	public val selectedAndroidAppLocale: StateFlow<Locale?>
+
+	/** Languages offered in Android Settings. Refreshed on activity resume and configuration changes. */
+	public val androidSupportedLocaleList: StateFlow<AndroidSupportedLocales>
 
 	/**
 	 * Apply and save [locale] if the app has no saved preference. An explicit [followSystem]
@@ -57,6 +58,7 @@ public interface LocaleEasy {
 	/**
 	 * Return a context for the current selection. Wrap an activity's base context in
 	 * `attachBaseContext`, or use the result for one-off resource lookups.
+	 * The Gradle plugin calls this overload when instrumenting `attachBaseContext`.
 	 * Obtain a fresh context after a language change.
 	 */
 	public fun localizedContext(base: Context): Context
@@ -73,10 +75,12 @@ public interface LocaleEasy {
 	 */
 	public fun localizedContext(base: Context, locales: List<Locale>): Context
 
+
 	public companion object {
 		@Volatile
 		private var _instance: LocaleEasy? = null
 
+		// The activity instrumentation also calls this to obtain the current instance.
 		public fun getInstance(): LocaleEasy {
 			return _instance ?: error("Attempt to access LocaleEasy instance before being initialized")
 		}
@@ -96,15 +100,19 @@ public interface LocaleEasy {
 		/**
 		 * On Android 7.0 and later, repair application resources if WebView changes their locales.
 		 * Activity resource scopes and existing WebViews retain their configurations.
+		 * The optional load instrumentation calls this before WebView navigation.
 		 */
 		@MainThread
 		public fun fixWebViewLocale() {
 			checkMainThread()
-			if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) return
+			if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+				return
+			}
 			(getInstance() as? AndroidLocaleEasy)?.reapplyResources()
 		}
 
 		// Called by the Gradle plugin after layout inflation, including layouts without a WebView.
+		@Suppress("Unused")
 		@PublishedApi
 		internal fun repairAfterLayoutInflation() {
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && Looper.myLooper() == Looper.getMainLooper()) {

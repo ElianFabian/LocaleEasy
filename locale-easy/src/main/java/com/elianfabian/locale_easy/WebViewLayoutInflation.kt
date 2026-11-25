@@ -12,23 +12,30 @@ import android.view.ViewGroup
 import android.webkit.WebView
 import org.xmlpull.v1.XmlPullParser
 
+// The Gradle plugin inserts this call after a WebView constructor returns.
 @PublishedApi
 internal fun repairAfterWebViewCreation() {
 	LocaleEasy.repairAfterLayoutInflation()
 }
 
+// The four inflate overloads are entry points for calls redirected by the Gradle plugin.
+@Suppress("Unused")
 @PublishedApi
 internal fun inflate(inflater: LayoutInflater, resource: Int, root: ViewGroup?): View =
 	withWebViewRepair(inflater).inflate(resource, root)
 
+// Also called from the AndroidX Fragment.onCreateView bytecode for Fragment(layoutId).
+@Suppress("Unused")
 @PublishedApi
 internal fun inflate(inflater: LayoutInflater, resource: Int, root: ViewGroup?, attach: Boolean): View =
 	withWebViewRepair(inflater).inflate(resource, root, attach)
 
+@Suppress("Unused")
 @PublishedApi
 internal fun inflate(inflater: LayoutInflater, parser: XmlPullParser, root: ViewGroup?): View =
 	withWebViewRepair(inflater).inflate(parser, root)
 
+@Suppress("Unused")
 @PublishedApi
 internal fun inflate(inflater: LayoutInflater, parser: XmlPullParser, root: ViewGroup?, attach: Boolean): View =
 	withWebViewRepair(inflater).inflate(parser, root, attach)

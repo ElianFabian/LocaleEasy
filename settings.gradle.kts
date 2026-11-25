@@ -26,3 +26,4 @@ dependencyResolutionManagement {
 rootProject.name = "LocaleEasy"
 include(":app")
 include(":locale-easy")
+include(":locale-easy-lint")

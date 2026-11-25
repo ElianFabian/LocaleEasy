@@ -9,6 +9,8 @@ import com.android.build.api.variant.BuildConfigField;
 import com.android.build.api.variant.ScopedArtifacts;
 import com.android.build.api.variant.SourceDirectories;
 import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,6 +34,7 @@ public final class LocaleCatalogPlugin implements Plugin<Project> {
         locales.getInstrumentWebViewInflation().convention(false);
         locales.getInstrumentWebViewCreation().convention(false);
         locales.getWebViewContentViewActivities().convention(Set.of());
+        locales.getShowInstrumentationHints().convention(true);
         project.getPluginManager().withPlugin("com.android.application", plugin -> {
             ApplicationAndroidComponentsExtension android =
                     project.getExtensions().getByType(ApplicationAndroidComponentsExtension.class);
@@ -44,10 +47,25 @@ public final class LocaleCatalogPlugin implements Plugin<Project> {
                         boolean inflation = locales.getInstrumentWebViewInflation().get();
                         boolean creation = locales.getInstrumentWebViewCreation().get();
                         var contentViewActivities = locales.getWebViewContentViewActivities().get();
+                        boolean hints = locales.getShowInstrumentationHints().get();
                         if (!contentViewActivities.isEmpty() && !creation) {
                             throw new GradleException("webViewContentViewActivities requires instrumentWebViewCreation.");
                         }
+                        if (hints && activities) publishLintFlag(variant, "ACTIVITIES");
+                        if (hints && webViewLoads) publishLintFlag(variant, "WEB_VIEW_LOADS");
+                        if (hints && inflation) publishLintFlag(variant, "WEB_VIEW_INFLATION");
+                        if (creation) {
+                            if (hints) publishLintFlag(variant, "WEB_VIEW_CREATION");
+                            variant.getInstrumentation().transformClassesWith(FragmentContentInstrumentation.class,
+                                    InstrumentationScope.ALL, unused -> Unit.INSTANCE);
+                        }
                         if (!contentViewActivities.isEmpty()) {
+                            if (hints) {
+                                var names = String.join("\n", contentViewActivities.stream().sorted().toList());
+                                var encoded = Base64.getEncoder().encodeToString(names.getBytes(StandardCharsets.UTF_8));
+                                variant.getBuildConfigFields().put("LOCALE_EASY_LINT_CONTENT_VIEW_ACTIVITIES",
+                                        new BuildConfigField<>("String", quote(encoded), "LocaleEasy Lint variant configuration."));
+                            }
                             variant.getInstrumentation().transformClassesWith(AppCompatContentInstrumentation.class,
                                     InstrumentationScope.ALL, unused -> Unit.INSTANCE);
                         }
@@ -71,6 +89,11 @@ public final class LocaleCatalogPlugin implements Plugin<Project> {
                         }
                     });
         });
+    }
+
+    private static void publishLintFlag(ApplicationVariant variant, String name) {
+        variant.getBuildConfigFields().put("LOCALE_EASY_LINT_" + name,
+                new BuildConfigField<>("boolean", true, "LocaleEasy Lint variant configuration."));
     }
 
     private static void configureCatalog(Project project, ApplicationVariant variant, LocaleCatalogExtension extension) {

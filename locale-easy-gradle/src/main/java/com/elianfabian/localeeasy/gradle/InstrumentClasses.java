@@ -40,7 +40,7 @@ public abstract class InstrumentClasses extends DefaultTask {
     private static final String LAYOUT_INFLATER = "android/view/LayoutInflater";
     private static final String LOCALE_EASY = "com/elianfabian/locale_easy/LocaleEasy";
     private static final String COMPANION = LOCALE_EASY + "$Companion";
-    private static final String WEB_VIEW_INFLATION = "com/elianfabian/locale_easy/WebViewLayoutInflation";
+    static final String WEB_VIEW_INFLATION = "com/elianfabian/locale_easy/WebViewLayoutInflation";
     private static final String WEB_VIEW_CONTENT = "com/elianfabian/locale_easy/WebViewContentView";
     private static final String ATTACH = "attachBaseContext";
     private static final String CONTEXT = "Landroid/content/Context;";

@@ -15,6 +15,7 @@ private class AppCompatContentRequest(val activity: Activity, val resource: Int)
 
 private val pendingAppCompatContent = ThreadLocal<AppCompatContentRequest>()
 
+// The Gradle plugin redirects opted-in AppCompatActivity.setContentView(Int) calls here.
 @PublishedApi
 internal fun setAppCompatContentView(activity: Activity, resource: Int) {
 	if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N || Looper.myLooper() != Looper.getMainLooper()) {
@@ -30,6 +31,7 @@ internal fun setAppCompatContentView(activity: Activity, resource: Int) {
 	}
 }
 
+// The Gradle plugin redirects the inflate call inside AppCompatDelegateImpl to this method.
 @PublishedApi
 internal fun inflateAppCompatContent(inflater: LayoutInflater, resource: Int, parent: ViewGroup): View {
 	val request = pendingAppCompatContent.get()

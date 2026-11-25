@@ -7,6 +7,7 @@ import android.os.Build
 import android.os.Looper
 import org.xmlpull.v1.XmlPullParser
 
+// The Gradle plugin redirects opted-in plain Activity.setContentView(Int) calls here.
 @PublishedApi
 internal fun setContentView(activity: Activity, resource: Int) {
 	if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N || Looper.myLooper() != Looper.getMainLooper()) {

@@ -19,9 +19,11 @@ public abstract class LocaleCatalogExtension {
     /** Repair native resources after XML layout inflation performed by the app module. */
     public abstract Property<Boolean> getInstrumentWebViewInflation();
 
-    /** Repair resources while creating WebViews in app code and explicit XML inflation calls. */
+    /** Repair resources while creating WebViews in app code, XML inflation, and AndroidX Fragment layouts. */
     public abstract Property<Boolean> getInstrumentWebViewCreation();
 
     /** Activities that opt into View Binding style inflation for direct setContentView calls in onCreate. */
     public abstract SetProperty<String> getWebViewContentViewActivities();
+    /** Show the informational Android Lint checks for enabled instrumentation. Defaults to true. */
+    public abstract Property<Boolean> getShowInstrumentationHints();
 }

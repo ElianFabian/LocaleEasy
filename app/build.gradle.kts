@@ -86,6 +86,7 @@ androidComponents.onVariants { variant ->
 
 dependencies {
 	implementation(project(":locale-easy"))
+	lintChecks(project(":locale-easy-lint"))
 
 	implementation(platform(libs.androidx.compose.bom))
 	implementation(libs.androidx.appcompat)

@@ -203,6 +203,8 @@ localeEasyLocales {
 
 For earlier repair, `instrumentWebViewCreation.set(true)` is an independent experimental option. It repairs resources when a WebView or subclass constructor called from the app module returns, including direct construction in a Compose `AndroidView` factory. For explicit `LayoutInflater.inflate()` calls, including generated View Binding calls in the app module, it inflates with a clone of the inflater. The clone preserves the existing public factory and handles both standard WebView tags and fully qualified WebView subclasses declared in XML. A subclass can come from a dependency and use the normal public `(Context, AttributeSet)` XML constructor. Repair runs as soon as the view is created, before subsequent XML elements are inflated.
 
+The same option instruments the default `onCreateView` of AndroidX `Fragment`. A class declared with `Fragment(R.layout.some_layout)` or `DialogFragment(R.layout.some_layout)` keeps the original inflater context, container, and `attachToRoot = false`. An override that inflates its own layout is covered through the app's explicit `LayoutInflater.inflate()` or generated View Binding call.
+
 This option is disabled by default and requires a matching LocaleEasy runtime. It clones the inflater for each supported call on the main thread from API 24 onward, including layouts without a WebView. If the public factory leaves a WebView tag unhandled, the clone creates the requested WebView class. An activity that supplies its own WebView for those tags through an `onCreateView()` fallback can use the post-inflation and load options. The load hook can still repair resources when a WebView created elsewhere is navigated from the app module.
 
 To include a direct `setContentView(layoutResId)` call from an activity's `onCreate(Bundle)`, opt that activity in by its fully qualified name.
@@ -218,6 +220,29 @@ On API 24 and later, an opted-in AppCompat activity still calls the original res
 
 For a plain activity, the option retains View Binding style inflation because the platform window's inflater call is outside the build. It inflates without a parent and passes the result to `setContentView(view)`, which can change root layout parameters and skips the resource-ID overload. A plain activity with a `<merge>` root keeps its original call. Explicit `super.setContentView(...)` calls and calls inside other methods stay outside the opt-in. The separate inflation option can repair later reads after those calls return. The sample defaults to early repair and exposes `-PsampleWebViewFallbacks=true` to build it with both fallback hooks enabled.
 
+The LocaleEasy AAR includes informational Android Lint checks for the options enabled in the active build variant.
+
+| Inspection | Where it appears |
+| --- | --- |
+| `LocaleEasyActivityContextRewrite` | The activity declaration if the plugin creates `attachBaseContext`, or the existing override if the plugin wraps its base context argument. |
+| `LocaleEasyContentViewRewrite` | Direct `setContentView(Int)` calls in `onCreate(Bundle)` of activities opted into `webViewContentViewActivities`. Its message describes the AppCompat or plain Activity route. |
+| `LocaleEasyLayoutInflationRewrite` | Supported `LayoutInflater.inflate()` calls and app-generated View Binding inflation calls. With the post-inflation hook enabled, it also covers `Activity.setContentView(Int)`. |
+| `LocaleEasyFragmentLayoutRewrite` | AndroidX `Fragment(layoutId)` and `DialogFragment(layoutId)` constructor calls when early repair is enabled. |
+| `LocaleEasyWebViewConstructionRewrite` | A WebView or WebView subclass constructor call when early repair is enabled. |
+| `LocaleEasyWebViewLoadRewrite` | `loadUrl()`, `loadData()` or `loadDataWithBaseURL()` on a WebView when the navigation hook is enabled. |
+
+Hover over an underlined call in Android Studio to read the explanation, or run `./gradlew :app:lintDebug` for the debug report. The source code can stay as written.
+
+To hide all LocaleEasy instrumentation hints in Android Studio and lint reports, set:
+
+```kotlin
+localeEasyLocales {
+    showInstrumentationHints.set(false)
+}
+```
+
+This setting defaults to `true`. Instrumentation and other Android Lint checks keep running when the hints are hidden.
+
 #### Configuration changes
 
 Android owns recreation for system configuration events. Apps that opt out through `configChanges` remain responsible for updating their own views for those events. Use one locale owner; independently changing AppCompatDelegate or framework app locales can conflict with LocaleEasy's current context strategy. Bundle needed translations or arrange their download before selecting them in language-split app bundles.
@@ -228,7 +253,7 @@ Tap languages in the LocaleEasy picker to add them in preference order. Tap a se
 
 LocaleEasy recreates the activity through Android's lifecycle. Normal activity and fragment saved-state contracts apply. The sample gives its programmatic ComposeView a stable ID to support saved navigation state.
 
-On Android 7.0 (API 24) and later, `fixWebViewLocale()` repairs the application resource locale if it differs from LocaleEasy's selection. Call it on the main thread after WebView initialization if the provider reset that locale. On earlier versions the helper returns before inspecting the resources. The sample enables `instrumentWebViewLoads` for its first navigation and keeps a manual repair button that separately reloads its local HTML fixture. See the [WebView verification results](locale-verification.md#webview-resource-repair-and-page-state).
+On Android 7.0 (API 24) and later, `fixWebViewLocale()` repairs the application resource locale if it differs from LocaleEasy's selection. Call it on the main thread after WebView initialization if the provider reset that locale. On earlier versions the helper returns before inspecting the resources. The sample uses early repair by default and keeps a manual repair button that also reloads its local HTML fixture. The optional navigation hook is a fallback when the WebView was created outside the instrumented paths, such as by reflection or in a dependency. In the tested XML and Compose paths, early repair kept application resource reads in the selected language through the first navigation with the load hook disabled. See the [WebView verification results](locale-verification.md#webview-resource-repair-and-page-state).
 
 ### Use `localizedContext()` outside an activity
 

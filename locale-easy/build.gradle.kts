@@ -40,6 +40,7 @@ kotlin {
 }
 
 dependencies {
+	lintPublish(project(":locale-easy-lint"))
 	implementation(libs.runtime.kotlin.stdlib)
 	api(libs.kotlinxCoroutinesCore)
 	implementation(libs.androidx.startupRuntime)

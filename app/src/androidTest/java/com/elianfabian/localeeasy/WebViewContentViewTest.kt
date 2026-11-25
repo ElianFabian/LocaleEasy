@@ -25,7 +25,11 @@ class WebViewContentViewTest {
     @SdkSuppress(minSdkVersion = 24)
     fun mergeLayoutStillAttachesToTheActivityContent() = verifyContentView(merge = true)
 
-    private fun verifyContentView(merge: Boolean) {
+    @Test
+    @SdkSuppress(minSdkVersion = 24)
+    fun fragmentLayoutIdRepairsBeforeTheSiblingConstructor() = verifyContentView(merge = false, fragment = true)
+
+    private fun verifyContentView(merge: Boolean, fragment: Boolean = false) {
         val instrumentation = InstrumentationRegistry.getInstrumentation()
         val api = LocaleEasy.getInstance()
         val previous = api.preference.value
@@ -34,9 +38,10 @@ class WebViewContentViewTest {
         try {
             val intent = Intent(instrumentation.targetContext, WebViewContentFixtureActivity::class.java)
                 .putExtra("merge", merge)
+                .putExtra("fragment", fragment)
             ActivityScenario.launch<WebViewContentFixtureActivity>(intent).use { scenario ->
                 scenario.onActivity { activity ->
-                    assertTrue(activity.usedResourceOverload)
+                    assertEquals(!fragment, activity.usedResourceOverload)
                     assertTrue(activity.findViewById<View>(R.id.webview_content_fixture_view) is DebugWebViewSubclass)
                     val label = activity.findViewById<TextView>(R.id.webview_constructor_label)
                     assertEquals("Chaîne Localisée: Vert", label.text.toString())
@@ -49,6 +54,7 @@ class WebViewContentViewTest {
                     } else {
                         val root = activity.findViewById<View>(R.id.webview_content_fixture_root)
                         assertEquals((320 * root.resources.displayMetrics.density).roundToInt(), root.layoutParams.height)
+                        if (fragment) assertEquals(android.R.id.custom, (root.parent as View).id)
                     }
                 }
             }

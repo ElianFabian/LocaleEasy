@@ -3,8 +3,10 @@ package com.elianfabian.localeeasy
 import android.content.Context
 import android.os.Bundle
 import android.util.AttributeSet
+import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatTextView
+import androidx.fragment.app.Fragment
 import java.util.concurrent.atomic.AtomicReference
 
 class WebViewContentFixtureActivity : AppCompatActivity() {
@@ -13,6 +15,15 @@ class WebViewContentFixtureActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (intent.getBooleanExtra("fragment", false)) {
+            setContentView(FrameLayout(this).apply { id = android.R.id.custom })
+            if (savedInstanceState == null) {
+                supportFragmentManager.beginTransaction()
+                    .replace(android.R.id.custom, WebViewContentFixtureFragment())
+                    .commitNow()
+            }
+            return
+        }
         val layout = if (intent.getBooleanExtra("merge", false)) {
             R.layout.webview_content_merge_fixture
         } else {
@@ -26,6 +37,8 @@ class WebViewContentFixtureActivity : AppCompatActivity() {
         super.setContentView(layoutResID)
     }
 }
+
+class WebViewContentFixtureFragment : Fragment(R.layout.webview_content_fixture)
 
 class WebViewConstructorLabel(context: Context, attrs: AttributeSet) : AppCompatTextView(context, attrs) {
     init {
