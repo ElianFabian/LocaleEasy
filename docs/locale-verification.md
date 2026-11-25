@@ -19,6 +19,22 @@ adb shell am instrument -w -e class com.elianfabian.localeeasy.AutomaticActivity
 
 The sample now uses the plugin for its main and XML activities. On Android 15, instrumentation verified that the panel shows the sample catalog and that its Android button sends the app-language settings intent. Android Settings displayed the five declared languages. The Compose navigation and locale recreation tests passed, along with the controls opened from the XML activity, dialog and WebView. One repeated Espresso back-navigation run timed out waiting for window focus. On Android 12L, the panel showed the device and catalog languages and omitted the Android settings button. The plain and AppCompat activity instrumentation tests passed on both versions.
 
+#### Back after a Compose locale change
+
+The Android 15 recording reproduced the Espresso timeout after switching to French. The activity instance changed and its window decor was retained. At the point immediately before `Espresso.pressBack()`, the activity and the restored sheet were visible and neither reported window focus. About 11.4 seconds later, Espresso reported that it was waiting for the base activity window. The sheet then reported focus while the activity still reported none. The video shows the French sheet open through that wait.
+
+Android accepted a separately injected Back key. About 0.2 seconds after injection, the sheet had disappeared from the Compose hierarchy, the same activity had regained focus, and the video showed the dismissal animation. A separate run using Android Back passed with French, Italian, and Spanish. These observations explain the reproduced test failure. They do not establish why focus was temporarily absent in every run.
+
+The opt-in diagnostic logs activity and decor identities, window types and focus, and key delivery under `LocaleEasyBackTrace`. On a failure it captures the screen, tries system Back, and rethrows the original Espresso failure. The comparison mode sends system Back throughout. Both modes operate in the test APK.
+
+```powershell
+adb shell am instrument -w -e traceBack true -e class 'com.elianfabian.localeeasy.ComposeLocaleTest#languageControlsUseLocalRecreationOnTheSameScreen' com.elianfabian.localeeasy.test/androidx.test.runner.AndroidJUnitRunner
+adb shell am instrument -w -e traceBack true -e backInput system -e class 'com.elianfabian.localeeasy.ComposeLocaleTest#languageControlsUseLocalRecreationOnTheSameScreen' com.elianfabian.localeeasy.test/androidx.test.runner.AndroidJUnitRunner
+adb logcat -d -s LocaleEasyBackTrace
+```
+
+The test writes PNGs under `files/compose-back-trace/` in the sample app. Use `adb shell run-as com.elianfabian.localeeasy ls files/compose-back-trace` to list the captures.
+
 ### System locales with an Android per-app language
 
 `SystemLocaleSourcesTest` runs on API 33 and newer. It temporarily selects an Android per-app language for the sample and waits for the process to receive that configuration. It prints the language tags from `Resources.getSystem().configuration`, `LocaleManager.getSystemLocales()`, and LocaleEasy's `systemLocaleList`. The test restores the sample's previous Android language setting in `finally`. It does not change the device language.
