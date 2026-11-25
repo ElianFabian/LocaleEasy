@@ -42,6 +42,18 @@ public class ResourceLocalesTest {
         }
     }
 
+    @Test
+    public void discoversLegacyAliasesScriptsAndNumericRegions() throws IOException {
+        File resources = temporaryFolder.newFolder("localeQualifiers");
+        for (String qualifier : List.of("values-iw", "values-he", "values-in", "values-id",
+                "values-ji", "values-yi", "values-b+sr+Latn+RS", "values-b+es+419")) {
+            addValuesFile(resources, qualifier);
+        }
+
+        assertEquals(List.of("en", "es-419", "he", "id", "sr-Latn-RS", "yi"),
+                ResourceLocales.discover(List.of(resources), "en"));
+    }
+
     private static void addValuesFile(File root, String qualifier) throws IOException {
         Path directory = Files.createDirectory(root.toPath().resolve(qualifier));
         Files.writeString(directory.resolve("strings.xml"), "<resources/>");

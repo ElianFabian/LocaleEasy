@@ -6,6 +6,8 @@ Date: 2026-11-05; sample recreation selector verification updated 2026-11-06. Th
 
 ### Legacy locale aliases on Android 5
 
+The permanent regression tests now verify that the old and modern Hebrew, Indonesian, and Yiddish tags select equal preferences. They also load Hebrew, Serbian Latin, and Latin American Spanish fixture strings through `localizedContext()` on API 21. A Gradle unit test checks that the corresponding source directory names produce canonical, deduplicated catalog entries. All six API 21 instrumentation tests and the Gradle and preference unit tests passed.
+
 An API 21 emulator probe passed old and modern Hebrew, Indonesian, and Yiddish codes through LocaleEasy. Both spellings of each language were accepted. Android 5 reported and serialized the legacy codes `iw`, `in`, and `ji`. The probe also accepted `fil-PH`, `tl-PH`, `sr-Latn-RS`, `zh-Hant-TW`, and `es-419`. It checked acceptance and effective locale state.
 
 The legacy constructor forms `Locale("no", "NO", "NY")`, `Locale("ja", "JP", "JP")`, and `Locale("th", "TH", "TH")` failed LocaleEasy's round-trip validation on API 21. Their modern equivalents `nn-NO`, `ja-JP-u-ca-japanese`, and `th-TH-u-nu-thai` passed. Lingver's legacy-code mapping lives in its string-returning `getLanguage()` method. A similar mapping in LocaleEasy would be relevant to an API that promises a canonical language string across Android versions. [Lingver source](https://raw.githubusercontent.com/YarikSOffice/lingver/master/library/src/main/java/com/yariksoffice/lingver/Lingver.kt) · [Android Locale reference](https://developer.android.com/reference/java/util/Locale#toLanguageTag())

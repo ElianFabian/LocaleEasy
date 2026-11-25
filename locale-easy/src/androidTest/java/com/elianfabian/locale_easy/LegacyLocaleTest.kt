@@ -50,6 +50,32 @@ class LegacyLocaleTest {
             LocaleState(LocalePreference.AppLocales(listOf(unsupported)), system, catalog).effectiveLocales)
     }
 
+    @Test fun legacyAndModernLanguageTagsResolveToTheSamePreference() {
+        instrumentation.runOnMainSync {
+            for ((legacy, modern) in listOf("iw-IL" to "he-IL", "in-ID" to "id-ID", "ji" to "yi")) {
+                api.setLanguageTag(legacy)
+                val selected = api.preference.value
+                api.setLanguageTag(modern)
+                assertEquals("Alias pair $legacy and $modern", selected, api.preference.value)
+                assertEquals(listOf(Locale.forLanguageTag(modern)), api.effectiveLocales.value)
+            }
+        }
+    }
+
+    @Test fun localizedContextLoadsLegacyAndBcp47ResourceFolders() {
+        instrumentation.runOnMainSync {
+            for ((tag, expected) in listOf(
+                "he-IL" to "Hebrew fixture",
+                "sr-Latn-RS" to "Serbian Latin fixture",
+                "es-419" to "Latin American Spanish fixture",
+            )) {
+                api.setLanguageTag(tag)
+                val resources = api.localizedContext(instrumentation.targetContext).resources
+                assertEquals("Resource for $tag", expected, resources.getString(R.string.locale_easy_fixture_label))
+            }
+        }
+    }
+
     @Test fun plainActivityRecreationAppliesFrench() {
         ActivityScenario.launch(LegacyLocaleFixtureActivity::class.java).use { scenario ->
             var original: LegacyLocaleFixtureActivity? = null
