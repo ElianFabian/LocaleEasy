@@ -77,6 +77,8 @@ LocaleEasy.getInstance().setInitialLocale(Locale.FRENCH)
 
 The call applies and saves French if there is no saved preference. It is safe to repeat on each launch. A saved language and an explicit `followSystem()` choice both take precedence, including preferences written by earlier LocaleEasy versions. Without an initial language or a saved preference, LocaleEasy follows the system.
 
+Read `LocaleEasy.getInstance().initialAppLocale` to retrieve the locale that `setInitialLocale()` applied. It survives restarts and later preference changes, including a reset to Follow system. It returns `null` when no initial locale was recorded, including installs that applied an initial locale before this property existed.
+
 Custom implementations of `LocaleEasy` implement `setInitialLocale()` against their own preference storage.
 
 ### Optional Gradle language catalog

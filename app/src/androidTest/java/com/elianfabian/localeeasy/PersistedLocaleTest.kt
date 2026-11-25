@@ -25,7 +25,7 @@ import java.util.Locale
 class PersistedLocaleTest {
     @Test fun initialLocaleRespectsSavedPreferences() {
         val phase = InstrumentationRegistry.getArguments().getString("initialLocalePhase")
-        assumeTrue(phase in listOf("seed", "verify", "verifyUser", "seedSystem", "verifySystem"))
+        assumeTrue(phase in listOf("seed", "verify", "verifyUser", "verifyReset", "seedSystem", "verifySystem"))
         val instrumentation = InstrumentationRegistry.getInstrumentation()
         val app = instrumentation.targetContext
         val api = LocaleEasy.getInstance()
@@ -33,19 +33,22 @@ class PersistedLocaleTest {
         val french = LocalePreference.AppLocales(listOf(Locale.FRENCH))
         val spanish = LocalePreference.AppLocales(listOf(Locale.forLanguageTag("es")))
         val expected = when (phase) {
-            "seedSystem", "verifySystem" -> LocalePreference.FollowSystem
+            "seedSystem", "verifySystem", "verifyReset" -> LocalePreference.FollowSystem
             "verifyUser" -> spanish
             else -> french
         }
+        val expectedInitial = if (phase == "seedSystem" || phase == "verifySystem") null else Locale.FRENCH
 
         instrumentation.runOnMainSync {
             if (phase == "seed" || phase == "seedSystem") {
                 assertEquals(LocalePreference.FollowSystem, api.preference.value)
                 assertFalse(prefs.contains("KEY_FOLLOW_SYSTEM_LOCALE"))
+                assertEquals(null, api.initialAppLocale)
                 if (phase == "seed") api.setInitialLocale(Locale.FRENCH) else api.followSystem()
             }
             api.setInitialLocale(Locale.ITALIAN)
             assertEquals(expected, api.preference.value)
+            assertEquals(expectedInitial, api.initialAppLocale)
             assertTrue(prefs.contains("KEY_FOLLOW_SYSTEM_LOCALE"))
         }
 
@@ -63,6 +66,10 @@ class PersistedLocaleTest {
         if (phase == "verify") {
             instrumentation.runOnMainSync { api.setPreference(spanish) }
         }
+        if (phase == "verifyUser") {
+            instrumentation.runOnMainSync { api.followSystem() }
+        }
+        assertEquals(expectedInitial, api.initialAppLocale)
         assertTrue(prefs.edit().commit())
         Log.i("LocaleEasyFixture", "initial locale phase=$phase process=${android.os.Process.myPid()}")
     }

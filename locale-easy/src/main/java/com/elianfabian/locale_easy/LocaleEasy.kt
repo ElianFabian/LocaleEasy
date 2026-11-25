@@ -11,6 +11,9 @@ public interface LocaleEasy {
 	/** The app's language catalog, read once at startup. Its default is optional. */
 	public val localeCatalog: LocaleCatalog get() = LocaleCatalog.Empty
 
+	/** The locale first applied by [setInitialLocale], or null if none was recorded. */
+	public val initialAppLocale: Locale?
+
 	/** The applied language selection and its resolution, available in one read. */
 	public val state: StateFlow<LocaleState>
 

@@ -41,6 +41,9 @@ internal class AndroidLocaleEasy(
 	private val pendingUpdates = ArrayDeque<() -> Unit>()
 	private var applyingUpdates = false
 	override val localeCatalog = LocaleCatalog.read(application)
+	override val initialAppLocale: Locale?
+		get() = preferences.getString(KEY_INITIAL_APP_LOCALE, null)?.let(::parseLocaleTag)
+
 	private val localeState = MutableStateFlow(resolveState(readInitialPreference(), readSystemLocales()))
 	override val state = localeState.asStateFlow()
 	override val systemLocaleList = state.project { it.systemLocales }
@@ -94,19 +97,19 @@ internal class AndroidLocaleEasy(
 		checkMainThread()
 		val selection = LocalePreference.AppLocales(listOf(locale))
 		applyUpdate {
-			if (!hasSavedPreference()) applyPreference(selection)
+			if (!hasSavedPreference()) applyPreference(selection, initialLocale = locale)
 		}
 	}
 
-	private fun applyPreference(selection: LocalePreference) {
+	private fun applyPreference(selection: LocalePreference, initialLocale: Locale? = null) {
 		if (selection == state.value.preference) {
 			// Selecting FollowSystem explicitly must survive a later initial-locale request.
-			if (!hasSavedPreference()) persist(selection)
+			if (!hasSavedPreference()) persist(selection, initialLocale)
 			return
 		}
 		val next = resolveState(selection, readSystemLocales())
 		updateResources(application, next.effectiveLocales)
-		persist(next.preference)
+		persist(next.preference, initialLocale)
 		localeState.value = next
 		activities.forEach { (activity, state) -> scheduleRefresh(activity, state) }
 	}
@@ -139,8 +142,9 @@ internal class AndroidLocaleEasy(
 		}
 	}
 
-	private fun persist(selection: LocalePreference) {
+	private fun persist(selection: LocalePreference, initialLocale: Locale? = null) {
 		preferences.edit {
+			if (initialLocale != null) putString(KEY_INITIAL_APP_LOCALE, initialLocale.toLanguageTag())
 			putBoolean(KEY_FOLLOW_SYSTEM_LOCALE, selection == LocalePreference.FollowSystem)
 			when (selection) {
 				LocalePreference.FollowSystem -> remove(KEY_LANGUAGES)
@@ -303,6 +307,7 @@ internal class AndroidLocaleEasy(
 		const val LOCALE_SHARED_PREFERENCES_NAME = "locale_easy_prefs"
 		const val KEY_FOLLOW_SYSTEM_LOCALE = "KEY_FOLLOW_SYSTEM_LOCALE"
 		const val KEY_LANGUAGES = "KEY_LANGUAGES"
+		private const val KEY_INITIAL_APP_LOCALE = "KEY_INITIAL_APP_LOCALE"
 		private const val KEY_FRAMEWORK_RECREATION = "KEY_FRAMEWORK_RECREATION"
 		private const val KEY_FRAMEWORK_DIAGNOSTIC_OWNER = "KEY_FRAMEWORK_DIAGNOSTIC_OWNER"
 		private fun configurationLocales(configuration: Configuration): List<Locale> {
