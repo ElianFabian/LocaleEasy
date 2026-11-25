@@ -8,17 +8,19 @@ This report records verification runs from 2026-11-05 through 2026-11-25.
 
 `WebViewLocaleTest.repairsAnActualApplicationResourceMismatch` deliberately sets the application resources to Spanish while LocaleEasy's preference and effective locales are French. It verifies the Spanish resource lookup before calling `fixWebViewLocale()`, then checks that the application resources return French again and the preference is preserved.
 
-`WebViewLocaleTest.observesLoadedWebViewAcrossLocalRecreation` opens the sample's WebView dialog in a fresh process. It reads the application and activity resource languages before and after WebView initialization, waits for the local page to load, navigates to a second URL, enters text, and scrolls. It calls the native repair with the page still open and asserts that the page state and history are intact. It then changes the app language to Spanish and checks the native strings and the replacement WebView's loaded HTML. The test reports the URL, form value, scroll position and history of the replacement.
+`WebViewLocaleTest.observesLoadedWebViewAcrossLocalRecreation` opens the sample's XML WebView dialog in a fresh process. It reads the application and activity resource languages before and after the dialog opens, waits for the local page to load, navigates to a second URL, enters text, and scrolls. It calls the native repair with the page still open and asserts that the page state and history are intact. It then changes the app language to Spanish and checks the native strings and the replacement WebView's loaded HTML. The test reports the URL, form value, scroll position and history of the replacement.
 
-First WebView initialization switched the application resources from French to the device's English (`en-US`). The wrapped activity continued to resolve French strings. The helper restored French in the application context while preserving the loaded URL, history, form text, and scroll position. Changing the app language to Spanish then recreated the activity, translated the native controls, and loaded the sample's initial HTML in a new WebView. That view started with an empty form, no back history and a scroll position of zero.
+Before enabling automatic repair in the sample, first WebView initialization switched the application resources from French to the device's English (`en-US`). The wrapped activity continued to resolve French strings. The helper restored French in the application context while preserving the loaded URL, history, form text, and scroll position. Changing the app language to Spanish then recreated the activity, translated the native controls, and loaded the sample's initial HTML in a new WebView. That view started with an empty form, no back history and a scroll position of zero.
 
-Both tests passed on the three configurations below. The provider on API 24 was identified from the framework's `WebViewFactory` log.
+Both tests passed before enabling automatic repair on the three configurations below. The provider on API 24 was identified from the framework's `WebViewFactory` log.
 
 | Android API | WebView provider |
 | --- | --- |
 | 24 | Chrome `51.0.2704.90` |
 | 32 | Google WebView `120.0.6099.193` |
 | 35 | Google WebView `124.0.6367.219` |
+
+With `instrumentWebViewLoads` enabled, opening the XML dialog in a fresh process kept the application resources in French on API 24 and API 35. The Compose fixture deliberately sets the application resources to English after constructing a WebView subclass. Its tests verify that `loadUrl()` with headers, `loadData()`, and `loadDataWithBaseURL()` restore French and still load the requested page. A separate consumer compiled with either plugin option alone. Inspection of its bytecode confirmed that the WebView-only build inserts the repair before real WebView calls and leaves an unrelated class's `loadUrl()` and the activity attachment code as written.
 
 To isolate first initialization after installing the sample and its test APK:
 

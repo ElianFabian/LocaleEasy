@@ -7,6 +7,7 @@ plugins {
 localeEasyLocales {
 	generateFallbackCatalog.set(true)
 	instrumentActivities.set(true)
+	instrumentWebViewLoads.set(true)
 }
 
 android {

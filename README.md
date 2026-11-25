@@ -33,6 +33,8 @@ override fun attachBaseContext(newBase: Context) {
 
 The optional Gradle plugin inserts the wrap for activities compiled in the application module. Activities supplied directly by other modules can use the manual integration where they are defined. See the [plugin setup and scope](docs/locale-preference-api.md#optional-gradle-integration).
 
+For WebViews, the optional `instrumentWebViewLoads` setting repairs native application resources before direct page loads from the application module. See [WebView integration](docs/locale-preference-api.md#optional-webview-repair).
+
 Use `localizedContext(context)` at the point of use for notifications, workers, and other resource lookups. Pass an explicit `Locale` or ordered `List<Locale>` when the text needs to follow someone else's language preferences.
 
 ## Choose which language state to read

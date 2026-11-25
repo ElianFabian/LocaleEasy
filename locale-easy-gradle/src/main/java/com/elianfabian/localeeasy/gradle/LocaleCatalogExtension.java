@@ -11,4 +11,7 @@ public abstract class LocaleCatalogExtension {
 
     /** Apply LocaleEasy to activities compiled in the app module. */
     public abstract Property<Boolean> getInstrumentActivities();
+
+    /** Repair native resources before WebView loads called from the app module. */
+    public abstract Property<Boolean> getInstrumentWebViewLoads();
 }

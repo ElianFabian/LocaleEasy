@@ -1,6 +1,7 @@
 package com.elianfabian.localeeasy
 
 import android.content.res.Configuration
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.webkit.WebView
@@ -71,6 +72,8 @@ class WebViewLocaleTest {
                 originalView = requireNotNull(webView(activity))
                 originalView.settings.javaScriptEnabled = true
                 afterOpening = nativeLocales(activity)
+                assertEquals("The XML WebView load should repair application resources",
+                    "Chaîne Localisée: Vert", app.getString(R.string.string_resource_example))
             }
             awaitPage(originalView)
 
@@ -135,6 +138,36 @@ class WebViewLocaleTest {
                 })
             }
             assertEquals("en", loaded.getString("language"))
+        }
+    }
+
+    @Test
+    fun composeUrlWithHeadersRepairsResources() =
+        verifyComposeLoad(ComposeWebViewFixtureActivity.Load.URL_WITH_HEADERS)
+
+    @Test
+    fun composeLoadDataRepairsResources() =
+        verifyComposeLoad(ComposeWebViewFixtureActivity.Load.DATA)
+
+    @Test
+    fun composeLoadDataWithBaseUrlRepairsResources() =
+        verifyComposeLoad(ComposeWebViewFixtureActivity.Load.DATA_WITH_BASE_URL)
+
+    private fun verifyComposeLoad(load: ComposeWebViewFixtureActivity.Load) = preservePreference {
+        instrumentation.runOnMainSync { api.setAppLocale(Locale.FRENCH) }
+        val intent = Intent(app, ComposeWebViewFixtureActivity::class.java)
+            .putExtra(ComposeWebViewFixtureActivity.EXTRA_LOAD, load.name)
+        ActivityScenario.launch<ComposeWebViewFixtureActivity>(intent).use { scenario ->
+            lateinit var webView: WebView
+            instrumentation.waitForIdleSync()
+            scenario.onActivity {
+                webView = it.webView
+                webView.settings.javaScriptEnabled = true
+                assertEquals("Localized String: Green", it.textBeforeLoad)
+                assertEquals("Chaîne Localisée: Vert", it.textAfterLoad)
+                assertEquals(listOf(Locale.FRENCH), api.effectiveLocaleList.value)
+            }
+            assertEquals("en", awaitPage(webView).getString("language"))
         }
     }
 

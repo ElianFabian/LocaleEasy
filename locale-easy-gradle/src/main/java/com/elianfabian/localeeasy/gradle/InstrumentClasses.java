@@ -1,6 +1,7 @@
 package com.elianfabian.localeeasy.gradle;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
@@ -8,6 +9,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
@@ -18,8 +20,10 @@ import org.gradle.api.file.Directory;
 import org.gradle.api.file.RegularFile;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.provider.ListProperty;
+import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.CacheableTask;
 import org.gradle.api.tasks.Classpath;
+import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
 import org.objectweb.asm.ClassReader;
@@ -29,9 +33,11 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
 @CacheableTask
-public abstract class InstrumentActivities extends DefaultTask {
+public abstract class InstrumentClasses extends DefaultTask {
     private static final String ACTIVITY = "android/app/Activity";
+    private static final String WEB_VIEW = "android/webkit/WebView";
     private static final String LOCALE_EASY = "com/elianfabian/locale_easy/LocaleEasy";
+    private static final String COMPANION = LOCALE_EASY + "$Companion";
     private static final String ATTACH = "attachBaseContext";
     private static final String CONTEXT = "Landroid/content/Context;";
     private static final String ATTACH_DESCRIPTOR = "(" + CONTEXT + ")V";
@@ -39,6 +45,8 @@ public abstract class InstrumentActivities extends DefaultTask {
     @Classpath public abstract ListProperty<RegularFile> getInputJars();
     @Classpath public abstract ListProperty<Directory> getInputDirectories();
     @Classpath public abstract ConfigurableFileCollection getClasspath();
+    @Input public abstract Property<Boolean> getInstrumentActivities();
+    @Input public abstract Property<Boolean> getInstrumentWebViewLoads();
     @OutputFile public abstract RegularFileProperty getOutputJar();
 
     @TaskAction
@@ -58,24 +66,30 @@ public abstract class InstrumentActivities extends DefaultTask {
         for (var file : classpath) urls[index++] = file.toURI().toURL();
         Path output = getOutputJar().get().getAsFile().toPath();
         Files.createDirectories(output.getParent());
+        boolean activities = getInstrumentActivities().get();
+        boolean webViewLoads = getInstrumentWebViewLoads().get();
         try (var loader = new URLClassLoader(urls, null);
                 var jar = new JarOutputStream(Files.newOutputStream(output))) {
             if (loader.getResource(LOCALE_EASY + ".class") == null) {
-                throw new GradleException("Add the LocaleEasy runtime dependency to use instrumentActivities.");
+                throw new GradleException("Add the LocaleEasy runtime dependency to enable LocaleEasy instrumentation.");
             }
-            var hierarchy = new ActivityHierarchy(projectClasses, new HashMap<>(), loader);
+            var hierarchy = new ClassHierarchy(projectClasses, new HashMap<>(), loader);
             for (var entry : entries.entrySet()) {
                 byte[] bytes = entry.getValue();
                 if (entry.getKey().endsWith(".class")) {
                     var reader = new ClassReader(bytes);
                     String parent = reader.getSuperName();
-                    if (!projectClasses.containsKey(parent) && hierarchy.isActivity(parent)) {
+                    ActivityClass activity = null;
+                    if (activities && !projectClasses.containsKey(parent) && hierarchy.isSubclassOf(parent, ACTIVITY)) {
                         if (hierarchy.hasFinalAttach(parent)) {
                             getLogger().warn("LocaleEasy skipped " + reader.getClassName().replace('/', '.')
                                     + " because its superclass has a final attachBaseContext outside the app module.");
                         } else {
-                            bytes = instrumentRoot(reader, projectClasses.get(reader.getClassName()));
+                            activity = projectClasses.get(reader.getClassName());
                         }
+                    }
+                    if (activity != null || webViewLoads) {
+                        bytes = instrumentClass(reader, activity, webViewLoads ? hierarchy::isWebView : null);
                     }
                 }
                 var outputEntry = new JarEntry(entry.getKey());
@@ -112,11 +126,11 @@ public abstract class InstrumentActivities extends DefaultTask {
 
     private static void putEntry(Map<String, byte[]> entries, String name, byte[] bytes) {
         if (entries.putIfAbsent(name, bytes) != null && name.endsWith(".class")) {
-            throw new GradleException("Duplicate class while instrumenting LocaleEasy activities: " + name);
+            throw new GradleException("Duplicate class while instrumenting with LocaleEasy: " + name);
         }
     }
 
-    private static byte[] instrumentRoot(ClassReader reader, ActivityClass activity) {
+    private static byte[] instrumentClass(ClassReader reader, ActivityClass activity, Predicate<String> isWebView) {
         var writer = new ClassWriter(reader, ClassWriter.COMPUTE_MAXS);
         reader.accept(new ClassVisitor(Opcodes.ASM9, writer) {
             private boolean wrappedSuperCall;
@@ -125,15 +139,22 @@ public abstract class InstrumentActivities extends DefaultTask {
             public MethodVisitor visitMethod(int access, String name, String descriptor, String signature,
                     String[] exceptions) {
                 MethodVisitor method = super.visitMethod(access, name, descriptor, signature, exceptions);
-                if (activity.attachAccess < 0) return method;
+                if (isWebView == null && activity.attachAccess < 0) return method;
                 return new MethodVisitor(Opcodes.ASM9, method) {
                     @Override
                     public void visitMethodInsn(int opcode, String owner, String calledName,
                             String calledDescriptor, boolean isInterface) {
-                        if (opcode == Opcodes.INVOKESPECIAL && owner.equals(activity.parent)
+                        if (activity != null && activity.attachAccess >= 0
+                                && opcode == Opcodes.INVOKESPECIAL && owner.equals(activity.parent)
                                 && isAttach(calledName, calledDescriptor)) {
                             wrapContext(this);
                             wrappedSuperCall = true;
+                        }
+                        if (isWebView != null && (opcode == Opcodes.INVOKEVIRTUAL || opcode == Opcodes.INVOKESPECIAL)
+                                && isWebViewLoad(calledName, calledDescriptor) && isWebView.test(owner)) {
+                            // Preserve the receiver and navigation arguments already on the stack.
+                            readCompanion(this);
+                            super.visitMethodInsn(Opcodes.INVOKEVIRTUAL, COMPANION, "fixWebViewLocale", "()V", false);
                         }
                         super.visitMethodInsn(opcode, owner, calledName, calledDescriptor, isInterface);
                     }
@@ -142,6 +163,10 @@ public abstract class InstrumentActivities extends DefaultTask {
 
             @Override
             public void visitEnd() {
+                if (activity == null) {
+                    super.visitEnd();
+                    return;
+                }
                 if (activity.attachAccess < 0) {
                     MethodVisitor method = super.visitMethod(Opcodes.ACC_PROTECTED, ATTACH, ATTACH_DESCRIPTOR, null, null);
                     method.visitCode();
@@ -166,14 +191,28 @@ public abstract class InstrumentActivities extends DefaultTask {
         return ATTACH.equals(name) && ATTACH_DESCRIPTOR.equals(descriptor);
     }
 
+    private static boolean isWebViewLoad(String name, String descriptor) {
+        return switch (name) {
+            case "loadUrl" -> descriptor.equals("(Ljava/lang/String;)V")
+                    || descriptor.equals("(Ljava/lang/String;Ljava/util/Map;)V");
+            case "loadData" -> descriptor.equals("(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
+            case "loadDataWithBaseURL" -> descriptor.equals(
+                    "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
+            default -> false;
+        };
+    }
+
     private static void wrapContext(MethodVisitor method) {
         // Keep the activity receiver under the context argument for the original super call.
-        String companion = LOCALE_EASY + "$Companion";
-        method.visitFieldInsn(Opcodes.GETSTATIC, LOCALE_EASY, "Companion", "L" + companion + ";");
-        method.visitMethodInsn(Opcodes.INVOKEVIRTUAL, companion, "getInstance", "()L" + LOCALE_EASY + ";", false);
+        readCompanion(method);
+        method.visitMethodInsn(Opcodes.INVOKEVIRTUAL, COMPANION, "getInstance", "()L" + LOCALE_EASY + ";", false);
         method.visitInsn(Opcodes.SWAP);
         method.visitMethodInsn(Opcodes.INVOKEINTERFACE, LOCALE_EASY, "localizedContext",
                 "(" + CONTEXT + ")" + CONTEXT, true);
+    }
+
+    private static void readCompanion(MethodVisitor method) {
+        method.visitFieldInsn(Opcodes.GETSTATIC, LOCALE_EASY, "Companion", "L" + COMPANION + ";");
     }
 
     private static final class ActivityClass {
@@ -198,16 +237,24 @@ public abstract class InstrumentActivities extends DefaultTask {
         }
     }
 
-    private record ActivityHierarchy(
+    private record ClassHierarchy(
             Map<String, ActivityClass> project, Map<String, ActivityClass> dependencies, URLClassLoader loader) {
-        boolean isActivity(String name) throws IOException {
+        boolean isSubclassOf(String name, String ancestor) throws IOException {
             while (name != null) {
-                if (ACTIVITY.equals(name)) return true;
+                if (ancestor.equals(name)) return true;
                 ActivityClass type = find(name);
                 if (type == null) return false;
                 name = type.parent;
             }
             return false;
+        }
+
+        boolean isWebView(String name) {
+            try {
+                return isSubclassOf(name, WEB_VIEW);
+            } catch (IOException error) {
+                throw new UncheckedIOException("Unable to resolve the hierarchy of " + name, error);
+            }
         }
 
         boolean hasFinalAttach(String name) throws IOException {

@@ -165,6 +165,18 @@ Instrumentation applies to classes compiled in the application module. Activitie
 
 The sample enables activity instrumentation in `app/build.gradle.kts`. Its main and XML sample activities use the plugin to supply their localized contexts.
 
+#### Optional WebView repair
+
+Enable the WebView hook in the Android application module:
+
+```kotlin
+localeEasyLocales {
+    instrumentWebViewLoads.set(true)
+}
+```
+
+The setting defaults to `false` and can be enabled on its own. The plugin inserts `LocaleEasy.fixWebViewLocale()` before direct calls to `WebView.loadUrl()` (with or without headers), `loadData()`, and `loadDataWithBaseURL()` compiled in the application module. This covers both a WebView inflated from XML and one created by Compose's `AndroidView`. Use an explicit repair call after construction when native resources are needed before the first load or when a dependency owns the load call.
+
 #### Configuration changes
 
 Android owns recreation for system configuration events. Apps that opt out through `configChanges` remain responsible for updating their own views for those events. Use one locale owner; independently changing AppCompatDelegate or framework app locales can conflict with LocaleEasy's current context strategy. Bundle needed translations or arrange their download before selecting them in language-split app bundles.
@@ -173,7 +185,7 @@ The sample's **Open State & Controls** panel shows the effective locales, device
 
 LocaleEasy recreates the activity through Android's lifecycle. Normal activity and fragment saved-state contracts apply. The sample gives its programmatic ComposeView a stable ID to support saved navigation state.
 
-`fixWebViewLocale()` repairs the application resource locale in local mode if it differs from LocaleEasy's selection. Call it on the main thread after WebView initialization if the provider reset that locale. The helper operates on native application resources. The sample's repair button separately reloads its local HTML fixture. See the [WebView verification results](locale-verification.md#webview-resource-repair-and-page-state).
+`fixWebViewLocale()` repairs the application resource locale in local mode if it differs from LocaleEasy's selection. Call it on the main thread after WebView initialization if the provider reset that locale. The helper operates on native application resources. The sample enables `instrumentWebViewLoads` for its first navigation and keeps a manual repair button that separately reloads its local HTML fixture. See the [WebView verification results](locale-verification.md#webview-resource-repair-and-page-state).
 
 ### Use `localizedContext()` outside an activity
 
