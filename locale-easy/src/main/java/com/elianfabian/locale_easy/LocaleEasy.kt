@@ -10,19 +10,6 @@ import java.util.Locale
 // Based on. https://github.com/YarikSOffice/lingver/blob/master/library/src/main/java/com/yariksoffice/lingver/Lingver.kt
 public interface LocaleEasy {
 
-	/**
-	 * Temporary diagnostic opt-in. Defaults to false on every API and every process start.
-	 * False uses localized activity contexts and Activity.recreate(); true delegates to
-	 * LocaleManager (requires API 33+). This flag is not persisted or exposed in the sample UI.
-	 * Normal updates avoid automatic framework window replacement because it exposed black
-	 * frames in the tested configuration. This is not a claim that every LocaleManager
-	 * integration flashes; a window-preserving hybrid is still under investigation.
-	 * Changing backend can itself recreate activities; compare subsequent language changes.
-	 * Manual mode does not synchronize with Android's per-app language settings.
-	 */
-	@set:MainThread
-	public var useFrameworkLocaleRecreation: Boolean
-
 	/** The app's generated language catalog. Its default is optional. */
 	public val localeCatalog: LocaleCatalog get() = LocaleCatalog.Empty
 

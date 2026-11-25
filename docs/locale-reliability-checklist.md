@@ -8,7 +8,7 @@ The numbered findings below describe the initial source review. Progress and exe
 
 ## Progress
 
-The public model is `LocalePreference.FollowSystem` / `AppLocales`. Implementation now includes automatic/idempotent installation, main-thread enforcement, explicit context participation on every API, queued local activity refresh, and a bounded native WebView-resource repair. Local recreation is the current default on API 21+; automatic framework recreation is a process-local diagnostic opt-in only. The fragment detach/attach and title-reset paths have been removed; `ViewCreatorComponent` is deprecated.
+The public model is `LocalePreference.FollowSystem` / `AppLocales`. Implementation now includes automatic/idempotent installation, main-thread enforcement, explicit context participation on every API, queued local activity refresh, and a bounded native WebView-resource repair. LocaleEasy uses local recreation on API 21+. The fragment detach/attach and title-reset paths have been removed; `ViewCreatorComponent` is deprecated.
 
 See [the API guide](locale-preference-api.md) for integration and [the verification report](locale-verification.md) for actual test counts, traces, and remaining checks. Historical findings below are retained to explain each task; their status lines describe the current implementation. Broader acceptance checkboxes stay open where coverage remains incomplete.
 
@@ -219,7 +219,7 @@ Verification — **Manual required:** open SampleFragment as a dialog, change la
 
 Follow-up: the separate [Recreation Lab](../recreation-lab/README.md) captures actual ART/framework call paths, heap class inventories, memory snapshots/timelines, and system traces. See [initial findings](recreation-lab-findings.md) for the executed comparison. The original-device acceptance checkbox remains open.
 
-The [existing sample](recreation-comparison.md) now uses local recreation only in its normal UI; its framework selector has been removed. Language buttons recreate the current activity in place. A framework diagnostic opt-in and the debug hybrid fixture remain available for investigation. The retired lab's results and scripts stay archived. Manual visual checks remain necessary on the affected device.
+The [existing sample](recreation-comparison.md) now uses local recreation only in its normal UI; its framework selector has been removed. Language buttons recreate the current activity in place. The former public framework diagnostic switch has been removed. The retired lab's results and scripts stay archived. Manual visual checks remain necessary on the affected device.
 
 The [longer headless run on 2026-11-06](headless-locale-comparison-2026-11-06.md) passed all 40 timing and 10 memory trials; manual recreation was faster to frame commit in that emulator workload. The reported manual-slower/visible-flash symptom remains unconfirmed, and no physical device was connected for that run.
 
@@ -239,7 +239,7 @@ Verification — **Manual required:** reproduce on the device/API where the fail
 
 ## 12. Select and implement locale application strategies by Android version
 
-**Current status:** Local context wrapping and activity recreation now apply on all APIs by request, avoiding the demonstrated automatic-framework surface gap in the tested configuration. First-install framework selections can migrate into library storage; stale persisted experiment switches are removed. The normal backend does not integrate with Android's per-app language Settings. The API-33+ framework backend and hybrid are retained only as diagnostics. AppCompat autoStore metadata is removed to avoid a second owner. The framework-owner plan below remains a future integration task, not current default behavior.
+**Current status:** Local context wrapping and activity recreation now apply on all APIs by request, avoiding the demonstrated automatic-framework surface gap in the tested configuration. Startup still migrates preferences from marked framework experiments. Android per-app language settings have independent ownership. AppCompat autoStore metadata is removed to avoid a second owner. The framework-owner plan below remains a future integration task, not current default behavior.
 
 **Confirmed architectural gap.** The library currently mutates resources through deprecated `Resources.updateConfiguration()` and process defaults. It does not set the framework per-app locale preference. This is separate from a request to recreate an activity.
 

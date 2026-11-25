@@ -1,5 +1,7 @@
 # Framework locale window handoff investigation
 
+The framework capture commands below describe the earlier diagnostic build. Use revision `d6b4e85` to rerun them. The current sample capture runs local recreation.
+
 2026-11-06. **The black flash has a demonstrated surface gap on API 36. A debug-only hybrid avoids that gap in three captured runs while retaining real framework app locales.** Its lifecycle/state behavior also passes on API 33. This report records the earlier comparison. The subsequent [current policy](recreation-comparison.md) makes local recreation the default on all APIs and removes the framework selector; the hybrid remains a debug-only prototype.
 
 ## What causes the captured black output

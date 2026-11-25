@@ -13,13 +13,10 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--adb", default="adb")
     parser.add_argument("--serial", required=True)
-    parser.add_argument("--path", choices=("manual", "framework"), default="framework")
+    parser.add_argument("--path", choices=("manual",), default="manual")
     parser.add_argument("--animations", choices=("unchanged", "off"), default="unchanged")
-    parser.add_argument("--local-relaunch", action="store_true", help="Use the debug configuration-callback fixture")
     parser.add_argument("--out", required=True, type=Path)
     args = parser.parse_args()
-    if args.local_relaunch and args.path != "framework":
-        parser.error("--local-relaunch compares framework preferences and requires --path framework")
     args.out.mkdir(parents=True, exist_ok=False)
     adb = [args.adb, "-s", args.serial]
 
@@ -40,7 +37,7 @@ def main():
     (args.out / "trace-sources.txt").write_text(sources)
     if "android.surfaceflinger.layers" not in sources:
         raise RuntimeError("This device does not expose the required SurfaceFlinger layer data source")
-    metadata = {"serial": args.serial, "path": args.path, "animations": args.animations, "local_relaunch": args.local_relaunch,
+    metadata = {"serial": args.serial, "path": args.path, "animations": args.animations, "local_relaunch": False,
                 "api": api, "fingerprint": shell("getprop", "ro.build.fingerprint"), "original_scales": original}
     apk = next(line.removeprefix("package:") for line in shell("pm", "path", PACKAGE).splitlines() if line.endswith("base.apk"))
     metadata["installed_apk_sha256"] = shell("sha256sum", apk).split()[0]
@@ -61,8 +58,6 @@ def main():
         metadata["perfetto_pid"] = pids[-1]
         result = call("shell", "am", "instrument", "-w", "-e", "class",
                       f"{PACKAGE}.RecreationWindowCaptureTest", "-e", "captureWindows", "true",
-                      "-e", "capturePath", args.path,
-                      "-e", "localRelaunch", str(args.local_relaunch).lower(),
                       f"{PACKAGE}.test/androidx.test.runner.AndroidJUnitRunner")
         report = (result.stdout + result.stderr).decode(errors="replace")
         (args.out / "instrumentation.txt").write_text(report)

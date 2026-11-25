@@ -15,7 +15,7 @@ The legend follows the same rule: its green label is localizable, while its gray
 
 In the tested API-36 configuration, automatic LocaleManager recreation removed the old app surface before the replacement was visible. Local recreation preserved the window. Code comments link to [the surface-trace investigation](framework-window-handoff-investigation.md), which also shows a supported hybrid retaining framework preferences. That prototype requires an activity/manifest integration contract and wider verification; it is not enabled as the normal implementation.
 
-The temporary `useFrameworkLocaleRecreation` API property remains available for investigation only. It defaults to false in **every process**, ignores/removes the obsolete persisted comparison switch, and cannot be enabled below API 33. It is not exposed by the sample UI. Changing it during an experiment can itself recreate activities. Normal locale changes do not write framework app-language preferences.
+The temporary `useFrameworkLocaleRecreation` API property was removed. Current captures exercise local recreation. The earlier framework recordings and comparisons remain available as historical evidence.
 
 The sample exposes its language picker inside the app. Local mode retains saved LocaleEasy selections across process restarts and preserves independent platform overrides. Startup clears a platform override after importing it only when a stored marker indicates prior LocaleEasy framework ownership. [API integration guide](locale-preference-api.md)
 
@@ -136,7 +136,7 @@ $env:ANDROID_SERIAL = 'DEVICE_SERIAL'
 ./gradlew.bat :app:connectedDebugAndroidTest --no-configuration-cache
 ```
 
-The normal UI tests change French → Italian → Spanish in place, assert activity/root replacement within the same task, and check that framework locales remain empty on API 33+. Lifecycle checks cover XML input, stopped activities, runtime titles, Compose navigation, dialogs, and identical/rapid requests using local recreation on modern Android too. Separate framework tests explicitly opt in and return to manual mode afterward.
+The normal UI tests change French → Italian → Spanish in place, assert activity/root replacement within the same task, and check that framework locales remain empty on API 33+. Lifecycle checks cover XML input, stopped activities, runtime titles, Compose navigation, dialogs, and identical/rapid requests using local recreation.
 
 Run seed/verify persistence phases in separate processes. The `localeBackend=framework` seed reproduces the old persisted switch. `framework_only` and `framework_stale` test marked owners with missing or older local choices. Verification must preserve French, clear the stale marker and framework override, and return to local recreation. The separate `ownershipPhase` probe verifies that an independent platform override survives a restart while a locally wrapped activity uses the LocaleEasy preference.
 

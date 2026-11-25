@@ -10,7 +10,6 @@ import androidx.test.espresso.Espresso
 import com.elianfabian.locale_easy.LocaleEasy
 import org.junit.After
 import org.junit.Assert.*
-import org.junit.Assume.assumeTrue
 import org.junit.Rule
 import org.junit.Test
 import java.util.Locale
@@ -20,7 +19,6 @@ class ComposeLocaleTest {
 
     @After fun cleanup() { compose.runOnUiThread {
         LocaleEasy.getInstance().followSystem()
-        LocaleEasy.getInstance().useFrameworkLocaleRecreation = false
     } }
 
     @Test fun composeNavigationAndTranslationSurviveLocaleRecreation() {
@@ -32,16 +30,7 @@ class ComposeLocaleTest {
         compose.onNodeWithText("Écran Compose").assertExists()
     }
 
-    @Test fun frameworkExperimentPreservesComposeNavigationWhenExplicitlyEnabled() {
-        assumeTrue(Build.VERSION.SDK_INT >= 33)
-        compose.runOnUiThread { LocaleEasy.getInstance().useFrameworkLocaleRecreation = true }
-        compose.waitForIdle()
-        composeNavigationAndTranslationSurviveLocaleRecreation()
-    }
-
     @Test fun languageControlsUseLocalRecreationOnTheSameScreen() {
-        val api = LocaleEasy.getInstance()
-        assertFalse("The normal sample must start with local recreation", api.useFrameworkLocaleRecreation)
         compose.onNodeWithText(compose.activity.getString(R.string.local_recreation_status)).assertExists()
         for (language in listOf("French", "Italian", "Spanish")) {
             compose.onNodeWithText(compose.activity.getString(R.string.open_settings)).performClick()
@@ -54,7 +43,6 @@ class ComposeLocaleTest {
             assertNotSame(root, compose.activity.findViewById<View>(R.id.main_compose_view))
             assertEquals(taskId, compose.activity.taskId)
             assertEquals(before.componentName, compose.activity.componentName)
-            assertFalse(api.useFrameworkLocaleRecreation)
             if (Build.VERSION.SDK_INT >= 33) {
                 assertTrue(compose.activity.getSystemService(LocaleManager::class.java).applicationLocales.isEmpty)
             }

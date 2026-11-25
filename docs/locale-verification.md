@@ -4,6 +4,8 @@ Date: 2026-11-05; sample recreation selector verification updated 2026-11-06. Th
 
 ## Executed checks
 
+After removal of the public framework recreation switch, the sample's API 36 lifecycle and UI suite covered 24 cases with one opt-in skip. Two UI cases lost window focus during an emulator System UI error and passed on rerun. Separate process pairs passed for migration of a marked framework experiment and preservation of an independent platform app language. The unit tests, APK builds, and lint passed.
+
 ### Runtime discovery with a default language only
 
 An API 24 probe appended the declared English default to the device-language candidates in a scoped Android configuration. It read the resulting locale order and both an app string and an AppCompat string from the same resource context. Inspection of the packaged APK confirmed that the app string has French, Spanish, Italian, and Portuguese versions. The German version of the AppCompat string is packaged alongside it.

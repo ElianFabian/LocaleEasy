@@ -71,11 +71,13 @@ class PersistedLocaleTest {
         val instrumentation = InstrumentationRegistry.getInstrumentation()
         val api = LocaleEasy.getInstance()
         val backend = InstrumentationRegistry.getArguments().getString("localeBackend")
-        val framework = when (backend) { "manual" -> false; "framework", "framework_only", "framework_stale" -> true; else -> null }
+        val framework = backend in listOf("framework", "framework_only", "framework_stale")
+        assumeTrue(!framework || Build.VERSION.SDK_INT >= 33)
         if (phase == "seed") instrumentation.runOnMainSync {
-            if (framework != null) api.useFrameworkLocaleRecreation = framework
             api.setLocale(Locale.FRENCH)
-            if (framework == true) {
+            if (framework) {
+                instrumentation.targetContext.getSystemService(LocaleManager::class.java)
+                    .applicationLocales = LocaleList(Locale.FRENCH)
                 // Reproduce the obsolete persisted switch written by older experiments.
                 instrumentation.targetContext.getSharedPreferences("locale_easy_prefs", 0).edit()
                     .putBoolean("KEY_FRAMEWORK_RECREATION", true).commit()
@@ -84,11 +86,9 @@ class PersistedLocaleTest {
         instrumentation.waitForIdleSync()
         // A framework seed represents an older experiment/install. The next process
         // must keep its saved language but return to the normal local-recreation path.
-        val expectedFramework = phase == "seed" && framework == true
-        assertEquals(expectedFramework, api.useFrameworkLocaleRecreation)
         if (phase == "verify") org.junit.Assert.assertFalse(
             instrumentation.targetContext.getSharedPreferences("locale_easy_prefs", 0).contains("KEY_FRAMEWORK_RECREATION"))
-        if (android.os.Build.VERSION.SDK_INT >= 33 && !expectedFramework) {
+        if (android.os.Build.VERSION.SDK_INT >= 33 && (phase == "verify" || !framework)) {
             org.junit.Assert.assertTrue(instrumentation.targetContext.getSystemService(android.app.LocaleManager::class.java).applicationLocales.isEmpty)
         }
         assertEquals(LocalePreference.AppLocales(listOf(Locale.FRENCH)), api.preference.value)

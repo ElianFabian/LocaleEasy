@@ -173,6 +173,6 @@ The executed emulator checks and remaining manual/device coverage are recorded i
 
 The [reliability checklist](locale-reliability-checklist.md) records implementation status separately from broader device acceptance.
 
-## Temporary framework diagnostic
+## Framework experiment migration
 
-`LocaleEasy.useFrameworkLocaleRecreation` is retained solely as an explicit API-33+ investigation opt-in. It starts false in every process, is not persisted, and is absent from the normal sample UI. Existing diagnostic tests can enable it for that process; a restart returns to local recreation while preserving the selected language. See [sample instructions](recreation-comparison.md). This diagnostic switch does not change the preference model.
+The temporary `LocaleEasy.useFrameworkLocaleRecreation` switch was removed. LocaleEasy applies language changes through local activity recreation. Existing installs with a stored framework experiment marker still migrate their saved choice at startup. [Recreation comparison](recreation-comparison.md)
