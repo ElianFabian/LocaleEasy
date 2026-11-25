@@ -3,5 +3,7 @@
         <activity android:name=".LocalRelaunchSampleActivity" android:exported="false"
             android:configChanges="locale|layoutDirection|screenLayout" android:theme="@style/Theme.LocaleEasy" />
         <activity android:name=".LocaleFixtureActivity" android:exported="false" />
+        <activity android:name=".AutomaticPlainLocaleActivity" android:exported="false" />
+        <activity android:name=".AutomaticAppCompatLocaleActivity" android:exported="false" />
     </application>
 </manifest>

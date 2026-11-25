@@ -6,6 +6,7 @@ plugins {
 
 localeEasyLocales {
 	generateFallbackCatalog.set(true)
+	instrumentActivities.set(providers.gradleProperty("localeEasy.instrumentActivities").map(String::toBoolean).orElse(false))
 }
 
 android {

@@ -1,12 +1,15 @@
 package com.elianfabian.localeeasy.gradle;
 
+import com.android.build.api.artifact.ScopedArtifact;
 import com.android.build.api.dsl.ApplicationExtension;
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension;
 import com.android.build.api.variant.ApplicationVariant;
 import com.android.build.api.variant.BuildConfigField;
+import com.android.build.api.variant.ScopedArtifacts;
 import com.android.build.api.variant.SourceDirectories;
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 import java.util.StringJoiner;
 import org.gradle.api.Action;
 import org.gradle.api.Plugin;
@@ -20,12 +23,28 @@ public final class LocaleCatalogPlugin implements Plugin<Project> {
         LocaleCatalogExtension locales =
                 project.getExtensions().create("localeEasyLocales", LocaleCatalogExtension.class);
         locales.getGenerateFallbackCatalog().convention(false);
+        locales.getInstrumentActivities().convention(false);
         project.getPluginManager().withPlugin("com.android.application", plugin -> {
             ApplicationAndroidComponentsExtension android =
                     project.getExtensions().getByType(ApplicationAndroidComponentsExtension.class);
             android.finalizeDsl((Action<ApplicationExtension>) dsl -> dsl.getBuildFeatures().setBuildConfig(true));
             android.onVariants(android.selector().all(),
-                    (Action<ApplicationVariant>) variant -> configureCatalog(project, variant, locales));
+                    (Action<ApplicationVariant>) variant -> {
+                        configureCatalog(project, variant, locales);
+                        if (locales.getInstrumentActivities().get()) {
+                            var task = project.getTasks().register(
+                                    "instrumentLocaleEasyActivities_" + variant.getName(),
+                                    InstrumentActivities.class, instrument -> {
+                                        instrument.getClasspath().from(variant.getCompileClasspath(),
+                                                android.getSdkComponents().getBootClasspath());
+                                    });
+                            variant.getArtifacts().forScope(ScopedArtifacts.Scope.PROJECT).use(task).toTransform(
+                                    ScopedArtifact.CLASSES.INSTANCE,
+                                    InstrumentActivities::getInputJars,
+                                    InstrumentActivities::getInputDirectories,
+                                    InstrumentActivities::getOutputJar);
+                        }
+                    });
         });
     }
 
@@ -34,19 +53,22 @@ public final class LocaleCatalogPlugin implements Plugin<Project> {
         Provider<List<File>> roots = resources.getStatic().map(layers ->
                 layers.stream().flatMap(layer -> layer.stream()).map(Directory::getAsFile).toList());
         Provider<String> defaultLanguage = extension.getDefaultLanguage()
-                .orElse(roots.map(ResourceLocales::readDefaultLanguage))
-                .map(ResourceLocales::validateDefaultLanguage);
-        Provider<List<String>> catalog = roots.zip(defaultLanguage, ResourceLocales::discover);
-        variant.getBuildConfigFields().put("DEFAULT_LANGUAGE", defaultLanguage.map(tag ->
-                new BuildConfigField<>("String", quote(tag), "Language of unqualified app resources.")));
+                .orElse(roots.map(ResourceLocales::readDefaultLanguage));
+        boolean catalogOptional = extension.getInstrumentActivities().get() && !extension.getGenerateFallbackCatalog().get();
+        Provider<List<String>> catalog = roots.zip(defaultLanguage, (directories, language) ->
+                catalogOptional && language.isEmpty() ? List.of()
+                        : ResourceLocales.discover(directories, ResourceLocales.validateDefaultLanguage(language)));
 
-        Provider<String> supportedLanguages = catalog.map(tags -> {
+        variant.getBuildConfigFields().putAll(catalog.map(tags -> {
+            if (tags.isEmpty()) return Map.of();
             StringJoiner entries = new StringJoiner(", ", "new String[] {", "}");
             tags.forEach(tag -> entries.add(quote(tag)));
-            return entries.toString();
-        });
-        variant.getBuildConfigFields().put("SUPPORTED_LANGUAGES", supportedLanguages.map(tags ->
-                new BuildConfigField<>("String[]", tags, "Language tags from the variant's app resources.")));
+            return Map.of(
+                    "DEFAULT_LANGUAGE", new BuildConfigField<>("String", quote(tags.get(0)),
+                            "Language of unqualified app resources."),
+                    "SUPPORTED_LANGUAGES", new BuildConfigField<>("String[]", entries.toString(),
+                            "Language tags from the variant's app resources."));
+        }));
 
         if (extension.getGenerateFallbackCatalog().get()) {
             var task = project.getTasks().register("generateLocaleEasyCatalog_" + variant.getName(),

@@ -13,6 +13,7 @@ java {
 
 dependencies {
 	compileOnly("com.android.tools.build:gradle-api:${libs.versions.agp.get()}")
+	implementation("org.ow2.asm:asm:9.9")
 	testImplementation(libs.junit)
 }
 
@@ -22,7 +23,7 @@ gradlePlugin {
 			id = "com.elianfabian.localeeasy.locales"
 			implementationClass = "com.elianfabian.localeeasy.gradle.LocaleCatalogPlugin"
 			displayName = "LocaleEasy language catalog"
-			description = "Generates BuildConfig language tags from an Android app variant's resource directories."
+			description = "Discovers app languages and optionally integrates LocaleEasy with activities."
 		}
 	}
 }

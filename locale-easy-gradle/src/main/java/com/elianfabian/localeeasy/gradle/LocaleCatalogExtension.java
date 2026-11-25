@@ -8,4 +8,7 @@ public abstract class LocaleCatalogExtension {
 
     /** Generate the XML catalog consumed by LocaleEasy at startup. */
     public abstract Property<Boolean> getGenerateFallbackCatalog();
+
+    /** Apply LocaleEasy to activities compiled in the app module. */
+    public abstract Property<Boolean> getInstrumentActivities();
 }

@@ -100,6 +100,10 @@ internal class AndroidLocaleEasy(
 
 	override fun localizedContext(base: Context): Context {
 		val current = state.value
+		val existing = base.localeEasyWrapper()
+		if (existing != null && existing.selection == current.preference && existing.locales == current.effectiveLocales) {
+			return base
+		}
 		// A host's platform override can coexist with locally wrapped activities.
 		// Explicitly apply system locales for FollowSystem when the platform base differs.
 		val useBase = current.preference == LocalePreference.FollowSystem &&

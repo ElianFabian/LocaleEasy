@@ -130,6 +130,8 @@ An app can also supply the catalog directly as `src/main/res/xml/locale_easy_cat
 
 LocaleEasy currently uses **local activity recreation on every supported API**, including API 33+. It owns the persisted preference, updates application resources, and supplies localized activity contexts. Automatic framework locale recreation exposed a gap with no visible app surface in the tested configuration; [the investigation](framework-window-handoff-investigation.md) documents the evidence and a promising hybrid that has not been promoted into the normal backend. This does not mean every use of LocaleManager must flash.
 
+#### Manual integration
+
 Wrap the base context in `attachBaseContext()` when LocaleEasy should manage the language of an entire activity. This runs before `onCreate()`, so the activity starts with the selected resources when it inflates layouts and reads strings. LocaleEasy also uses that wrapper to identify which activities to recreate after a language change. For an individual resource lookup, call `localizedContext()` at the point of use, as shown below.
 
 ```kotlin
@@ -139,6 +141,29 @@ override fun attachBaseContext(newBase: Context) {
 ```
 
 This works with plain `Activity`, `ComponentActivity`, and `AppCompatActivity`; AppCompat is not required by the library. LocaleEasy updates application resources and queues one refresh per started, wrapped activity when its selection is stale. Stopped activities refresh when started again, and finishing/destroyed activities are skipped. Rapid requests made before the queued refresh executes use the latest selection. Unwrapped third-party activities are not enrolled automatically.
+
+#### Optional Gradle integration
+
+Apply the LocaleEasy Gradle plugin in the application module and enable `instrumentActivities`. Keep the LocaleEasy runtime dependency in that module.
+
+```kotlin
+plugins {
+    id("com.android.application")
+    id("com.elianfabian.localeeasy.locales")
+}
+
+localeEasyLocales {
+    instrumentActivities.set(true)
+}
+```
+
+The option defaults to `false`. It inserts the `localizedContext()` call when the app is compiled. Existing `attachBaseContext()` methods are preserved, and subclasses inherit the integration through their normal call to `super`. An existing manual LocaleEasy wrapper can be reused. The automatic option works without a configured default language or a generated XML catalog.
+
+Instrumentation applies to classes compiled in the application module. Activities provided directly by another module or dependency can use manual integration in their own code. If an external superclass has a final `attachBaseContext()`, the plugin skips that hierarchy with a build warning. LocaleEasy must be initialized before the first activity starts, which AndroidX Startup handles by default.
+
+The sample defaults to manual integration. Pass `'-PlocaleEasy.instrumentActivities=true'` to Gradle to build the sample with instrumentation enabled.
+
+#### Configuration changes
 
 Android owns recreation for system configuration events. Apps that opt out through `configChanges` remain responsible for updating their own views for those events. Use one locale owner; independently changing AppCompatDelegate or framework app locales can conflict with LocaleEasy's current context strategy. Bundle needed translations or arrange their download before selecting them in language-split app bundles.
 

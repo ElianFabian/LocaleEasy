@@ -4,6 +4,17 @@ Date: 2026-11-05; sample recreation selector verification updated 2026-11-06. Th
 
 ## Executed checks
 
+### Optional activity instrumentation
+
+Both sample builds passed with Gradle's configuration cache enabled. On an Android 15 emulator, the automatic build localized and recreated a plain activity with no override and an AppCompat activity with an inherited final `attachBaseContext()`. The existing manual activity test passed on both builds and restored user input after recreation. A separate Android app with no declared default language or catalog also compiled with instrumentation enabled. Its transformed class contained the generated `attachBaseContext()` call.
+
+To reproduce the automatic tests, install the instrumented sample and its test APK, then opt into the targeted test class:
+
+```powershell
+./gradlew.bat :app:installDebug :app:installDebugAndroidTest '-PlocaleEasy.instrumentActivities=true'
+adb shell am instrument -w -e instrumentActivities true -e class com.elianfabian.localeeasy.AutomaticActivityLocalizationTest com.elianfabian.localeeasy.test/androidx.test.runner.AndroidJUnitRunner
+```
+
 ### System locales with an Android per-app language
 
 `SystemLocaleSourcesTest` runs on API 33 and newer. It temporarily selects an Android per-app language for the sample and waits for the process to receive that configuration. It prints the language tags from `Resources.getSystem().configuration`, `LocaleManager.getSystemLocales()`, and LocaleEasy's `systemLocaleList`. The test restores the sample's previous Android language setting in `finally`. It does not change the device language.
