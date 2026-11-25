@@ -9,6 +9,7 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.elianfabian.locale_easy.LocaleEasy
+import com.elianfabian.locale_easy.followSystem
 import com.elianfabian.locale_easy.LocalePreference
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -74,7 +75,7 @@ class PersistedLocaleTest {
         val framework = backend in listOf("framework", "framework_only", "framework_stale")
         assumeTrue(!framework || Build.VERSION.SDK_INT >= 33)
         if (phase == "seed") instrumentation.runOnMainSync {
-            api.setLocale(Locale.FRENCH)
+            api.setAppLocale(Locale.FRENCH)
             if (framework) {
                 instrumentation.targetContext.getSystemService(LocaleManager::class.java)
                     .applicationLocales = LocaleList(Locale.FRENCH)
@@ -138,7 +139,7 @@ class PersistedLocaleTest {
         val manager = app.getSystemService(LocaleManager::class.java)
         if (phase == "seed") {
             instrumentation.runOnMainSync {
-                api.setLocale(Locale.FRENCH)
+                api.setAppLocale(Locale.FRENCH)
                 manager.applicationLocales = LocaleList(Locale.ITALIAN)
             }
             // Flush the local selection before the next process starts.

@@ -8,6 +8,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.espresso.Espresso
 import com.elianfabian.locale_easy.LocaleEasy
+import com.elianfabian.locale_easy.followSystem
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Rule
@@ -23,7 +24,7 @@ class ComposeLocaleTest {
 
     @Test fun composeNavigationAndTranslationSurviveLocaleRecreation() {
         compose.onNodeWithText(compose.activity.getString(R.string.compose_sample_btn)).performClick()
-        compose.runOnUiThread { LocaleEasy.getInstance().setLocale(Locale.FRENCH) }
+        compose.runOnUiThread { LocaleEasy.getInstance().setAppLocale(Locale.FRENCH) }
         compose.waitUntil(15_000) {
             compose.onAllNodes(androidx.compose.ui.test.hasText("Écran Compose")).fetchSemanticsNodes().isNotEmpty()
         }

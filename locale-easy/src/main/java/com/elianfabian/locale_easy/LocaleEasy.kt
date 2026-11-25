@@ -10,7 +10,7 @@ import java.util.Locale
 // Based on. https://github.com/YarikSOffice/lingver/blob/master/library/src/main/java/com/yariksoffice/lingver/Lingver.kt
 public interface LocaleEasy {
 
-	/** The app's generated language catalog. Its default is optional. */
+	/** The app's language catalog, read once at startup. Its default is optional. */
 	public val localeCatalog: LocaleCatalog get() = LocaleCatalog.Empty
 
 	/** The applied language selection and its resolution, available in one read. */
@@ -30,10 +30,11 @@ public interface LocaleEasy {
 	public fun setPreference(preference: LocalePreference)
 
 	@MainThread
-	public fun followSystem() { setPreference(LocalePreference.FollowSystem) }
+	public fun setAppLocale(locale: Locale) { setAppLocales(listOf(locale)) }
 
+	/** Set the app's locales in preference order. */
 	@MainThread
-	public fun setLocale(locale: Locale) { setLocales(listOf(locale)) }
+	public fun setAppLocales(locales: List<Locale>) { setPreference(LocalePreference.AppLocales(locales)) }
 
 	/**
 	 * Apply and save [locale] if the app has no saved preference. An explicit [followSystem]
@@ -46,11 +47,16 @@ public interface LocaleEasy {
 	/** Select a language using a well-formed BCP 47 tag such as `fr-CA`. */
 	@MainThread
 	public fun setLanguageTag(tag: String) {
-		setLocale(requireNotNull(parseLocaleTag(tag)) { "Expected a BCP 47 tag with a language" })
+		setAppLocale(requireNotNull(parseLocaleTag(tag)) { "Expected a BCP 47 tag with a language" })
 	}
 
+	@Deprecated("Use setAppLocale", ReplaceWith("setAppLocale(locale)"))
 	@MainThread
-	public fun setLocales(locales: List<Locale>) { setPreference(LocalePreference.AppLocales(locales)) }
+	public fun setLocale(locale: Locale) { setAppLocale(locale) }
+
+	@Deprecated("Use setAppLocales", ReplaceWith("setAppLocales(locales)"))
+	@MainThread
+	public fun setLocales(locales: List<Locale>) { setAppLocales(locales) }
 
 	/** Compatibility view of whether [preference] is [LocalePreference.FollowSystem]. */
 	public val isFollowingSystemLocale: StateFlow<Boolean>
@@ -64,11 +70,9 @@ public interface LocaleEasy {
 	@set:MainThread
 	public var followSystemLocale: Boolean
 
+	@Deprecated("Use setAppLocales", ReplaceWith("setAppLocales(localeList)"))
 	@MainThread
-	public fun setAppLocale(locale: Locale) { setLocale(locale) }
-
-	@MainThread
-	public fun setAppLocaleList(localeList: List<Locale>) { setLocales(localeList) }
+	public fun setAppLocaleList(localeList: List<Locale>) { setAppLocales(localeList) }
 
 	/** Return a context for the current selection. Obtain a new one after a language change. */
 	public fun localizedContext(base: Context): Context
@@ -107,4 +111,10 @@ public interface LocaleEasy {
 			(getInstance() as? AndroidLocaleEasy)?.reapplyResources()
 		}
 	}
+}
+
+/** Save the preference to follow the device's languages. */
+@MainThread
+public fun LocaleEasy.followSystem() {
+	setPreference(LocalePreference.FollowSystem)
 }

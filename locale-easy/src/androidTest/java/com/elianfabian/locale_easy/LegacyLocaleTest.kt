@@ -23,7 +23,7 @@ class LegacyLocaleTest {
         instrumentation.runOnMainSync {
             LocaleEasy.install(instrumentation.targetContext)
             assertSame(before, api)
-            api.setLocale(Locale.FRENCH)
+            api.setAppLocale(Locale.FRENCH)
             assertEquals("French fixture", api.localizedContext(instrumentation.targetContext).getString(R.string.locale_easy_fixture_label))
         }
     }
@@ -53,7 +53,7 @@ class LegacyLocaleTest {
     @Test fun plainActivityRecreationAppliesFrench() {
         ActivityScenario.launch(LegacyLocaleFixtureActivity::class.java).use { scenario ->
             var original: LegacyLocaleFixtureActivity? = null
-            scenario.onActivity { original = it; api.setLocale(Locale.FRENCH) }
+            scenario.onActivity { original = it; api.setAppLocale(Locale.FRENCH) }
             val deadline = System.nanoTime() + 15_000_000_000L
             var ready = false
             while (!ready && System.nanoTime() < deadline) {

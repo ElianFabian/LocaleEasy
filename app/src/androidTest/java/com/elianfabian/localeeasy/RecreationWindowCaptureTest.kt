@@ -9,6 +9,7 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.elianfabian.locale_easy.LocaleEasy
+import com.elianfabian.locale_easy.followSystem
 import com.elianfabian.localeeasy.ui.legacy.SampleActivity
 import org.json.JSONArray
 import org.json.JSONObject
@@ -72,7 +73,7 @@ class RecreationWindowCaptureTest {
                     val trigger = SystemClock.elapsedRealtimeNanos()
                     instrumentation.runOnMainSync {
                         Trace.beginSection("LocaleEasy.change.$name")
-                        try { api.setLocale(if (api.effectiveLocales.value.first().language == "fr") Locale.ITALIAN else Locale.FRENCH) }
+                        try { api.setAppLocale(if (api.effectiveLocales.value.first().language == "fr") Locale.ITALIAN else Locale.FRENCH) }
                         finally { Trace.endSection() }
                     }
                     val deadline = SystemClock.uptimeMillis() + 15_000

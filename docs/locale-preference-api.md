@@ -3,12 +3,14 @@
 `LocalePreference` describes the user's choice. `effectiveLocales` resolves that choice to an ordered locale list. Neither flow signals that activity recreation or view refresh has finished; Android may select a supported fallback language when loading resources.
 
 ```kotlin
+import com.elianfabian.locale_easy.followSystem
+
 val localeEasy = LocaleEasy.getInstance()
 
 localeEasy.followSystem()
-localeEasy.setLocale(Locale.FRENCH)
+localeEasy.setAppLocale(Locale.FRENCH)
 localeEasy.setLanguageTag("fr-CA")
-localeEasy.setLocales(listOf(Locale.forLanguageTag("fr-CA"), Locale.ENGLISH))
+localeEasy.setAppLocales(listOf(Locale.forLanguageTag("fr-CA"), Locale.ENGLISH))
 
 // Equivalent explicit selection:
 localeEasy.setPreference(LocalePreference.AppLocales(listOf(Locale.FRENCH)))
@@ -36,14 +38,16 @@ Existing consumer calls remain available:
 
 | Existing API | Meaning |
 | --- | --- |
-| `setAppLocale(locale)` | Alias for `setLocale(locale)` |
-| `setAppLocaleList(locales)` | Alias for `setLocales(locales)`; empty lists are rejected |
+| `setLocale(locale)` | Deprecated alias for `setAppLocale(locale)` |
+| `setLocales(locales)`, `setAppLocaleList(locales)` | Deprecated aliases for `setAppLocales(locales)` |
 | `appLocaleList` | Alias for `effectiveLocales` |
 | `isFollowingSystemLocale` | Compatibility flow indicating follow-system mode |
 | `followSystemLocale = true` | Select `FollowSystem` |
 | `followSystemLocale = false` | If following system, freeze current effective locales as `AppLocales`; otherwise keep the app selection |
 
 Use `state` for a single coherent read of preference, system locales, and effective locales. The existing flows project individual values from this snapshot. Custom implementations of `LocaleEasy` must also expose a `StateFlow<LocaleState>`.
+
+`followSystem()` is a Kotlin extension. Import `com.elianfabian.locale_easy.followSystem` when updating existing call sites. The Java member call can use `setPreference(LocalePreference.FollowSystem.INSTANCE)` instead.
 
 ## Android integration
 
@@ -103,7 +107,7 @@ localeEasyLocales {
 }
 ```
 
-LocaleEasy loads the generated resource at startup. The sample picker reads `LocaleEasy.getInstance().localeCatalog.supportedLocales`. This catalog is always available. Without generated XML, the list is empty and `defaultLocaleOrNull` returns null. Reading `defaultLocale` then throws an `IllegalStateException`.
+LocaleEasy loads the generated resource at startup. The sample picker reads `LocaleEasy.getInstance().localeCatalog.supportedLocales`. The catalog is a read-only property separate from `state`. Without generated XML, the list is empty and `defaultLocaleOrNull` returns null. Reading `defaultLocale` then throws an `IllegalStateException`.
 
 While following the system, LocaleEasy keeps the system locales that match the catalog by language and script, in system preference order. It uses `defaultLocale` when none match. The stored preference stays `FollowSystem`, and subsequent system changes can select another language. Explicit app choices still apply. For example, an app with English fallback resources can call `setInitialLocale(Locale.FRENCH)` to save French on its first launch. A later explicit `followSystem()` uses English whenever the device has no supported language.
 
