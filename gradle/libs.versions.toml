@@ -7,6 +7,7 @@ localeEasyProviderGroup = "com.github.ElianFabian.YuruPermissions"
 
 agp = "9.2.1"
 coreKtx = "1.17.0"
+runtimeCoreKtx = "1.15.0"
 junit = "4.13.2"
 junitVersion = "1.3.0"
 espressoCore = "3.7.0"
@@ -15,6 +16,7 @@ activityCompose = "1.9.3"
 activityKtx = "1.9.3"
 fragmentKtx = "1.8.5"
 kotlin = "2.2.10"
+runtimeKotlin = "1.9.24"
 composeBom = "2024.12.01"
 kotlinCoroutines = "1.8.1"
 kotlinxCoroutinesTest = "1.8.1"
@@ -28,6 +30,8 @@ startupRuntime = "1.2.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+runtime-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "runtimeCoreKtx" }
+runtime-kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "runtimeKotlin" }
 androidx-orchestrator = { module = "androidx.test:orchestrator", version.ref = "orchestrator" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }

@@ -2,6 +2,8 @@
 
 LocaleEasy is an Android library for changing the app language and observing the user preference, device languages and effective locales. The runtime supports Android 5.0 (API 21) and later. The sample includes Compose, XML activities, fragments and WebView.
 
+Apps consuming the runtime AAR need Android `compileSdk` 35 or higher. The AAR uses Kotlin 1.9 language and API settings, with a consumer build verified on Kotlin 1.8.22 and 1.9.24. The sample builds with Kotlin 2.2.10. See the [compatibility checks](docs/locale-verification.md#kotlin-consumer-compatibility).
+
 ## Try it in this checkout
 
 Open the root project in Android Studio or run `./gradlew :app:assembleDebug`. The sample uses `implementation(project(":locale-easy"))` and applies the optional activity plugin. See the [integration guide](docs/locale-preference-api.md) for the Gradle and AndroidX Startup setup.

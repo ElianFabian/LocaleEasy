@@ -4,6 +4,12 @@ This report records verification runs from 2026-11-05 through 2026-11-25.
 
 ## Executed checks
 
+### Kotlin consumer compatibility
+
+The runtime AAR uses Kotlin language and API version 1.9. The runtime module declares Kotlin stdlib 1.9.24, builds against Android API 35, and supports devices starting at API 21. The sample uses Kotlin 2.2.10.
+
+A separate Gradle 8.11.1 / AGP 8.8 consumer compiled against the release AAR and its runtime dependencies with Kotlin 1.8.22 and 1.9.24. Both consumer APKs were optimized with R8 and ran on API 21. AndroidX Startup initialized the library, and the app read the public locale flows and resolved a French string through a context with an ordered locale list. The sample also assembled with Kotlin 2.2.10, and the runtime's eleven instrumentation tests passed on API 21.
+
 ### WebView resource repair and page state
 
 `WebViewLocaleTest.repairsAnActualApplicationResourceMismatch` deliberately sets the application resources to Spanish while LocaleEasy's preference and effective locales are French. It verifies the Spanish resource lookup before calling `fixWebViewLocale()`, then checks that the application resources return French again and the preference is preserved.
