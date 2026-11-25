@@ -27,7 +27,9 @@ class ComposeWebViewConstructionTest {
         val instrumentation = InstrumentationRegistry.getInstrumentation()
         val api = LocaleEasy.getInstance()
         val previous = api.preference.value
-        val afterConstruction = if (reset == "true") ENGLISH else FRENCH
+        val creationInstrumented =
+            InstrumentationRegistry.getArguments().getString("webViewCreationInstrumented") == "true"
+        val afterConstruction = if (reset == "true" && !creationInstrumented) ENGLISH else FRENCH
         val displayedApplicationText = if (repairEarly) FRENCH else afterConstruction
         instrumentation.runOnMainSync { api.setAppLocale(Locale.FRENCH) }
         val intent = Intent(instrumentation.targetContext, ComposeWebViewFixtureActivity::class.java)

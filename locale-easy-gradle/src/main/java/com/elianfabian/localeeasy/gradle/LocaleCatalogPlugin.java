@@ -26,6 +26,7 @@ public final class LocaleCatalogPlugin implements Plugin<Project> {
         locales.getInstrumentActivities().convention(false);
         locales.getInstrumentWebViewLoads().convention(false);
         locales.getInstrumentWebViewInflation().convention(false);
+        locales.getInstrumentWebViewCreation().convention(false);
         project.getPluginManager().withPlugin("com.android.application", plugin -> {
             ApplicationAndroidComponentsExtension android =
                     project.getExtensions().getByType(ApplicationAndroidComponentsExtension.class);
@@ -36,13 +37,15 @@ public final class LocaleCatalogPlugin implements Plugin<Project> {
                         boolean activities = locales.getInstrumentActivities().get();
                         boolean webViewLoads = locales.getInstrumentWebViewLoads().get();
                         boolean inflation = locales.getInstrumentWebViewInflation().get();
-                        if (activities || webViewLoads || inflation) {
+                        boolean creation = locales.getInstrumentWebViewCreation().get();
+                        if (activities || webViewLoads || inflation || creation) {
                             var task = project.getTasks().register(
                                     "instrumentLocaleEasyClasses_" + variant.getName(),
                                     InstrumentClasses.class, instrument -> {
                                         instrument.getInstrumentActivities().set(activities);
                                         instrument.getInstrumentWebViewLoads().set(webViewLoads);
                                         instrument.getInstrumentWebViewInflation().set(inflation);
+                                        instrument.getInstrumentWebViewCreation().set(creation);
                                         instrument.getClasspath().from(variant.getCompileClasspath(),
                                                 android.getSdkComponents().getBootClasspath());
                                     });
@@ -63,7 +66,8 @@ public final class LocaleCatalogPlugin implements Plugin<Project> {
         Provider<String> defaultLanguage = extension.getDefaultLanguage()
                 .orElse(roots.map(ResourceLocales::readDefaultLanguage));
         boolean catalogOptional = (extension.getInstrumentActivities().get()
-                || extension.getInstrumentWebViewLoads().get() || extension.getInstrumentWebViewInflation().get())
+                || extension.getInstrumentWebViewLoads().get() || extension.getInstrumentWebViewInflation().get()
+                || extension.getInstrumentWebViewCreation().get())
                 && !extension.getGenerateFallbackCatalog().get();
         Provider<List<String>> catalog = roots.zip(defaultLanguage, (directories, language) ->
                 catalogOptional && language.isEmpty() ? List.of()

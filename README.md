@@ -35,7 +35,7 @@ override fun attachBaseContext(newBase: Context) {
 
 The optional Gradle plugin inserts the wrap for activities compiled in the application module. Activities supplied directly by other modules can use the manual integration where they are defined. See the [plugin setup and scope](docs/locale-preference-api.md#optional-gradle-integration).
 
-For WebViews, the optional `instrumentWebViewLoads` setting repairs native application resources before direct page loads from the application module. See [WebView integration](docs/locale-preference-api.md#optional-webview-repair).
+For WebViews, the optional plugin settings can repair native application resources during WebView creation, after XML inflation, or before navigation. See [WebView integration](docs/locale-preference-api.md#optional-webview-repair).
 
 Use `localizedContext(context)` at the point of use for notifications, workers, and other resource lookups. Pass an explicit `Locale` or ordered `List<Locale>` when the text needs to follow someone else's language preferences.
 
@@ -53,3 +53,5 @@ Use `localizedContext(context)` at the point of use for notifications, workers, 
 LocaleEasy's in-app choice and Android Settings are independent. If Settings saves Italian while LocaleEasy has French selected, wrapped screens use French and `selectedAndroidAppLocale` reports Italian. On API 34+, `setAndroidSupportedLocaleList()` changes which languages the Android picker offers.
 
 See the [API and usage examples](docs/locale-preference-api.md) and [verification results](docs/locale-verification.md).
+
+See [Android locale pitfalls](docs/android-locale-pitfalls.md) for the behavior observed across Android versions, including activity recreation and WebView initialization.

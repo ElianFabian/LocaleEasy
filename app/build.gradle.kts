@@ -12,6 +12,7 @@ localeEasyLocales {
 	instrumentActivities.set(true)
 	instrumentWebViewLoads.set(true)
 	instrumentWebViewInflation.set(true)
+	instrumentWebViewCreation.set(true)
 }
 
 android {
