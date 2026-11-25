@@ -3,6 +3,7 @@ package com.elianfabian.locale_easy
 import android.app.Application
 import android.content.Context
 import androidx.annotation.MainThread
+import androidx.annotation.RequiresApi
 import kotlinx.coroutines.flow.StateFlow
 import java.util.Locale
 
@@ -13,8 +14,8 @@ public interface LocaleEasy {
 	/** The locale first applied by [setInitialLocale], or null if none was recorded. */
 	public val initialAppLocale: Locale?
 
-	/** Languages offered in Android Settings. Null if unavailable or not declared. */
-	public val androidSupportedLocaleList: List<Locale>?
+	/** Languages offered in Android Settings. Refreshed on activity resume and configuration changes. */
+	public val androidSupportedLocaleList: StateFlow<AndroidSupportedLocales>
 
 	/** The user's selection. This is not a signal that activity recreation has completed. */
 	public val preference: StateFlow<LocalePreference>
@@ -42,6 +43,15 @@ public interface LocaleEasy {
 	@MainThread
 	public fun setPreference(preference: LocalePreference)
 
+	/**
+	 * Replace the languages offered in Android Settings. An empty list offers zero languages;
+	 * null removes the override and restores the APK configuration. Android can clear its
+	 * saved app language if it is excluded by the new configuration.
+	 */
+	@MainThread
+	@RequiresApi(34)
+	public fun setAndroidSupportedLocaleList(locales: List<Locale>?)
+
 	/** Select a language using a well-formed BCP 47 tag such as `fr-CA`. */
 	@MainThread
 	public fun setLanguageTag(tag: String) {
@@ -54,6 +64,9 @@ public interface LocaleEasy {
 	 * Obtain a fresh context after a language change.
 	 */
 	public fun localizedContext(base: Context): Context
+
+	/** Return a context for a one-off resource lookup in [locale], independent of the saved choice. */
+	public fun localizedContext(base: Context, locale: Locale): Context
 
 	public companion object {
 		@Volatile

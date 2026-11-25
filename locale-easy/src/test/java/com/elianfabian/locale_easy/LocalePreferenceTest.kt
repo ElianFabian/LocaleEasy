@@ -55,8 +55,8 @@ class LocalePreferenceTest {
 	@Test fun followSystemResolvesNewSystemLanguagesWhileCustomStaysFixed() {
 		val custom = LocalePreference.AppLocales(listOf(Locale.FRENCH))
 		for (system in listOf(listOf(Locale.ENGLISH), listOf(Locale.ITALIAN, Locale.ENGLISH))) {
-			assertEquals(system, LocalePreference.FollowSystem.resolveLocales(system))
-			assertEquals(listOf(Locale.FRENCH), custom.resolveLocales(system))
+			assertEquals(system, LocaleState(LocalePreference.FollowSystem, system, LocaleCatalog.Empty).effectiveLocales)
+			assertEquals(listOf(Locale.FRENCH), LocaleState(custom, system, LocaleCatalog.Empty).effectiveLocales)
 		}
 	}
 

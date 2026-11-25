@@ -1,8 +1,16 @@
 # LocaleEasy verification report
 
-Date: 2026-11-05; sample recreation selector verification updated 2026-11-06. This report separates implementation verification from wider compatibility claims.
+This report records verification runs from 2026-11-05 through 2026-11-25.
 
 ## Executed checks
+
+### Context composition and Android picker
+
+On 2026-11-25, all eight library fixture tests passed on API 21 and again on API 35. They exercise a French context retained across a return to Follow system, a lookup in an explicit language, and preservation of a host's night mode and text scale. Eight focused sample tests passed on API 35. They exercise those overrides through the generated activity integration and check that a context without an explicit night override follows a real night-mode change. The manual activity fixture also verifies translated XML and restored input after local recreation.
+
+On API 35, the Android picker tests cover setting a populated list, configuring zero languages, removing an override to restore the APK declaration and importing an override written through Android when an activity resumes. The test for zero languages also starts with French selected in Android and observes Android clear it.
+
+The release App Bundle was converted with bundletool and installed twice on an API 35 emulator, using APK sets extracted for `en-US` and `fr-FR`. The sample launched in both installations. The English set installed `split_config.en.apk` and the French set installed `split_config.fr.apk`. AAPT2 found the default English string in the base APK and its French translation in the French split. Both APK sets come from the same declared catalog, which demonstrates why the catalog alone cannot establish that a translation has been installed.
 
 ### Optional activity instrumentation
 
@@ -47,7 +55,7 @@ The test passed on an Android 15 emulator (API 35). With the device set to `en-U
 | `LocaleManager.getSystemLocales()` | `en-US` | `en-US` |
 | LocaleEasy `systemLocaleList` | — | `en-US` |
 
-With the separate locale properties, the Android 15 tests also verified that `selectedAndroidAppLocale` reports an Android selection and its reset without changing LocaleEasy's own preference or effective locales. A second test replaced the platform's supported languages twice and verified that `androidSupportedLocaleList` reflected each change on the next read. Three additional tests passed for the generated catalog, resource lookup during a locale update, and activity recreation with restored input. All six Android 5 tests passed, including checks that both Android-specific properties are null and that a missing catalog has no default locale.
+The Android 15 tests also verified that `selectedAndroidAppLocale` reports an Android selection and its reset while LocaleEasy retains its own preference and effective locales. The Android 5 fixture checks that `selectedAndroidAppLocale` is null, `androidSupportedLocaleList` reports `Unsupported` and the missing LocaleEasy catalog has no default locale.
 
 Run the test from Android Studio or install the sample and its test APK on the same device and run:
 

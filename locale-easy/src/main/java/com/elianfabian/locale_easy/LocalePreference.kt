@@ -33,11 +33,6 @@ internal fun LocalePreference.immutableCopy(): LocalePreference = when (this) {
 	is LocalePreference.AppLocales -> copy(locales = Collections.unmodifiableList(locales.distinct()))
 }
 
-internal fun LocalePreference.resolveLocales(systemLocales: List<Locale>): List<Locale> = when (this) {
-	LocalePreference.FollowSystem -> systemLocales
-	is LocalePreference.AppLocales -> locales
-}
-
 internal fun restoreLocalePreference(followSystem: Boolean, storedLocales: String?): LocalePreference {
 	if (followSystem || storedLocales.isNullOrBlank()) return LocalePreference.FollowSystem
 	// Migrate common legacy Locale.toString() values such as en_US and pt_BR.

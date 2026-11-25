@@ -29,8 +29,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.elianfabian.locale_easy.AndroidSupportedLocales
 import com.elianfabian.locale_easy.LocalePreference
 import com.elianfabian.localeeasy.R
 import com.elianfabian.localeeasy.ui.screens.TextOriginLegend
@@ -52,11 +52,6 @@ fun LocaleSettingsSheet(
 	val androidSelection by viewModel.selectedAndroidAppLocale.collectAsStateWithLifecycle()
 	val catalog = viewModel.localeCatalog
 	val context = LocalContext.current
-
-	LifecycleResumeEffect(viewModel) {
-		viewModel.refreshAndroidSupportedLocales()
-		onPauseOrDispose {}
-	}
 
 	ModalBottomSheet(
 		onDismissRequest = onDismiss,
@@ -92,7 +87,7 @@ fun LocaleSettingsSheet(
 				catalog.defaultLocale?.toLanguageTag() ?: stringResource(R.string.locale_not_configured),
 			)
 
-			androidLanguages?.let { available ->
+			if (androidLanguages != AndroidSupportedLocales.Unsupported) {
 				HorizontalDivider()
 				Text(
 					text = stringResource(R.string.android_languages_title),
@@ -103,17 +98,27 @@ fun LocaleSettingsSheet(
 					R.string.state_android_locale,
 					androidSelection?.toLanguageTag() ?: stringResource(R.string.android_locale_uses_device),
 				)
-				LocaleListSummary(R.string.state_android_supported_locales, available.sortedBy(Locale::toLanguageTag))
+				val available = (androidLanguages as? AndroidSupportedLocales.Configured)?.locales
+				LocaleSummary(
+					R.string.state_android_supported_locales,
+					when {
+						available == null -> stringResource(R.string.locale_not_configured)
+						available.isEmpty() -> stringResource(R.string.android_no_languages)
+						else -> available.sortedBy(Locale::toLanguageTag).joinToString { it.toLanguageTag() }
+					},
+				)
 				Text(
 					text = stringResource(R.string.android_languages_description),
 					style = MaterialTheme.typography.bodySmall,
 					color = TranslatedTextColor,
 				)
-				OutlinedButton(
-					onClick = { context.openAndroidAppLanguages() },
-					modifier = Modifier.fillMaxWidth(),
-				) {
-					Text(stringResource(R.string.open_android_languages), color = TranslatedTextColor)
+				if (!available.isNullOrEmpty()) {
+					OutlinedButton(
+						onClick = { context.openAndroidAppLanguages() },
+						modifier = Modifier.fillMaxWidth(),
+					) {
+						Text(stringResource(R.string.open_android_languages), color = TranslatedTextColor)
+					}
 				}
 			}
 		}

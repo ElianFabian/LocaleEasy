@@ -8,9 +8,12 @@ import android.content.res.Resources
 import android.os.Build
 import android.os.Bundle
 import android.os.LocaleList
+import androidx.lifecycle.Lifecycle
+import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SdkSuppress
 import androidx.test.platform.app.InstrumentationRegistry
+import com.elianfabian.locale_easy.AndroidSupportedLocales
 import com.elianfabian.locale_easy.LocaleEasy
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -94,22 +97,63 @@ class SystemLocaleSourcesTest {
         val api = LocaleEasy.getInstance()
         val originalConfig = manager.overrideLocaleConfig
         val originalSelection = manager.applicationLocales
-        val originalSupported = api.androidSupportedLocaleList
+        val originalSupported = api.androidSupportedLocaleList.value
+        val originalPreference = api.preference.value
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
         val selected = List(originalSelection.size()) { originalSelection[it] }
         try {
             val first = (listOf(Locale.FRENCH, Locale.ENGLISH) + selected).distinct()
-            manager.overrideLocaleConfig = LocaleConfig(LocaleList(*first.toTypedArray()))
-            assertEquals(first, api.androidSupportedLocaleList)
-
-            val second = (listOf(Locale.ITALIAN) + selected).distinct()
-            manager.overrideLocaleConfig = LocaleConfig(LocaleList(*second.toTypedArray()))
-            assertEquals(second, api.androidSupportedLocaleList)
+            instrumentation.runOnMainSync {
+                api.setAndroidSupportedLocaleList(first + first.first())
+                assertEquals(AndroidSupportedLocales.Configured(first), api.androidSupportedLocaleList.value)
+            }
+            manager.applicationLocales = LocaleList(Locale.FRENCH)
+            runBlocking { withTimeout(10_000) { api.selectedAndroidAppLocale.first { it == Locale.FRENCH } } }
+            instrumentation.runOnMainSync {
+                api.setAndroidSupportedLocaleList(emptyList())
+                assertEquals(AndroidSupportedLocales.Configured(emptyList()), api.androidSupportedLocaleList.value)
+                assertEquals(originalPreference, api.preference.value)
+            }
+            runBlocking { withTimeout(10_000) { api.selectedAndroidAppLocale.first { it == null } } }
+            instrumentation.runOnMainSync {
+                api.setAndroidSupportedLocaleList(null)
+                val declared = LocaleConfig(app).supportedLocales
+                assertEquals(AndroidSupportedLocales.Configured(List(declared!!.size()) { declared[it] }),
+                    api.androidSupportedLocaleList.value)
+            }
         } finally {
-            manager.overrideLocaleConfig = originalConfig
+            instrumentation.runOnMainSync {
+                val locales = originalConfig?.supportedLocales
+                api.setAndroidSupportedLocaleList(locales?.let { List(it.size()) { index -> it[index] } })
+            }
             if (manager.applicationLocales != originalSelection) {
                 manager.applicationLocales = originalSelection
             }
         }
-        assertEquals(originalSupported, api.androidSupportedLocaleList)
+        assertEquals(originalSupported, api.androidSupportedLocaleList.value)
+    }
+
+    @Test
+    @SdkSuppress(minSdkVersion = 34)
+    fun platformConfigWrittenElsewhereIsReadWhenAnActivityResumes() {
+        val app = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext
+        val manager = app.getSystemService(LocaleManager::class.java)
+        val api = LocaleEasy.getInstance()
+        val originalConfig = manager.overrideLocaleConfig
+        val selection = manager.applicationLocales
+        val languages = (listOf(Locale.GERMAN) + List(selection.size()) { selection[it] }).distinct()
+        ActivityScenario.launch(AutomaticPlainLocaleActivity::class.java).use { scenario ->
+            try {
+                scenario.moveToState(Lifecycle.State.CREATED)
+                manager.overrideLocaleConfig = LocaleConfig(LocaleList(*languages.toTypedArray()))
+                scenario.moveToState(Lifecycle.State.RESUMED)
+                assertEquals(AndroidSupportedLocales.Configured(languages), api.androidSupportedLocaleList.value)
+            } finally {
+                manager.overrideLocaleConfig = originalConfig
+                if (manager.applicationLocales != selection) manager.applicationLocales = selection
+                scenario.moveToState(Lifecycle.State.CREATED)
+                scenario.moveToState(Lifecycle.State.RESUMED)
+            }
+        }
     }
 }

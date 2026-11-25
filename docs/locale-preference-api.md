@@ -44,10 +44,12 @@ Startup restores the preference before exposing effective locales. Storage uses 
 | `systemLocaleList` | Observable device languages, in preference order |
 | `effectiveLocaleList` | Observable list applied by LocaleEasy |
 | `selectedAndroidAppLocale` | Observable primary app language saved by Android. Null before API 33 or when Android has no app language set. |
-| `androidSupportedLocaleList` | The current languages offered in Android Settings. Null before API 33 or without a valid Android locale configuration. |
+| `androidSupportedLocaleList` | Observable Android Settings picker configuration. `Unsupported` before API 33, `NotConfigured` without a usable configuration and `Configured(locales)` otherwise. |
 | `localeCatalog` | The optional catalog for the LocaleEasy picker and fallback |
 
-`androidSupportedLocaleList` reads the current Android `LocaleConfig` when accessed, including an override supplied by the host app on API 34+. `selectedAndroidAppLocale` emits even if the selection saved by LocaleEasy stays the same. LocaleEasy keeps its own preference when Android changes or clears its app language. Android supplies the saved language without its origin. [Android locale configuration](https://developer.android.com/reference/android/app/LocaleConfig) · [Android app language API](https://developer.android.com/reference/android/app/LocaleManager#getApplicationLocales())
+`androidSupportedLocaleList` reads Android's effective `LocaleConfig` at startup, on activity resume and on configuration changes. On API 34+, call `setAndroidSupportedLocaleList(listOf(Locale.ENGLISH, Locale.FRENCH))` on the main thread to change the picker and refresh the observable values. Pass `emptyList()` for a configured picker with zero languages, or `null` to restore the APK declaration. Android can clear its saved app language when the new configuration excludes it. Direct platform writes made while an activity is already resumed are reflected on the next refresh. [Android locale configuration](https://developer.android.com/reference/android/app/LocaleConfig) · [Android app language API](https://developer.android.com/reference/android/app/LocaleManager#setOverrideLocaleConfig(android.app.LocaleConfig))
+
+`selectedAndroidAppLocale` can emit while LocaleEasy's own choice stays the same. If Android saves Italian and LocaleEasy has French selected, `selectedAndroidAppLocale` reports Italian and the wrapped screens use French. Android supplies the saved language without its origin.
 
 `followSystem()`, `setAppLocale()`, and `setAppLocaleList()` are Kotlin extensions over `setPreference()`. To check whether the app follows the system, compare `preference.value` with `LocalePreference.FollowSystem`.
 
@@ -99,7 +101,7 @@ localeEasyLocales {
 }
 ```
 
-`BuildConfig.DEFAULT_LANGUAGE` contains the declared tag. `BuildConfig.SUPPORTED_LANGUAGES` starts with that tag and adds the distinct tags found in the app variant's static `values-*` directories. The catalog describes app source resources. Translation coverage, resource filters, and installed Play language splits determine what Android can resolve on a device.
+`BuildConfig.DEFAULT_LANGUAGE` contains the declared tag. `BuildConfig.SUPPORTED_LANGUAGES` starts with that tag and adds the distinct tags from the app variant's static `values-*` directories that contain strings, plurals, string arrays or their typed aliases. The catalog describes app source resources. Translation coverage, resource filters, and installed Play language splits determine what Android can resolve on a device.
 
 #### Use the catalog for Follow system
 
@@ -157,7 +159,7 @@ localeEasyLocales {
 }
 ```
 
-The option defaults to `false`. It inserts the `localizedContext()` call when the app is compiled. Existing `attachBaseContext()` methods are preserved, and subclasses inherit the integration through their normal call to `super`. An existing manual LocaleEasy wrapper can be reused. The automatic option works without a configured default language or a generated XML catalog.
+The option defaults to `false`. It inserts the `localizedContext()` call when the app is compiled. Existing `attachBaseContext()` methods are preserved, and subclasses inherit the integration through their normal call to `super`. Code before the superclass call runs first. LocaleEasy carries forward public resource configuration differences it can observe, such as custom night mode or font scale. When creating a configuration context, it treats values equal to the inherited configuration as inherited, since Android exposes the resolved values. The automatic option works without a configured default language or a generated XML catalog.
 
 Instrumentation applies to classes compiled in the application module. Activities provided directly by another module or dependency can use manual integration in their own code. If an external superclass has a final `attachBaseContext()`, the plugin skips that hierarchy with a build warning. LocaleEasy must be initialized before the first activity starts, which AndroidX Startup handles by default.
 
@@ -176,6 +178,15 @@ LocaleEasy recreates the activity through Android's lifecycle. Normal activity a
 ### Use `localizedContext()` outside an activity
 
 Pass the context you already have to `localizedContext()` when building user-facing text. Obtain it at the point of use so the lookup picks up the current LocaleEasy preference.
+
+To prepare text in a recipient's preferred language, pass that locale explicitly:
+
+```kotlin
+val recipientContext = LocaleEasy.getInstance().localizedContext(context, recipientLocale)
+val title = recipientContext.getString(R.string.order_ready_title, orderNumber)
+```
+
+The explicit lookup leaves the current preference, activity lifecycle and observable locale state intact. Use the single-argument overload for activity integration.
 
 #### Build a notification
 

@@ -44,7 +44,9 @@ class SettingsControlsTest {
     @SdkSuppress(minSdkVersion = 33)
     fun opensTheAndroidLanguagePickerForTheDeclaredCatalog() {
         val api = LocaleEasy.getInstance()
-        assertEquals(api.localeCatalog.supportedLocales.toSet(), api.androidSupportedLocaleList.orEmpty().toSet())
+        val androidLocales = api.androidSupportedLocaleList.value as
+            com.elianfabian.locale_easy.AndroidSupportedLocales.Configured
+        assertEquals(api.localeCatalog.supportedLocales.toSet(), androidLocales.locales.toSet())
         tapText(R.string.open_settings)
         assertSettingsVisible()
         val selected = api.selectedAndroidAppLocale.value?.toLanguageTag()

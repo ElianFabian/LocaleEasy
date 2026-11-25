@@ -34,8 +34,43 @@ class LegacyLocaleTest {
         assertNull(api.localeCatalog.defaultLocale)
         assertEquals(api.systemLocaleList.value, api.effectiveLocaleList.value)
         if (Build.VERSION.SDK_INT < 33) {
-            assertNull(api.androidSupportedLocaleList)
+            assertEquals(AndroidSupportedLocales.Unsupported, api.androidSupportedLocaleList.value)
             assertNull(api.selectedAndroidAppLocale.value)
+        } else {
+            assertEquals(AndroidSupportedLocales.NotConfigured, api.androidSupportedLocaleList.value)
+        }
+    }
+
+    @Test fun relocalizesAnOldContextWhenReturningToFollowSystem() {
+        instrumentation.runOnMainSync {
+            val base = instrumentation.targetContext.applicationContext
+            val followed = api.localizedContext(base)
+            val original = followed.getString(R.string.locale_easy_fixture_label)
+            val other = if (original == "French fixture") Locale.forLanguageTag("he-IL") else Locale.FRENCH
+            api.setAppLocale(other)
+            val previous = api.localizedContext(base)
+            assertNotEquals(original, previous.getString(R.string.locale_easy_fixture_label))
+            api.followSystem()
+            assertEquals(original, api.localizedContext(previous).getString(R.string.locale_easy_fixture_label))
+        }
+    }
+
+    @Test fun explicitLookupPreservesHostOverridesAndPreference() {
+        instrumentation.runOnMainSync {
+            val base = instrumentation.targetContext.applicationContext
+            val host = base.createConfigurationContext(android.content.res.Configuration().apply {
+                fontScale = 1.75f
+                uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES
+            })
+            val preference = api.preference.value
+            val effective = api.effectiveLocaleList.value
+            val french = api.localizedContext(host, Locale.FRENCH)
+            assertEquals("French fixture", french.getString(R.string.locale_easy_fixture_label))
+            assertEquals(1.75f, french.resources.configuration.fontScale, 0f)
+            assertEquals(android.content.res.Configuration.UI_MODE_NIGHT_YES,
+                french.resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK)
+            assertEquals(preference, api.preference.value)
+            assertEquals(effective, api.effectiveLocaleList.value)
         }
     }
 

@@ -27,6 +27,8 @@ public class ResourceLocalesTest {
         addValuesFile(debug, "values-fr");
         addValuesFile(debug, "values-b+pt+BR");
         Files.createDirectory(debug.toPath().resolve("values-it"));
+        Path colors = Files.createDirectory(debug.toPath().resolve("values-de"));
+        Files.writeString(colors.resolve("colors.xml"), "<resources><color name=\"accent\">#ffffff</color></resources>");
 
         assertEquals(List.of("en", "es-US", "fil", "fr", "fr-CA", "pt-BR", "zh-Hant-TW"),
                 ResourceLocales.discover(List.of(main, debug), "en"));
@@ -56,6 +58,6 @@ public class ResourceLocalesTest {
 
     private static void addValuesFile(File root, String qualifier) throws IOException {
         Path directory = Files.createDirectory(root.toPath().resolve(qualifier));
-        Files.writeString(directory.resolve("strings.xml"), "<resources/>");
+        Files.writeString(directory.resolve("strings.xml"), "<resources><string name=\"label\">Label</string></resources>");
     }
 }

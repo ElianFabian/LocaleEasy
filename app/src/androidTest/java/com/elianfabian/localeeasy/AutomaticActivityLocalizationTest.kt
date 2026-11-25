@@ -1,6 +1,7 @@
 package com.elianfabian.localeeasy
 
 import android.app.Activity
+import android.content.res.Configuration
 import android.widget.TextView
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -35,6 +36,7 @@ class AutomaticActivityLocalizationTest {
                     firstActivity = activity
                     firstView = activity.findViewById(R.id.locale_fixture_label)
                     assertEquals("Chaîne Localisée: Vert", fixtureLabel(activity))
+                    assertHostConfiguration(activity)
                     if (activity is AutomaticAppCompatLocaleActivity) assertEquals(1, activity.attachCalls)
                     api.setAppLocale(Locale.forLanguageTag("es"))
                 }
@@ -46,6 +48,7 @@ class AutomaticActivityLocalizationTest {
                         if (activity !== firstActivity) {
                             assertNotSame(firstView, activity.findViewById<TextView>(R.id.locale_fixture_label))
                             assertEquals("Cadena Localizada: Verde", fixtureLabel(activity))
+                            assertHostConfiguration(activity)
                             if (activity is AutomaticAppCompatLocaleActivity) assertEquals(1, activity.attachCalls)
                             recreated = true
                         }
@@ -62,4 +65,12 @@ class AutomaticActivityLocalizationTest {
 
     private fun fixtureLabel(activity: Activity): String =
         activity.findViewById<TextView>(R.id.locale_fixture_label).text.toString()
+
+    private fun assertHostConfiguration(activity: Activity) {
+        if (activity is AutomaticPlainLocaleActivity) {
+            val configuration = activity.resources.configuration
+            assertEquals(1.75f, configuration.fontScale, 0f)
+            assertEquals(Configuration.UI_MODE_NIGHT_YES, configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK)
+        }
+    }
 }

@@ -50,15 +50,13 @@ internal class AndroidLocaleEasy(
 	override val initialAppLocale: Locale?
 		get() = preferences.getString(KEY_INITIAL_APP_LOCALE, null)?.let(::parseLocaleTag)
 
-	override val androidSupportedLocaleList: List<Locale>?
-		get() = if (Build.VERSION.SDK_INT >= 33) Api33.supportedLocales(application) else null
-
 	private val localeState = MutableStateFlow(readLocaleState(readInitialPreference()))
 	private val state = localeState.asStateFlow()
 	override val systemLocaleList = state.project { it.systemLocales }
 	override val preference = state.project { it.preference }
 	override val effectiveLocaleList = state.project { it.effectiveLocales }
 	override val selectedAndroidAppLocale = state.project { it.selectedAndroidAppLocale }
+	override val androidSupportedLocaleList = state.project { it.androidSupportedLocales }
 
 	private val localeReceiver = object : BroadcastReceiver() {
 		override fun onReceive(context: Context, intent: Intent) {
@@ -98,27 +96,41 @@ internal class AndroidLocaleEasy(
 		applyUpdate { applyPreference(selection) }
 	}
 
+	@RequiresApi(34)
+	override fun setAndroidSupportedLocaleList(locales: List<Locale>?) {
+		checkMainThread()
+		val selection = locales?.distinct()
+		if (!selection.isNullOrEmpty()) LocalePreference.AppLocales(selection)
+		applyUpdate {
+			Api34.setSupportedLocales(application, selection)
+			refreshAndroidLocales()
+		}
+	}
+
 	override fun localizedContext(base: Context): Context {
 		val current = state.value
+		val locales = current.effectiveLocales
 		val existing = base.localeEasyWrapper()
-		if (existing != null && existing.selection == current.preference && existing.locales == current.effectiveLocales) {
+		val applied = if (Build.VERSION.SDK_INT >= 24) locales else locales.take(1)
+		val baseMatches = configurationLocales(base.resources.configuration) == applied
+		if (existing != null && existing.selection == current.preference && existing.locales == locales && baseMatches) {
 			return base
 		}
-		// A host's platform override can coexist with locally wrapped activities.
-		// Explicitly apply system locales for FollowSystem when the platform base differs.
-		val useBase = current.preference == LocalePreference.FollowSystem &&
-			localeCatalog.defaultLocale == null &&
-			(Build.VERSION.SDK_INT < 33 || Api33.selectedAppLocale(application) == null)
-		val localized = if (useBase) {
-			base
-		} else {
-			base.createConfigurationContext(Configuration().apply {
-				// A fresh Configuration defaults to font scale 1 on older Android releases.
-				fontScale = 0f
-				applyLocales(current.effectiveLocales)
-			})
-		}
-		return LocaleEasyContextWrapper(localized, current.effectiveLocales, current.preference)
+		val useBase = baseMatches && existing?.overridesLocales != true &&
+			current.preference == LocalePreference.FollowSystem && localeCatalog.defaultLocale == null &&
+			current.selectedAndroidAppLocale == null
+		val localized = if (useBase) base else createLocalizedContext(base, locales)
+		return LocaleEasyContextWrapper(localized, locales, current.preference, overridesLocales = !useBase)
+	}
+
+	override fun localizedContext(base: Context, locale: Locale): Context {
+		val selection = LocalePreference.AppLocales(listOf(locale))
+		return createLocalizedContext(base, selection.locales)
+	}
+
+	private fun createLocalizedContext(base: Context, locales: List<Locale>): Context {
+		val override = configurationOverrides(base).apply { applyLocales(locales) }
+		return base.createConfigurationContext(override)
 	}
 
 	/** Repair the legacy application resources after a WebView-provider configuration mutation. */
@@ -166,10 +178,10 @@ internal class AndroidLocaleEasy(
 			val next = readLocaleState(current.preference)
 			updateResources(application, next.effectiveLocales)
 			localeState.value = next
-			if (localeCatalog.defaultLocale != null &&
-				current.effectiveLocales != next.effectiveLocales
-			) {
-				activities.forEach { (activity, activityState) -> scheduleRefresh(activity, activityState) }
+			if (current.effectiveLocales != next.effectiveLocales) {
+				activities.forEach { (activity, activityState) ->
+					if (activityState.overridesLocales) scheduleRefresh(activity, activityState)
+				}
 			}
 		}
 	}
@@ -177,7 +189,7 @@ internal class AndroidLocaleEasy(
 	override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
 		// Only explicitly wrapped activities participate. No class/package-name guesses.
 		val wrapper = activity.baseContext.localeEasyWrapper() ?: return
-		activities[activity] = ActivityState(wrapper.locales, wrapper.selection)
+		activities[activity] = ActivityState(wrapper.locales, wrapper.selection, wrapper.overridesLocales)
 	}
 
 	override fun onActivityStarted(activity: Activity) {
@@ -186,8 +198,9 @@ internal class AndroidLocaleEasy(
 			activityState.started = true
 			if (activityState.selection == LocalePreference.FollowSystem &&
 				current.preference == LocalePreference.FollowSystem &&
-				localeCatalog.defaultLocale == null &&
-				configurationLocales(activity.resources.configuration) == current.effectiveLocales
+				!activityState.overridesLocales &&
+				configurationLocales(activity.resources.configuration) ==
+					(if (Build.VERSION.SDK_INT >= 24) current.effectiveLocales else current.effectiveLocales.take(1))
 			) {
 				activityState.locales = current.effectiveLocales
 			}
@@ -195,7 +208,22 @@ internal class AndroidLocaleEasy(
 		}
 	}
 
-	override fun onActivityResumed(activity: Activity) = Unit
+	override fun onActivityResumed(activity: Activity) {
+		if (Build.VERSION.SDK_INT >= 33) applyUpdate { refreshAndroidLocales() }
+	}
+
+	private fun refreshAndroidLocales() {
+		val current = state.value
+		if (Build.VERSION.SDK_INT >= 33) {
+			localeState.value = LocaleState(
+				current.preference,
+				current.systemLocales,
+				localeCatalog,
+				Api33.selectedAppLocale(application),
+				Api33.supportedLocales(application),
+			)
+		}
+	}
 
 	override fun onActivityPaused(activity: Activity) = Unit
 
@@ -237,6 +265,7 @@ internal class AndroidLocaleEasy(
 	private class ActivityState(
 		var locales: List<Locale>,
 		val selection: LocalePreference,
+		val overridesLocales: Boolean,
 		var started: Boolean = false,
 		var pending: Boolean = false,
 		var recreating: Boolean = false,
@@ -278,6 +307,8 @@ internal class AndroidLocaleEasy(
 			systemLocales = readSystemLocales(),
 			catalog = localeCatalog,
 			selectedAndroidAppLocale = if (Build.VERSION.SDK_INT >= 33) Api33.selectedAppLocale(application) else null,
+			androidSupportedLocales = if (Build.VERSION.SDK_INT >= 33) Api33.supportedLocales(application)
+				else AndroidSupportedLocales.Unsupported,
 		)
 
 	@Suppress("DEPRECATION")
@@ -314,6 +345,7 @@ internal class AndroidLocaleEasy(
 		context: Context,
 		val locales: List<Locale>,
 		val selection: LocalePreference,
+		val overridesLocales: Boolean,
 	) : ContextWrapper(context) {
 		private val inflater by lazy { LayoutInflater.from(baseContext).cloneInContext(this) }
 
@@ -327,15 +359,25 @@ internal class AndroidLocaleEasy(
 
 		fun selectedAppLocale(context: Context): Locale? = manager(context).applicationLocales[0]
 
-		fun supportedLocales(context: Context): List<Locale>? {
+		fun supportedLocales(context: Context): AndroidSupportedLocales {
 			val config = LocaleConfig(context)
-			return if (config.status == LocaleConfig.STATUS_SUCCESS) config.supportedLocales?.toList() else null
+			val locales = if (config.status == LocaleConfig.STATUS_SUCCESS) config.supportedLocales else null
+			return locales?.let { AndroidSupportedLocales.Configured(it.toList()) }
+				?: AndroidSupportedLocales.NotConfigured
 		}
 
 		private fun manager(context: Context): LocaleManager =
 			context.getSystemService(LocaleManager::class.java)
 
 		private fun LocaleList.toList(): List<Locale> = Collections.unmodifiableList(List(size()) { get(it) })
+	}
+
+	@RequiresApi(34)
+	private object Api34 {
+		fun setSupportedLocales(context: Context, locales: List<Locale>?) {
+			context.getSystemService(LocaleManager::class.java).overrideLocaleConfig =
+				locales?.let { LocaleConfig(LocaleList(*it.toTypedArray())) }
+		}
 	}
 
 	companion object {

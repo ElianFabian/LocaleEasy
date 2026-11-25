@@ -3,10 +3,19 @@ package com.elianfabian.localeeasy
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
+import android.content.res.Configuration
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 
 class AutomaticPlainLocaleActivity : Activity() {
+    override fun attachBaseContext(newBase: Context) {
+        val customized = newBase.createConfigurationContext(Configuration().apply {
+            fontScale = 1.75f
+            uiMode = Configuration.UI_MODE_NIGHT_YES
+        })
+        super.attachBaseContext(customized)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_locale_fixture)

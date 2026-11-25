@@ -28,10 +28,11 @@
     <string name="state_android_locale">Seleção do Android: %s</string>
     <string name="android_locale_uses_device">Usar o idioma do dispositivo</string>
     <string name="state_android_supported_locales">Idiomas oferecidos pelo Android: %s</string>
-    <string name="android_languages_description">O seletor acima muda o idioma das telas de exemplo.</string>
+    <string name="android_languages_description">As telas de exemplo usam o idioma escolhido no seletor do LocaleEasy acima.</string>
     <string name="open_android_languages">Abrir as configurações de idioma do Android</string>
     <string name="android_languages_unavailable">As configurações de idioma do Android não estão disponíveis neste dispositivo.</string>
 
     <string name="fix_webview">Corrigir Locale do WebView &amp; Recarregar</string>
     <string name="open_settings">Abrir Estado &amp; Controles</string>
+    <string name="android_no_languages">Nenhum idioma configurado no seletor</string>
 </resources>
