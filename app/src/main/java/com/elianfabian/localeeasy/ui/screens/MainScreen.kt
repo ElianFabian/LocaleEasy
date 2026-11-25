@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.elianfabian.localeeasy.BuildConfig
 import com.elianfabian.localeeasy.ui.settings.LocaleSettingsSheet
 import com.elianfabian.localeeasy.ui.settings.LocaleSettingsViewModel
 import com.elianfabian.localeeasy.R
@@ -47,6 +48,7 @@ fun MainScreen(
     var showSettings by rememberSaveable { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val locales by viewModel.effectiveLocaleList.collectAsStateWithLifecycle()
+    val stringsXmlLanguages = BuildConfig.STRINGS_XML_LANGUAGE_TAGS.distinct().joinToString()
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = { TopAppBar(title = { Text(stringResource(R.string.main_title), color = TranslatedTextColor) }) }
@@ -64,6 +66,14 @@ fun MainScreen(
                         style = MaterialTheme.typography.labelLarge)
                     Text(stringResource(R.string.state_app_locales, locales.joinToString { it.toLanguageTag() }),
                         style = MaterialTheme.typography.bodyMedium, color = TranslatedTextColor)
+                    Text(
+                        stringResource(
+                            R.string.home_strings_xml_languages,
+                            stringsXmlLanguages.ifEmpty { stringResource(R.string.locale_not_configured) },
+                        ),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = TranslatedTextColor,
+                    )
                     Button(onClick = { showSettings = true }, modifier = Modifier.fillMaxWidth(), colors = localizableButtonColors()) {
                         Text(stringResource(R.string.open_settings))
                     }

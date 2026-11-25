@@ -35,4 +35,5 @@
     <string name="fix_webview">Corriger le Locale WebView &amp; Recharger</string>
     <string name="open_settings">Ouvrir État &amp; Contrôles</string>
     <string name="android_no_languages">Aucune langue proposée dans le sélecteur</string>
+    <string name="home_strings_xml_languages">Langues de strings.xml : %s</string>
 </resources>

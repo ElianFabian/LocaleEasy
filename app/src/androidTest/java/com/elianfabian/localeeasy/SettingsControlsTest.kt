@@ -26,6 +26,11 @@ import org.junit.Test
 class SettingsControlsTest {
     @get:Rule val compose = createAndroidComposeRule<MainActivity>()
 
+    @Test fun homeShowsStringsXmlLanguages() {
+        compose.onNodeWithText(compose.activity.getString(R.string.home_strings_xml_languages, "en, es, fr, it, pt"))
+            .assertIsDisplayed()
+    }
+
     @Test fun homeOpensSettings() {
         tapText(R.string.open_settings)
         assertSettingsVisible()

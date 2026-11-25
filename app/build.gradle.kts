@@ -1,3 +1,6 @@
+import com.android.build.api.variant.BuildConfigField
+import java.util.Locale
+
 plugins {
 	alias(libs.plugins.android.application)
 	alias(libs.plugins.kotlin.compose)
@@ -43,6 +46,33 @@ android {
 		compose = true
 		viewBinding = true
 	}
+}
+
+androidComponents.onVariants { variant ->
+	val localeQualifier = Regex(
+		"""^values-(?:mcc\d{3}-)?(?:mnc\d{1,3}-)?(b\+[a-z0-9+]+|(?!car(?:-|$))[a-z]{2,3}(?:-r[a-z]{2})?)(?:-|$)""",
+		RegexOption.IGNORE_CASE,
+	)
+	val tags = requireNotNull(variant.sources.res).static.map { layers ->
+		val roots = layers.flatten().map { it.asFile }
+		val localized = roots.flatMap { it.listFiles().orEmpty().toList() }
+			.filter { it.resolve("strings.xml").isFile }
+			.mapNotNull { localeQualifier.find(it.name)?.groupValues?.get(1) }
+			.map { qualifier ->
+				val tag = qualifier.lowercase(Locale.ROOT)
+				Locale.forLanguageTag(
+					if (tag.startsWith("b+")) tag.substring(2).replace('+', '-') else tag.replace("-r", "-"),
+				).toLanguageTag()
+			}
+			.filter { it != "und" }
+			.toSortedSet()
+		val entries = buildList {
+			if (roots.any { it.resolve("values/strings.xml").isFile }) add("BuildConfig.DEFAULT_LANGUAGE")
+			localized.forEach { add("\"$it\"") }
+		}
+		BuildConfigField("String[]", entries.joinToString(", ", "new String[] {", "}"), null)
+	}
+	requireNotNull(variant.buildConfigFields).put("STRINGS_XML_LANGUAGE_TAGS", tags)
 }
 
 dependencies {
