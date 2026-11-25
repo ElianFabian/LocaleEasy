@@ -10,11 +10,13 @@ import android.view.View
 import android.view.WindowManager
 import android.view.inspector.WindowInspector
 import androidx.compose.ui.test.assertIsNotSelected
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.test.espresso.Espresso
 import androidx.test.platform.app.InstrumentationRegistry
 import com.elianfabian.locale_easy.LocaleEasy
@@ -55,8 +57,8 @@ class ComposeLocaleTest {
             val root = before.findViewById<View>(R.id.main_compose_view)
             traceWindows("$language before selection")
             compose.onNodeWithText(language).performClick()
-            compose.waitUntil(15_000) { compose.activity !== before }
-            compose.waitForIdle()
+            assertSame(before, compose.activity)
+            applyLocaleChangesAndWait()
             assertNotSame(root, compose.activity.findViewById<View>(R.id.main_compose_view))
             assertEquals(taskId, compose.activity.taskId)
             assertEquals(before.componentName, compose.activity.componentName)
@@ -67,49 +69,76 @@ class ComposeLocaleTest {
             compose.onNodeWithText(compose.activity.getString(R.string.local_recreation_status)).assertExists()
         }
         compose.onNodeWithText(compose.activity.getString(R.string.open_settings)).performClick()
-        val before = compose.activity
-        compose.onNodeWithText(before.getString(R.string.follow_system_locale)).performClick()
-        compose.waitUntil(15_000) { compose.activity !== before }
+        followSystemChip().performClick()
+        applyLocaleChangesAndWait()
         assertEquals(LocalePreference.FollowSystem, LocaleEasy.getInstance().preference.value)
     }
 
-    @Test fun languageControlsToggleAnOrderedSelectionAndReturnToFollowSystem() {
+    @Test fun languageControlsApplyAnOrderedSelectionAndReturnToFollowSystem() {
         val api = LocaleEasy.getInstance()
         compose.runOnUiThread { api.followSystem() }
         compose.onNodeWithText(compose.activity.getString(R.string.open_settings)).performClick()
         val spanish = Locale.forLanguageTag("es")
+        val before = compose.activity
 
         followSystemChip().assertIsSelected()
-        toggleLocaleAndWait("Spanish")
-        toggleLocaleAndWait("French")
-        assertEquals(LocalePreference.AppLocales(listOf(spanish, Locale.FRENCH)), api.preference.value)
+        applyChangesButton().assertIsNotEnabled()
+        compose.onNodeWithText("Spanish").performClick()
+        compose.onNodeWithText("French").performClick()
         compose.onNodeWithText("Spanish").assertIsSelected()
         compose.onNodeWithText("French").assertIsSelected()
         followSystemChip().assertIsNotSelected()
+        assertEquals(LocalePreference.FollowSystem, api.preference.value)
+        assertSame(before, compose.activity)
+        applyLocaleChangesAndWait()
+        assertEquals(LocalePreference.AppLocales(listOf(spanish, Locale.FRENCH)), api.preference.value)
+        applyChangesButton().assertIsNotEnabled()
 
-        toggleLocaleAndWait("Spanish")
-        assertEquals(LocalePreference.AppLocales(listOf(Locale.FRENCH)), api.preference.value)
+        compose.onNodeWithText("Spanish").performClick()
         compose.onNodeWithText("Spanish").assertIsNotSelected()
-
-        toggleLocaleAndWait("French")
+        compose.onNodeWithText("French").performClick()
+        followSystemChip().assertIsSelected()
+        assertEquals(LocalePreference.AppLocales(listOf(spanish, Locale.FRENCH)), api.preference.value)
+        compose.activityRule.scenario.recreate()
+        followSystemChip().assertIsSelected()
+        applyLocaleChangesAndWait()
         assertEquals(LocalePreference.FollowSystem, api.preference.value)
         followSystemChip().assertIsSelected()
 
-        toggleLocaleAndWait("French")
-        toggleLocaleAndWait("Spanish")
-        toggleLocaleAndWait(compose.activity.getString(R.string.follow_system_locale))
-        assertEquals(LocalePreference.FollowSystem, api.preference.value)
-        followSystemChip().assertIsSelected()
+        compose.onNodeWithText("French").performClick()
+        compose.onNodeWithText("Spanish").performClick()
+        applyLocaleChangesAndWait()
+        followSystemChip().performClick()
+        assertEquals(LocalePreference.AppLocales(listOf(Locale.FRENCH, spanish)), api.preference.value)
         compose.onNodeWithText("French").assertIsNotSelected()
         compose.onNodeWithText("Spanish").assertIsNotSelected()
+        applyLocaleChangesAndWait()
+        assertEquals(LocalePreference.FollowSystem, api.preference.value)
+        followSystemChip().assertIsSelected()
+    }
+
+    @Test fun dismissingSettingsDiscardsUnappliedChanges() {
+        val api = LocaleEasy.getInstance()
+        compose.runOnUiThread { api.followSystem() }
+        compose.onNodeWithText(compose.activity.getString(R.string.open_settings)).performClick()
+        compose.onNodeWithText("French").performClick()
+        compose.onNodeWithText("French").assertIsSelected()
+        pressBackFromSettings("discard")
+        compose.onNodeWithText(compose.activity.getString(R.string.open_settings)).performClick()
+        followSystemChip().assertIsSelected()
+        compose.onNodeWithText("French").assertIsNotSelected()
+        assertEquals(LocalePreference.FollowSystem, api.preference.value)
     }
 
     private fun followSystemChip() =
         compose.onNodeWithText(compose.activity.getString(R.string.follow_system_locale))
 
-    private fun toggleLocaleAndWait(label: String) {
+    private fun applyChangesButton() =
+        compose.onNodeWithText(compose.activity.getString(R.string.apply_locale_changes))
+
+    private fun applyLocaleChangesAndWait() {
         val before = compose.activity
-        compose.onNodeWithText(label).performClick()
+        applyChangesButton().performScrollTo().performClick()
         compose.waitUntil(15_000) { compose.activity !== before }
         compose.waitForIdle()
     }

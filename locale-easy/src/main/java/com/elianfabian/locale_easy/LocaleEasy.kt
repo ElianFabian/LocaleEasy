@@ -53,12 +53,6 @@ public interface LocaleEasy {
 	@RequiresApi(34)
 	public fun setAndroidSupportedLocaleList(locales: List<Locale>?)
 
-	/** Select a language using a well-formed BCP 47 tag such as `fr-CA`. */
-	@MainThread
-	public fun setLanguageTag(tag: String) {
-		setAppLocale(requireNotNull(parseLocaleTag(tag)) { "Expected a BCP 47 tag with a language" })
-	}
-
 	/**
 	 * Return a context for the current selection. Wrap an activity's base context in
 	 * `attachBaseContext`, or use the result for one-off resource lookups.

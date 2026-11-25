@@ -12,7 +12,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,7 +40,6 @@ fun ComposeSampleScreen(
 	onBack: () -> Unit,
 ) {
 	var showSettings by rememberSaveable { mutableStateOf(false) }
-	val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
 	Scaffold(
 		modifier = Modifier.fillMaxSize(),
@@ -89,7 +87,6 @@ fun ComposeSampleScreen(
 		if (showSettings) {
 			LocaleSettingsSheet(
 				viewModel = viewModel,
-				sheetState = sheetState,
 				onDismiss = { showSettings = false }
 			)
 		}

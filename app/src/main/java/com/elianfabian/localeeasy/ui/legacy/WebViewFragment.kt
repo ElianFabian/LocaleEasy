@@ -7,8 +7,6 @@ import android.view.ViewGroup
 import android.webkit.WebViewClient
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -30,7 +28,6 @@ class WebViewFragment : DialogFragment() {
 		return binding.root
 	}
 
-	@OptIn(ExperimentalMaterial3Api::class)
 	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 		super.onViewCreated(view, savedInstanceState)
 		showSettings = savedInstanceState?.getBoolean("settings_open") ?: showSettings
@@ -48,12 +45,10 @@ class WebViewFragment : DialogFragment() {
 		}
 
 		binding.settingsComposeView.setContent {
-			val sheetState = rememberModalBottomSheetState()
 			LocaleEasyTheme {
 				if (showSettings) {
 					LocaleSettingsSheet(
 						viewModel = viewModel,
-						sheetState = sheetState,
 						onDismiss = { showSettings = false }
 					)
 				}

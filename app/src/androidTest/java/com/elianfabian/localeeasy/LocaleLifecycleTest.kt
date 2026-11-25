@@ -99,7 +99,6 @@ class LocaleLifecycleTest {
         main {
             assertTrue(runCatching { api.setAppLocaleList(emptyList()) }.exceptionOrNull() is IllegalArgumentException)
             assertTrue(runCatching { api.setAppLocale(Locale("fr-CA")) }.exceptionOrNull() is IllegalArgumentException)
-            assertTrue(runCatching { api.setLanguageTag("fr_CA") }.exceptionOrNull() is IllegalArgumentException)
             assertEquals(LocalePreference.FollowSystem, api.preference.value)
         }
         assertEquals(before, prefs.all)
@@ -127,7 +126,7 @@ class LocaleLifecycleTest {
                                 assertEquals(listOf(Locale.FRENCH), api.effectiveLocaleList.value)
                                 assertEquals(translated("fr"), app.getString(R.string.string_resource_example))
                                 observedFrench = true
-                                api.setLanguageTag("it")
+                                api.setAppLocale(Locale.ITALIAN)
                             }
                         }
                     }

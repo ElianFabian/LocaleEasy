@@ -133,9 +133,9 @@ class LegacyLocaleTest {
     @Test fun legacyAndModernLanguageTagsResolveToTheSamePreference() {
         instrumentation.runOnMainSync {
             for ((legacy, modern) in listOf("iw-IL" to "he-IL", "in-ID" to "id-ID", "ji" to "yi")) {
-                api.setLanguageTag(legacy)
+                api.setAppLocale(Locale.forLanguageTag(legacy))
                 val selected = api.preference.value
-                api.setLanguageTag(modern)
+                api.setAppLocale(Locale.forLanguageTag(modern))
                 assertEquals("Alias pair $legacy and $modern", selected, api.preference.value)
                 assertEquals(listOf(Locale.forLanguageTag(modern)), api.effectiveLocaleList.value)
             }
@@ -149,7 +149,7 @@ class LegacyLocaleTest {
                 "sr-Latn-RS" to "Serbian Latin fixture",
                 "es-419" to "Latin American Spanish fixture",
             )) {
-                api.setLanguageTag(tag)
+                api.setAppLocale(Locale.forLanguageTag(tag))
                 val resources = api.localizedContext(instrumentation.targetContext).resources
                 assertEquals("Resource for $tag", expected, resources.getString(R.string.locale_easy_fixture_label))
             }

@@ -3,8 +3,6 @@ package com.elianfabian.localeeasy.ui.legacy
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -13,7 +11,6 @@ import com.elianfabian.localeeasy.ui.settings.LocaleSettingsSheet
 import com.elianfabian.localeeasy.ui.settings.LocaleSettingsViewModel
 import com.elianfabian.localeeasy.ui.theme.LocaleEasyTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
 abstract class BaseSampleActivity : AppCompatActivity() {
 	private val viewModel: LocaleSettingsViewModel by viewModels()
 	private var showSettings by mutableStateOf(false)
@@ -30,12 +27,10 @@ abstract class BaseSampleActivity : AppCompatActivity() {
 
 	protected fun setupGlobalSettingsFab(composeView: ComposeView) {
 		composeView.setContent {
-			val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 			LocaleEasyTheme {
 				if (showSettings) {
 					LocaleSettingsSheet(
 						viewModel = viewModel,
-						sheetState = sheetState,
 						onDismiss = { showSettings = false }
 					)
 				}

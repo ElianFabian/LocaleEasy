@@ -4,6 +4,12 @@ This report records verification runs from 2026-11-05 through 2026-11-25.
 
 ## Executed checks
 
+### Applying a language selection and manual initialization
+
+Seven focused sample tests passed on API 24 and 35. They covered ordered changes applied together, no recreation while editing, an empty draft surviving recreation, returning to Follow System, discarding an unapplied draft, and the panel remaining open on the Fragment and WebView screens. Sample lint reported zero errors. All eleven library instrumentation tests passed on API 21, including legacy locale aliases through `setAppLocale(Locale)`.
+
+A standalone app consuming the release AAR passed on API 21, 24, and 35 with only LocaleEasy's initializer metadata removed. In `Application.onCreate()`, it verified the pre-install error, called `install(this)`, and checked that another call retained the instance. Selecting French recreated the wrapped activity with French resources. A cold launch restored the preference before creating the first activity.
+
 ### Kotlin consumer compatibility
 
 The runtime AAR uses Kotlin language and API version 1.9. The runtime module declares Kotlin stdlib 1.9.24, builds against Android API 35, and supports devices starting at API 21. The sample uses Kotlin 2.2.10.
@@ -17,6 +23,8 @@ A separate Gradle 8.11.1 / AGP 8.8 consumer compiled against the release AAR and
 `WebViewLocaleTest.observesLoadedWebViewAcrossLocalRecreation` opens the sample's XML WebView dialog in a fresh process. It reads the application and activity resource languages before and after the dialog opens, waits for the local page to load, navigates to a second URL, enters text, and scrolls. It calls the native repair with the page still open and asserts that the page state and history are intact. It then changes the app language to Spanish and checks the native strings and the replacement WebView's loaded HTML. The test reports the URL, form value, scroll position and history of the replacement.
 
 Before enabling automatic repair in the sample, first WebView initialization switched the application resources from French to the device's English (`en-US`). The wrapped activity continued to resolve French strings. The helper restored French in the application context while preserving the loaded URL, history, form text, and scroll position. Changing the app language to Spanish then recreated the activity, translated the native controls, and loaded the sample's initial HTML in a new WebView. That view started with an empty form, no back history and a scroll position of zero.
+
+A [historical report for Android 7.0](https://stackoverflow.com/questions/40398528/android-webview-language-changes-abruptly-on-android-7-0-and-above) describes the same return to the device locale with a global resource override. AOSP adds provider assets to the host application's assets while loading WebView. In the sample, the first provider initialization is the observed trigger, so repair can run after construction without creating a disposable WebView at startup. [AOSP WebViewFactory](https://android.googlesource.com/platform/frameworks/base/+/6258dcd/core/java/android/webkit/WebViewFactory.java)
 
 Both tests passed before enabling automatic repair on the three configurations below. The provider on API 24 was identified from the framework's `WebViewFactory` log.
 

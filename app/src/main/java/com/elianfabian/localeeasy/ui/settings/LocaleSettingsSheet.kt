@@ -21,11 +21,16 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -42,10 +47,18 @@ import java.util.Locale
 @Composable
 fun LocaleSettingsSheet(
 	viewModel: LocaleSettingsViewModel,
-	sheetState: SheetState,
 	onDismiss: () -> Unit
 ) {
 	val preference by viewModel.preference.collectAsStateWithLifecycle()
+	val appliedLocales = (preference as? LocalePreference.AppLocales)?.locales.orEmpty()
+	var draftLocales by rememberSaveable(
+		appliedLocales,
+		stateSaver = Saver<List<Locale>, ArrayList<String>>(
+			save = { locales -> ArrayList(locales.map(Locale::toLanguageTag)) },
+			restore = { tags -> tags.map(Locale::forLanguageTag) },
+		),
+	) { mutableStateOf(appliedLocales) }
+	val hasChanges = draftLocales != appliedLocales
 	val effectiveLocales by viewModel.effectiveLocaleList.collectAsStateWithLifecycle()
 	val deviceLocales by viewModel.systemLocaleList.collectAsStateWithLifecycle()
 	val androidLanguages by viewModel.androidSupportedLocaleList.collectAsStateWithLifecycle()
@@ -55,7 +68,7 @@ fun LocaleSettingsSheet(
 
 	ModalBottomSheet(
 		onDismissRequest = onDismiss,
-		sheetState = sheetState
+		sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 	) {
 		Column(
 			modifier = Modifier
@@ -72,11 +85,23 @@ fun LocaleSettingsSheet(
 			TextOriginLegend()
 
 			LanguageButtons(
-				languages = catalog.supportedLocales,
-				selectedLocales = (preference as? LocalePreference.AppLocales)?.locales.orEmpty(),
-				onFollowSystemSelected = viewModel::followSystem,
-				onLanguageToggled = viewModel::toggleLocale,
+				languages = (catalog.supportedLocales + appliedLocales).distinct(),
+				selectedLocales = draftLocales,
+				onFollowSystemSelected = { draftLocales = emptyList() },
+				onLanguageToggled = { locale ->
+					draftLocales = if (locale in draftLocales) draftLocales - locale else draftLocales + locale
+				},
 			)
+			OutlinedButton(
+				onClick = { viewModel.applyLocales(draftLocales) },
+				enabled = hasChanges,
+				modifier = Modifier.fillMaxWidth(),
+			) {
+				Text(
+					text = stringResource(R.string.apply_locale_changes),
+					color = if (hasChanges) TranslatedTextColor else Color.Unspecified,
+				)
+			}
 			HorizontalDivider()
 
 			LocaleListSummary(R.string.state_app_locales, effectiveLocales)
@@ -164,7 +189,7 @@ private fun LanguageButtons(
 			onClick = onFollowSystemSelected,
 			label = { Text(text = stringResource(R.string.follow_system_locale), color = TranslatedTextColor) },
 		)
-		(languages + selectedLocales).distinct().forEach { locale ->
+		languages.forEach { locale ->
 			FilterChip(
 				selected = locale in selectedLocales,
 				onClick = { onLanguageToggled(locale) },

@@ -17,7 +17,6 @@ import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,7 +45,6 @@ fun MainScreen(
     onOpenWebView: () -> Unit
 ) {
     var showSettings by rememberSaveable { mutableStateOf(false) }
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val locales by viewModel.effectiveLocaleList.collectAsStateWithLifecycle()
     val stringsXmlLanguages = BuildConfig.STRINGS_XML_LANGUAGE_TAGS.distinct().joinToString()
     Scaffold(
@@ -87,7 +85,7 @@ fun MainScreen(
                 SampleDestination(R.string.webview_sample_btn, R.string.webview_description, onOpenWebView)
             }
         }
-        if (showSettings) LocaleSettingsSheet(viewModel, sheetState) { showSettings = false }
+        if (showSettings) LocaleSettingsSheet(viewModel) { showSettings = false }
     }
 }
 

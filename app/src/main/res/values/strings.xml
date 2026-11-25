@@ -27,6 +27,7 @@
 
     <string name="settings_title">LocaleEasy State</string>
     <string name="follow_system_locale">Follow System Locale</string>
+    <string name="apply_locale_changes">Apply changes</string>
     <string name="state_app_locales">Applied by LocaleEasy: %s</string>
     <string name="state_system_locales">Device languages: %s</string>
     <string name="state_catalog_locales">LocaleEasy catalog: %s</string>

@@ -11,7 +11,7 @@ val localeEasy = LocaleEasy.getInstance()
 
 localeEasy.followSystem()
 localeEasy.setAppLocale(Locale.FRENCH)
-localeEasy.setLanguageTag("fr-CA")
+localeEasy.setAppLocale(Locale.forLanguageTag("fr-CA"))
 localeEasy.setAppLocaleList(listOf(Locale.forLanguageTag("fr-CA"), Locale.ENGLISH))
 
 // Equivalent explicit selection:
@@ -32,7 +32,7 @@ localeEasy.selectedAndroidAppLocale.collect { locale ->
 }
 ```
 
-`AppLocales` is a data class with value equality, `copy()`, and destructuring. It requires a nonempty ordered list whose locales round-trip as BCP 47 tags with a language. LocaleEasy copies the list when applying it and keeps the first occurrence of each locale. Use `setLanguageTag("fr-CA")` for input from a picker or a server. Use `FollowSystem` to reset the choice. Passing the same normalized preference again leaves the existing activity in place.
+`AppLocales` is a data class with value equality, `copy()`, and destructuring. It requires a nonempty ordered list whose locales round-trip as BCP 47 tags with a language. LocaleEasy copies the list when applying it and keeps the first occurrence of each locale. Use `FollowSystem` to reset the choice. Passing the same normalized preference again leaves the existing activity in place.
 
 Startup restores the preference before exposing effective locales. Storage uses BCP 47 language tags and accepts legacy underscore region tags on read. Startup normalizes previously stored duplicates and recovers from missing or invalid overrides by following the system. A reset clears the stored override.
 
@@ -69,6 +69,17 @@ AndroidX Startup now installs LocaleEasy automatically. Calling `install()` agai
     </application>
 </manifest>
 ```
+
+```kotlin
+class MyApplication : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        LocaleEasy.install(this)
+    }
+}
+```
+
+Register `MyApplication` as the application class in the manifest.
 
 Installation, locale mutations, and `fixWebViewLocale()` must run on the main thread. A state emission represents an applied preference. View recreation and the first translated frame follow asynchronously. A request made from a collector while another change is being published is applied after that change, before the outer setter returns. Preferences are written to disk asynchronously.
 
@@ -183,7 +194,7 @@ Android owns recreation for system configuration events. Apps that opt out throu
 
 The sample home screen shows the effective locales and the languages with a `strings.xml` file in the sample's resource source sets. **Open State & Controls** shows device locales, the LocaleEasy catalog and its default. On API 33+, it also shows the Android app language and the options declared in the sample's `android:localeConfig`. The Android section opens the real app-language screen in Settings. The sample screens continue to use the preference chosen in the LocaleEasy picker. On earlier versions, the panel shows the LocaleEasy controls and locale information.
 
-Tap languages in the LocaleEasy picker to add them in preference order. Tap a selected language again to remove it. Removing the final language or selecting **Follow system** clears the explicit list and follows the device languages.
+Tap languages in the LocaleEasy picker to add them in preference order. Tap a selected language again to remove it. Removing the final language or selecting **Follow system** clears the pending selection. Tap **Apply changes** to save the selection or follow the device languages if it is empty. Dismissing the panel discards pending edits.
 
 LocaleEasy recreates the activity through Android's lifecycle. Normal activity and fragment saved-state contracts apply. The sample gives its programmatic ComposeView a stable ID to support saved navigation state.
 
@@ -302,7 +313,7 @@ The executed emulator checks and remaining manual/device coverage are recorded i
 
 1. Select French on an English device, restart the process without clearing data, and verify the initial screen and newly opened sample activities use French.
 2. Select follow-system, change system language, and verify effective languages and visible resources update. Repeat with a custom selection and verify it remains fixed.
-3. Select a language in the sample picker, then select **Follow System Locale**. Verify the preference resets to `FollowSystem` and survives restart.
+3. Select a language in the sample picker and tap **Apply changes**. Then select **Follow System Locale** and apply again. Verify the preference resets to `FollowSystem` and survives restart.
 4. Reapply the same selection and verify no additional refresh. Check both XML and Compose screens.
 
 The [reliability checklist](locale-reliability-checklist.md) records implementation status separately from broader device acceptance.

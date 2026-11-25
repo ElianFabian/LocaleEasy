@@ -24,6 +24,7 @@ import com.elianfabian.locale_easy.LocaleEasy
 import com.elianfabian.locale_easy.LocalePreference
 import com.elianfabian.locale_easy.followSystem
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertSame
 import org.junit.Rule
 import org.junit.Test
 import java.util.Locale
@@ -113,12 +114,12 @@ class SettingsControlsTest {
             tapNativeSettings(inDialog = true)
             val before = compose.activity
             compose.onNodeWithText("French").performClick()
-            compose.waitUntil(15_000) { compose.activity !== before }
             compose.onNodeWithText("French").assertIsSelected()
-
-            val frenchActivity = compose.activity
             compose.onNodeWithText("Italian").performClick()
-            compose.waitUntil(15_000) { compose.activity !== frenchActivity }
+            assertEquals(LocalePreference.FollowSystem, api.preference.value)
+            assertSame(before, compose.activity)
+            tapText(R.string.apply_locale_changes)
+            compose.waitUntil(15_000) { compose.activity !== before }
             assertEquals(LocalePreference.AppLocales(listOf(Locale.FRENCH, Locale.ITALIAN)), api.preference.value)
             compose.onNodeWithText("French").assertIsSelected()
             compose.onNodeWithText("Italian").assertIsSelected()

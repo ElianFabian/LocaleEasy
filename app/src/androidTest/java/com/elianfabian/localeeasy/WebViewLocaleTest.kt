@@ -111,7 +111,7 @@ class WebViewLocaleTest {
             }
             assertEquals(edited.toString(), evaluatePage(originalView).toString())
             scenario.onActivity {
-                api.setLanguageTag("es")
+                api.setAppLocale(Locale.forLanguageTag("es"))
             }
 
             var replacement: WebView? = null
