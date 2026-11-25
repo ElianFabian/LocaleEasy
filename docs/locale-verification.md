@@ -30,6 +30,12 @@ A separate app with WebView instrumentation enabled reproduced a visible mixed-l
 
 The same app compared the load hook alone with the experimental inflation hook alone. With the load hook, the early label remained English on API 24 and 35 with `LayoutInflater.inflate()`, generated View Binding, and `Activity.setContentView(layoutResId)`. With the inflation hook, all three paths showed French in that label before the first load, without a manual repair. On API 23, both APKs kept all three labels in French on all three paths. The five sample WebView instrumentation tests passed on API 24 and 35 with both hooks enabled.
 
+With both hooks enabled, another View Binding probe placed two custom `TextView`s immediately after the WebView in the XML. The view that read from `applicationContext` in its constructor displayed “Payment confirmed” on API 24 and 35. The view that read from its own localized context displayed “Paiement confirmé”. A new lookup from `applicationContext` after `inflate()` returned French on both versions, while the original constructor-assigned text stayed English. On API 23, all readings returned French.
+
+`ComposeWebViewConstructionTest` creates a WebView directly in an `AndroidView` factory, without modifying the resource configuration or calling `loadUrl()` until the test checks the initial labels. It compares the application context, the factory context, and Compose's `stringResource()`, then compares the first instrumented load with an explicit repair immediately after the constructor. Run each test in a fresh app process and pass `webViewResetsApplicationLocale` as an instrumentation argument for the expected behavior of the provider being tested.
+
+On API 24 and 35, construction switched the application lookup from French to English, while the factory context and `stringResource()` both returned French before navigation. The load hook restored later application lookups and the label already populated with English stayed English. An explicit repair immediately after construction kept that label French. On API 23, all readings stayed French in both runs.
+
 Both tests passed before enabling automatic repair on the three configurations below. The provider on API 24 was identified from the framework's `WebViewFactory` log.
 
 | Android API | WebView provider |
