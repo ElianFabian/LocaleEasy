@@ -8,6 +8,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.espresso.Espresso
 import com.elianfabian.locale_easy.LocaleEasy
+import com.elianfabian.locale_easy.LocalePreference
 import com.elianfabian.locale_easy.followSystem
 import com.elianfabian.locale_easy.setAppLocale
 import org.junit.After
@@ -51,5 +52,10 @@ class ComposeLocaleTest {
             Espresso.pressBack()
             compose.onNodeWithText(compose.activity.getString(R.string.local_recreation_status)).assertExists()
         }
+        compose.onNodeWithText(compose.activity.getString(R.string.open_settings)).performClick()
+        val before = compose.activity
+        compose.onNodeWithText(before.getString(R.string.follow_system_locale)).performClick()
+        compose.waitUntil(15_000) { compose.activity !== before }
+        assertEquals(LocalePreference.FollowSystem, LocaleEasy.getInstance().state.value.preference)
     }
 }

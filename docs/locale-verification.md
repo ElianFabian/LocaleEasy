@@ -4,6 +4,14 @@ Date: 2026-11-05; sample recreation selector verification updated 2026-11-06. Th
 
 ## Executed checks
 
+### Legacy locale aliases on Android 5
+
+An API 21 emulator probe passed old and modern Hebrew, Indonesian, and Yiddish codes through LocaleEasy. Both spellings of each language were accepted. Android 5 reported and serialized the legacy codes `iw`, `in`, and `ji`. The probe also accepted `fil-PH`, `tl-PH`, `sr-Latn-RS`, `zh-Hant-TW`, and `es-419`. It checked acceptance and effective locale state.
+
+The legacy constructor forms `Locale("no", "NO", "NY")`, `Locale("ja", "JP", "JP")`, and `Locale("th", "TH", "TH")` failed LocaleEasy's round-trip validation on API 21. Their modern equivalents `nn-NO`, `ja-JP-u-ca-japanese`, and `th-TH-u-nu-thai` passed. Lingver's legacy-code mapping lives in its string-returning `getLanguage()` method. A similar mapping in LocaleEasy would be relevant to an API that promises a canonical language string across Android versions. [Lingver source](https://raw.githubusercontent.com/YarikSOffice/lingver/master/library/src/main/java/com/yariksoffice/lingver/Lingver.kt) · [Android Locale reference](https://developer.android.com/reference/java/util/Locale#toLanguageTag())
+
+Localazy's tables are a reference for test cases and resource directory syntax. The tables cover API 10–29. With SDK build tools 36.0.0, AAPT2 rejected the listed `values-ji-r001` example and accepted `values-b+yi+001`. It also accepted the old and modern Hebrew, Indonesian, and Yiddish folder names tested. Check the actual resource compiler and minimum supported device when adding a qualifier. [Localazy Android locale tables](https://github.com/localazy/android-locales) · [Android resource qualifiers](https://developer.android.com/guide/topics/resources/providing-resources)
+
 After removal of the public framework recreation switch, the sample's API 36 lifecycle and UI suite covered 24 cases with one opt-in skip. Two UI cases lost window focus during an emulator System UI error and passed on rerun. Separate process pairs passed for migration of a marked framework experiment and preservation of an independent platform app language. The unit tests, APK builds, and lint passed.
 
 ### Runtime discovery with a default language only

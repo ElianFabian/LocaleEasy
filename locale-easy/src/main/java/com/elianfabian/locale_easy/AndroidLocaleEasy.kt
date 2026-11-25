@@ -74,19 +74,6 @@ internal class AndroidLocaleEasy(
 		}
 	}
 
-	override var followSystemLocale: Boolean
-		get() = preference.value == LocalePreference.FollowSystem
-		set(value) {
-			checkMainThread()
-			applyUpdate {
-				val current = state.value
-				if (value) applyPreference(LocalePreference.FollowSystem)
-				else if (current.preference == LocalePreference.FollowSystem) {
-					applyPreference(LocalePreference.AppLocales(current.effectiveLocales))
-				}
-			}
-		}
-
 	override fun setPreference(preference: LocalePreference) {
 		checkMainThread()
 		val selection = preference.immutableCopy()

@@ -6,13 +6,12 @@ import androidx.lifecycle.viewModelScope
 import com.elianfabian.locale_easy.LocaleEasy
 import com.elianfabian.locale_easy.followSystem
 import com.elianfabian.locale_easy.setAppLocale
-import com.elianfabian.locale_easy.LocalePreference
 import kotlinx.coroutines.launch
 import java.util.Locale
 
 sealed interface UiAction {
 	data class SetLocale(val locale: Locale) : UiAction
-	data class SetFollowSystemLocale(val follow: Boolean) : UiAction
+	data object FollowSystem : UiAction
 	data object FixWebViewLocale : UiAction
 }
 
@@ -37,11 +36,7 @@ class MainViewModel : ViewModel() {
 	fun sendAction(action: UiAction) {
 		when (action) {
 			is UiAction.SetLocale -> localeEasy.setAppLocale(action.locale)
-			is UiAction.SetFollowSystemLocale -> if (action.follow) {
-				localeEasy.followSystem()
-			} else {
-				localeEasy.setPreference(LocalePreference.AppLocales(localeState.value.effectiveLocales))
-			}
+			UiAction.FollowSystem -> localeEasy.followSystem()
 			UiAction.FixWebViewLocale -> LocaleEasy.fixWebViewLocale()
 		}
 	}

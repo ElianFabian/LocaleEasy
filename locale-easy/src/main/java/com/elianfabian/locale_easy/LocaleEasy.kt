@@ -49,10 +49,6 @@ public interface LocaleEasy {
 	/** Compatibility alias for [effectiveLocales]. */
 	public val appLocaleList: StateFlow<List<Locale>> get() = effectiveLocales
 
-	/** Setting false freezes the current effective locales as a custom preference. */
-	@set:MainThread
-	public var followSystemLocale: Boolean
-
 	/** Return a context for the current selection. Obtain a new one after a language change. */
 	public fun localizedContext(base: Context): Context
 

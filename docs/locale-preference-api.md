@@ -41,8 +41,6 @@ Existing consumer calls remain available:
 | Existing API | Meaning |
 | --- | --- |
 | `appLocaleList` | Alias for `effectiveLocales` |
-| `followSystemLocale = true` | Select `FollowSystem` |
-| `followSystemLocale = false` | If following system, freeze current effective locales as `AppLocales`; otherwise keep the app selection |
 
 Use `state` for a single coherent read of preference, system locales, and effective locales. The existing flows project individual values from this snapshot. Custom implementations of `LocaleEasy` must also expose a `StateFlow<LocaleState>`.
 
@@ -173,7 +171,7 @@ The executed emulator checks and remaining manual/device coverage are recorded i
 
 1. Select French on an English device, restart the process without clearing data, and verify the initial screen and newly opened sample activities use French.
 2. Select follow-system, change system language, and verify effective languages and visible resources update. Repeat with a custom selection and verify it remains fixed.
-3. Disable follow-system using the sample checkbox; verify the current languages become a custom preference and survive restart.
+3. Select a language in the sample picker, then select **Follow System Locale**. Verify the preference resets to `FollowSystem` and survives restart.
 4. Reapply the same selection and verify no additional refresh. Check both XML and Compose screens.
 
 The [reliability checklist](locale-reliability-checklist.md) records implementation status separately from broader device acceptance.

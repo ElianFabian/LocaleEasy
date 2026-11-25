@@ -248,7 +248,10 @@ class LocaleLifecycleTest {
     @Test fun manualModeSwitchWithIdenticalLanguagesStillRebuildsTheContext() {
         ActivityScenario.launch(LocaleFixtureActivity::class.java).use { scenario ->
             var initialId = 0
-            scenario.onActivity { initialId = it.instanceId; api.followSystemLocale = false }
+            scenario.onActivity {
+                initialId = it.instanceId
+                api.setAppLocaleList(api.state.value.effectiveLocales)
+            }
             await {
                 var replaced = false
                 scenario.onActivity { replaced = it.instanceId != initialId }

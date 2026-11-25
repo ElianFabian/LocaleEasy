@@ -4,15 +4,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.Switch
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.selection.toggleable
-import androidx.compose.ui.semantics.Role
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -21,7 +17,6 @@ import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -65,14 +60,11 @@ fun LocaleSettingsSheet(
 			)
 			TextOriginLegend()
 
-			Row(modifier = Modifier.fillMaxWidth().toggleable(value = isFollowingSystem, role = Role.Switch,
-				onValueChange = { viewModel.sendAction(UiAction.SetFollowSystemLocale(it)) }), verticalAlignment = Alignment.CenterVertically,
-				horizontalArrangement = Arrangement.SpaceBetween) {
-				Text(text = stringResource(R.string.follow_system_locale), modifier = Modifier.weight(1f), color = TranslatedTextColor)
-				Switch(checked = isFollowingSystem, onCheckedChange = null)
-			}
-			LanguageButtons(selectedLocale = if (isFollowingSystem) null else appLocales.firstOrNull(),
-				onLanguageSelected = { viewModel.sendAction(UiAction.SetLocale(it)) })
+			LanguageButtons(
+				selectedLocale = if (isFollowingSystem) null else appLocales.firstOrNull(),
+				onFollowSystemSelected = { viewModel.sendAction(UiAction.FollowSystem) },
+				onLanguageSelected = { viewModel.sendAction(UiAction.SetLocale(it)) },
+			)
 			HorizontalDivider()
 
 			Text(
@@ -94,7 +86,11 @@ fun LocaleSettingsSheet(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun LanguageButtons(selectedLocale: Locale? = null, onLanguageSelected: (Locale) -> Unit) {
+private fun LanguageButtons(
+	selectedLocale: Locale?,
+	onFollowSystemSelected: () -> Unit,
+	onLanguageSelected: (Locale) -> Unit,
+) {
 	val languages = LocaleEasy.getInstance().localeCatalog.supportedLocales
 	val selectedLanguage = selectedLocale?.let { selected ->
 		languages.firstOrNull { it == selected } ?: Locale.forLanguageTag(selected.language)
@@ -104,6 +100,11 @@ fun LanguageButtons(selectedLocale: Locale? = null, onLanguageSelected: (Locale)
 		modifier = Modifier.fillMaxWidth(),
 		horizontalArrangement = Arrangement.spacedBy(8.dp)
 	) {
+		FilterChip(
+			selected = selectedLocale == null,
+			onClick = onFollowSystemSelected,
+			label = { Text(text = stringResource(R.string.follow_system_locale), color = TranslatedTextColor) },
+		)
 		languages.forEach { locale ->
 			FilterChip(
 				selected = selectedLanguage == locale,
