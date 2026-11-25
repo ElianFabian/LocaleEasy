@@ -8,6 +8,9 @@ import androidx.appcompat.widget.AppCompatTextView
 import java.util.concurrent.atomic.AtomicReference
 
 class WebViewContentFixtureActivity : AppCompatActivity() {
+    var usedResourceOverload = false
+        private set
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val layout = if (intent.getBooleanExtra("merge", false)) {
@@ -16,6 +19,11 @@ class WebViewContentFixtureActivity : AppCompatActivity() {
             R.layout.webview_content_fixture
         }
         setContentView(layout)
+    }
+
+    override fun setContentView(layoutResID: Int) {
+        usedResourceOverload = true
+        super.setContentView(layoutResID)
     }
 }
 

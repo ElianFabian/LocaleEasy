@@ -214,7 +214,9 @@ localeEasyLocales {
 }
 ```
 
-This uses View Binding style inflation from API 24 onward. It inflates the XML with no parent and passes the resulting view to `setContentView(view)`, which can change root layout parameters. Use it for screens that accept those mounting semantics and do not rely on an override of the resource-ID overload. A layout with a `<merge>` root, an explicit `super.setContentView(...)` call, or a call inside another method still uses the original resource-ID overload. The separate inflation option can repair subsequent reads after that overload returns. The sample defaults to early repair and exposes `-PsampleWebViewFallbacks=true` to build it with both fallback hooks enabled.
+On API 24 and later, an opted-in AppCompat activity still calls the original resource-ID overload. The plugin instruments the inflater call inside AppCompat's delegate and gives it the original content parent. AppCompat still prepares the window, attaches the layout, and calls its content-changed callback. This preserves layout parameters and supports `<merge>`. The delegate integration was verified with AppCompat 1.7.1. An incompatible AppCompat delegate fails the build when the plugin cannot find its inflation call.
+
+For a plain activity, the option retains View Binding style inflation because the platform window's inflater call is outside the build. It inflates without a parent and passes the result to `setContentView(view)`, which can change root layout parameters and skips the resource-ID overload. A plain activity with a `<merge>` root keeps its original call. Explicit `super.setContentView(...)` calls and calls inside other methods stay outside the opt-in. The separate inflation option can repair later reads after those calls return. The sample defaults to early repair and exposes `-PsampleWebViewFallbacks=true` to build it with both fallback hooks enabled.
 
 #### Configuration changes
 

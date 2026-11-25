@@ -44,6 +44,8 @@ A follow-up APK enabled `instrumentWebViewCreation` and disabled both `instrumen
 
 The opt-in `webViewContentViewActivities` implementation passed on API 24 and 35 with the sample's fallback hooks disabled. Its XML declared a WebView subclass compiled in the runtime module, outside the plugin's app-module transform. The inflated view retained its subclass and the sibling label recorded French on its first constructor call. A `<merge>` root in the same activity still used the resource-ID overload, and AppCompat attached its child directly to the content container. The Compose creation and XML page-state tests passed in the same configuration. All five WebView regression tests passed in a separate build with both fallback hooks enabled.
 
+The AppCompat 1.7.1 follow-up instrumented the delegate's original inflation call. With both fallback hooks disabled, separate cold-process tests on API 24 and 35 verified that the resource-ID overload ran, a fixed `320dp` root kept its layout height, and a `<merge>` layout attached its views directly to the actual content container. Both layouts created the external WebView subclass and the following label read French on its first construction. The unlisted activity and XML WebView recreation checks also covered the delegate's ordinary path.
+
 Both tests passed before enabling automatic repair on the three configurations below. The provider on API 24 was identified from the framework's `WebViewFactory` log.
 
 | Android API | WebView provider |

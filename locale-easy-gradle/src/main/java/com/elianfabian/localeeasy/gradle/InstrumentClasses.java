@@ -35,6 +35,7 @@ import org.objectweb.asm.Opcodes;
 @CacheableTask
 public abstract class InstrumentClasses extends DefaultTask {
     private static final String ACTIVITY = "android/app/Activity";
+    private static final String APP_COMPAT_ACTIVITY = "androidx/appcompat/app/AppCompatActivity";
     private static final String WEB_VIEW = "android/webkit/WebView";
     private static final String LAYOUT_INFLATER = "android/view/LayoutInflater";
     private static final String LOCALE_EASY = "com/elianfabian/locale_easy/LocaleEasy";
@@ -88,6 +89,10 @@ public abstract class InstrumentClasses extends DefaultTask {
             if (!contentViewActivities.isEmpty() && loader.getResource(WEB_VIEW_CONTENT + ".class") == null) {
                 throw new GradleException("Use a LocaleEasy runtime that supports webViewContentViewActivities.");
             }
+            if (!contentViewActivities.isEmpty()
+                    && loader.getResource(AppCompatContentInstrumentation.RUNTIME_OWNER + ".class") == null) {
+                throw new GradleException("Use a LocaleEasy runtime that supports AppCompat content inflation.");
+            }
             var hierarchy = new ClassHierarchy(projectClasses, new HashMap<>(), loader);
             for (var entry : entries.entrySet()) {
                 byte[] bytes = entry.getValue();
@@ -106,8 +111,9 @@ public abstract class InstrumentClasses extends DefaultTask {
                     if (activity != null || webViewLoads || inflation || creation) {
                         boolean rewriteContentView = contentViewActivities.contains(reader.getClassName().replace('/', '.'))
                                 && hierarchy.isSubclassOf(parent, ACTIVITY);
+                        boolean appCompatContentView = rewriteContentView && hierarchy.isSubclassOf(parent, APP_COMPAT_ACTIVITY);
                         bytes = instrumentClass(reader, activity, hierarchy, webViewLoads, inflation, creation,
-                                rewriteContentView);
+                                rewriteContentView, appCompatContentView);
                     }
                 }
                 var outputEntry = new JarEntry(entry.getKey());
@@ -149,7 +155,8 @@ public abstract class InstrumentClasses extends DefaultTask {
     }
 
     private static byte[] instrumentClass(ClassReader reader, ActivityClass activity, ClassHierarchy hierarchy,
-            boolean webViewLoads, boolean inflation, boolean creation, boolean rewriteContentView) {
+            boolean webViewLoads, boolean inflation, boolean creation, boolean rewriteContentView,
+            boolean appCompatContentView) {
         var writer = new ClassWriter(reader, ClassWriter.COMPUTE_MAXS);
         reader.accept(new ClassVisitor(Opcodes.ASM9, writer) {
             private boolean wrappedSuperCall;
@@ -183,8 +190,10 @@ public abstract class InstrumentClasses extends DefaultTask {
                         boolean activityLayoutCall = (inflation || rewriteHere) && instanceCall
                                 && isActivityLayoutCall(hierarchy, owner, calledName, calledDescriptor);
                         if (rewriteHere && opcode == Opcodes.INVOKEVIRTUAL && activityLayoutCall) {
-                            super.visitMethodInsn(Opcodes.INVOKESTATIC, WEB_VIEW_CONTENT,
-                                    "setContentView", "(L" + ACTIVITY + ";I)V", false);
+                            super.visitMethodInsn(Opcodes.INVOKESTATIC,
+                                    appCompatContentView ? AppCompatContentInstrumentation.RUNTIME_OWNER : WEB_VIEW_CONTENT,
+                                    appCompatContentView ? "setAppCompatContentView" : "setContentView",
+                                    "(L" + ACTIVITY + ";I)V", false);
                         } else if (creation && inflaterCall && opcode == Opcodes.INVOKEVIRTUAL) {
                             String descriptorWithInflater = "(L" + LAYOUT_INFLATER + ";" + calledDescriptor.substring(1);
                             super.visitMethodInsn(Opcodes.INVOKESTATIC, WEB_VIEW_INFLATION,

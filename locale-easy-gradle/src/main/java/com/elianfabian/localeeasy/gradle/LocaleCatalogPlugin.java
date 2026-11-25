@@ -2,6 +2,7 @@ package com.elianfabian.localeeasy.gradle;
 
 import com.android.build.api.artifact.ScopedArtifact;
 import com.android.build.api.dsl.ApplicationExtension;
+import com.android.build.api.instrumentation.InstrumentationScope;
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension;
 import com.android.build.api.variant.ApplicationVariant;
 import com.android.build.api.variant.BuildConfigField;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringJoiner;
+import kotlin.Unit;
 import org.gradle.api.Action;
 import org.gradle.api.GradleException;
 import org.gradle.api.Plugin;
@@ -44,6 +46,10 @@ public final class LocaleCatalogPlugin implements Plugin<Project> {
                         var contentViewActivities = locales.getWebViewContentViewActivities().get();
                         if (!contentViewActivities.isEmpty() && !creation) {
                             throw new GradleException("webViewContentViewActivities requires instrumentWebViewCreation.");
+                        }
+                        if (!contentViewActivities.isEmpty()) {
+                            variant.getInstrumentation().transformClassesWith(AppCompatContentInstrumentation.class,
+                                    InstrumentationScope.ALL, unused -> Unit.INSTANCE);
                         }
                         if (activities || webViewLoads || inflation || creation) {
                             var task = project.getTasks().register(
