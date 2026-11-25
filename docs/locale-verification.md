@@ -12,7 +12,7 @@ A separate Gradle 8.11.1 / AGP 8.8 consumer compiled against the release AAR and
 
 ### WebView resource repair and page state
 
-`WebViewLocaleTest.repairsAnActualApplicationResourceMismatch` deliberately sets the application resources to Spanish while LocaleEasy's preference and effective locales are French. It verifies the Spanish resource lookup before calling `fixWebViewLocale()`, then checks that the application resources return French again and the preference is preserved.
+`WebViewLocaleTest.repairsAnApplicationResourceMismatchFromApi24` deliberately sets the application resources to Spanish while LocaleEasy's preference and effective locales are French. It verifies the Spanish resource lookup before calling `fixWebViewLocale()`. On API 24 and later it expects French after the call. On earlier versions it expects the resource locale to stay Spanish. In both cases it checks that the preference is preserved.
 
 `WebViewLocaleTest.observesLoadedWebViewAcrossLocalRecreation` opens the sample's XML WebView dialog in a fresh process. It reads the application and activity resource languages before and after the dialog opens, waits for the local page to load, navigates to a second URL, enters text, and scrolls. It calls the native repair with the page still open and asserts that the page state and history are intact. It then changes the app language to Spanish and checks the native strings and the replacement WebView's loaded HTML. The test reports the URL, form value, scroll position and history of the replacement.
 
@@ -27,6 +27,8 @@ Both tests passed before enabling automatic repair on the three configurations b
 | 35 | Google WebView `124.0.6367.219` |
 
 With `instrumentWebViewLoads` enabled, opening the XML dialog in a fresh process kept the application resources in French on API 24 and API 35. The Compose fixture deliberately sets the application resources to English after constructing a WebView subclass. Its tests verify that `loadUrl()` with headers, `loadData()`, and `loadDataWithBaseURL()` restore French and still load the requested page. A separate consumer compiled with either plugin option alone. Inspection of its bytecode confirmed that the WebView-only build inserts the repair before real WebView calls and leaves an unrelated class's `loadUrl()` and the activity attachment code as written.
+
+A separate first-load probe kept the application and activity resources in French on API 21, 22 and 23, through WebView construction and page completion. The same APK switched application resources to the device's English on API 24 while the activity stayed French. The helper now skips resource inspection on API 21–23 and keeps the mismatch check from API 24.
 
 To isolate first initialization after installing the sample and its test APK:
 

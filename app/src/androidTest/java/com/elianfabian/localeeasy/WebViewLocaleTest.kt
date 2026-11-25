@@ -9,6 +9,7 @@ import android.widget.Button
 import androidx.core.os.ConfigurationCompat
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.filters.SdkSuppress
 import androidx.test.platform.app.InstrumentationRegistry
 import com.elianfabian.locale_easy.LocaleEasy
 import com.elianfabian.locale_easy.setAppLocale
@@ -31,14 +32,15 @@ class WebViewLocaleTest {
 
     @Test
     @Suppress("DEPRECATION")
-    fun repairsAnActualApplicationResourceMismatch() = preservePreference {
+    fun repairsAnApplicationResourceMismatchFromApi24() = preservePreference {
         instrumentation.runOnMainSync {
             api.setAppLocale(Locale.FRENCH)
             val preference = api.preference.value
             val effective = api.effectiveLocaleList.value
             val resources = app.resources
             val spanish = Locale.forLanguageTag("es")
-            val mismatch = Configuration(resources.configuration).apply { setLocale(spanish) }
+            val originalConfig = Configuration(resources.configuration)
+            val mismatch = Configuration(originalConfig).apply { setLocale(spanish) }
             try {
                 resources.updateConfiguration(mismatch, resources.displayMetrics)
                 assertEquals(spanish, ConfigurationCompat.getLocales(resources.configuration)[0])
@@ -47,17 +49,21 @@ class WebViewLocaleTest {
 
                 LocaleEasy.fixWebViewLocale()
 
-                assertEquals(Locale.FRENCH, ConfigurationCompat.getLocales(resources.configuration)[0])
-                assertEquals("Chaîne Localisée: Vert", app.getString(R.string.string_resource_example))
+                val repairSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N
+                val expectedLocale = if (repairSupported) Locale.FRENCH else spanish
+                val expectedText = if (repairSupported) "Chaîne Localisée: Vert" else "Cadena Localizada: Verde"
+                assertEquals(expectedLocale, ConfigurationCompat.getLocales(resources.configuration)[0])
+                assertEquals(expectedText, app.getString(R.string.string_resource_example))
                 assertEquals(preference, api.preference.value)
                 assertEquals(effective, api.effectiveLocaleList.value)
             } finally {
-                LocaleEasy.fixWebViewLocale()
+                resources.updateConfiguration(originalConfig, resources.displayMetrics)
             }
         }
     }
 
     @Test
+    @SdkSuppress(minSdkVersion = 24)
     fun observesLoadedWebViewAcrossLocalRecreation() = preservePreference {
         instrumentation.runOnMainSync { api.setAppLocale(Locale.FRENCH) }
         ActivityScenario.launch(MainActivity::class.java).use { scenario ->
@@ -142,14 +148,17 @@ class WebViewLocaleTest {
     }
 
     @Test
+    @SdkSuppress(minSdkVersion = 24)
     fun composeUrlWithHeadersRepairsResources() =
         verifyComposeLoad(ComposeWebViewFixtureActivity.Load.URL_WITH_HEADERS)
 
     @Test
+    @SdkSuppress(minSdkVersion = 24)
     fun composeLoadDataRepairsResources() =
         verifyComposeLoad(ComposeWebViewFixtureActivity.Load.DATA)
 
     @Test
+    @SdkSuppress(minSdkVersion = 24)
     fun composeLoadDataWithBaseUrlRepairsResources() =
         verifyComposeLoad(ComposeWebViewFixtureActivity.Load.DATA_WITH_BASE_URL)
 

@@ -2,6 +2,7 @@ package com.elianfabian.locale_easy
 
 import android.app.Application
 import android.content.Context
+import android.os.Build
 import androidx.annotation.MainThread
 import androidx.annotation.RequiresApi
 import kotlinx.coroutines.flow.StateFlow
@@ -98,12 +99,13 @@ public interface LocaleEasy {
 		}
 
 		/**
-		 * Repair application resources in local mode if a WebView provider changes their locales.
+		 * On Android 7.0 and later, repair application resources if WebView changes their locales.
 		 * Activity resource scopes and existing WebViews retain their configurations.
 		 */
 		@MainThread
 		public fun fixWebViewLocale() {
 			checkMainThread()
+			if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) return
 			(getInstance() as? AndroidLocaleEasy)?.reapplyResources()
 		}
 	}
