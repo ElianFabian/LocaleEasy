@@ -33,7 +33,7 @@ override fun attachBaseContext(newBase: Context) {
 
 The optional Gradle plugin inserts the wrap for activities compiled in the application module. Activities supplied directly by other modules can use the manual integration where they are defined. See the [plugin setup and scope](docs/locale-preference-api.md#optional-gradle-integration).
 
-Use `localizedContext(context)` at the point of use for notifications, workers, and other resource lookups. Use `localizedContext(context, Locale.FRENCH)` when the text needs a specific language regardless of the reader's app preference.
+Use `localizedContext(context)` at the point of use for notifications, workers, and other resource lookups. Pass an explicit `Locale` or ordered `List<Locale>` when the text needs to follow someone else's language preferences.
 
 ## Choose which language state to read
 

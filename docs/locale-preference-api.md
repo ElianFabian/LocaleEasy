@@ -186,6 +186,17 @@ val recipientContext = LocaleEasy.getInstance().localizedContext(context, recipi
 val title = recipientContext.getString(R.string.order_ready_title, orderNumber)
 ```
 
+If the recipient has several preferences, pass a nonempty list in order:
+
+```kotlin
+val recipientContext = LocaleEasy.getInstance().localizedContext(
+    context,
+    listOf(Locale.CANADA_FRENCH, Locale.ENGLISH),
+)
+```
+
+LocaleEasy keeps the first occurrence of each locale and passes the list to Android for resource resolution on API 24 and later. On API 21–23 it applies only the first locale.
+
 The explicit lookup leaves the current preference, activity lifecycle and observable locale state intact. Use the single-argument overload for activity integration.
 
 #### Build a notification

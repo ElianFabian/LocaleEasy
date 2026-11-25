@@ -66,7 +66,16 @@ public interface LocaleEasy {
 	public fun localizedContext(base: Context): Context
 
 	/** Return a context for a one-off resource lookup in [locale], independent of the saved choice. */
-	public fun localizedContext(base: Context, locale: Locale): Context
+	public fun localizedContext(base: Context, locale: Locale): Context =
+		localizedContext(base, listOf(locale))
+
+	/**
+	 * Return a context for a one-off resource lookup with [locales] in preference order.
+	 * The list must be nonempty and contain valid locales. Repeated locales are ignored
+	 * after their first occurrence. On API 21–23, Android resources use the first locale.
+	 * The saved preference and observable locale state are unaffected.
+	 */
+	public fun localizedContext(base: Context, locales: List<Locale>): Context
 
 	public companion object {
 		@Volatile

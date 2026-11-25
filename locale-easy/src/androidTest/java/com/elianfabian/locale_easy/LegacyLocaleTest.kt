@@ -2,6 +2,7 @@ package com.elianfabian.locale_easy
 
 import android.os.Build
 import android.widget.TextView
+import androidx.core.os.ConfigurationCompat
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -71,6 +72,46 @@ class LegacyLocaleTest {
                 french.resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK)
             assertEquals(preference, api.preference.value)
             assertEquals(effective, api.effectiveLocaleList.value)
+        }
+    }
+
+    @Test fun explicitLocaleListKeepsOrderAndDeduplicatesWithoutChangingAppLocale() {
+        instrumentation.runOnMainSync {
+            val base = instrumentation.targetContext.applicationContext
+            api.setAppLocale(Locale.ENGLISH)
+            val preference = api.preference.value
+            val effective = api.effectiveLocaleList.value
+            val processDefault = Locale.getDefault()
+            val hebrew = Locale.forLanguageTag("he-IL")
+            for ((preferred, expectedText) in listOf(
+                listOf(Locale.FRENCH, Locale.FRENCH, hebrew) to "French fixture",
+                listOf(hebrew, Locale.FRENCH, hebrew) to "Hebrew fixture",
+            )) {
+                val context = api.localizedContext(base, preferred)
+                val configLocales = ConfigurationCompat.getLocales(context.resources.configuration)
+                val expected = if (Build.VERSION.SDK_INT >= 24) preferred.distinct() else preferred.take(1)
+                assertEquals(expected, List(configLocales.size()) { configLocales[it] })
+                assertEquals(expectedText, context.getString(R.string.locale_easy_fixture_label))
+            }
+            assertEquals(preference, api.preference.value)
+            assertEquals(effective, api.effectiveLocaleList.value)
+            assertEquals(processDefault, Locale.getDefault())
+            assertEquals("English fixture", base.getString(R.string.locale_easy_fixture_label))
+        }
+    }
+
+    @Test fun explicitLocaleListFallsBackThroughAndroid() {
+        val base = instrumentation.targetContext.applicationContext
+        val context = api.localizedContext(base, listOf(Locale.forLanguageTag("qaa"), Locale.FRENCH))
+        val expected = if (Build.VERSION.SDK_INT >= 24) "French fixture" else "English fixture"
+        assertEquals(expected, context.getString(R.string.locale_easy_fixture_label))
+    }
+
+    @Test fun explicitLocaleListRejectsEmptyAndInvalidInput() {
+        val base = instrumentation.targetContext.applicationContext
+        assertThrows(IllegalArgumentException::class.java) { api.localizedContext(base, emptyList()) }
+        assertThrows(IllegalArgumentException::class.java) {
+            api.localizedContext(base, listOf(Locale.FRENCH, Locale.ROOT))
         }
     }
 

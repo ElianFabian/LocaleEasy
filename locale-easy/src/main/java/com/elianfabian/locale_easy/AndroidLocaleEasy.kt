@@ -123,8 +123,9 @@ internal class AndroidLocaleEasy(
 		return LocaleEasyContextWrapper(localized, locales, current.preference, overridesLocales = !useBase)
 	}
 
-	override fun localizedContext(base: Context, locale: Locale): Context {
-		val selection = LocalePreference.AppLocales(listOf(locale))
+	override fun localizedContext(base: Context, locales: List<Locale>): Context {
+		val orderedLocales = locales.distinct()
+		val selection = LocalePreference.AppLocales(orderedLocales)
 		return createLocalizedContext(base, selection.locales)
 	}
 
