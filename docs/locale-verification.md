@@ -8,12 +8,16 @@ Date: 2026-11-05; sample recreation selector verification updated 2026-11-06. Th
 
 Both sample builds passed with Gradle's configuration cache enabled. On an Android 15 emulator, the automatic build localized and recreated a plain activity with no override and an AppCompat activity with an inherited final `attachBaseContext()`. The existing manual activity test passed on both builds and restored user input after recreation. A separate Android app with no declared default language or catalog also compiled with instrumentation enabled. Its transformed class contained the generated `attachBaseContext()` call.
 
-To reproduce the automatic tests, install the instrumented sample and its test APK, then opt into the targeted test class:
+The sample now enables instrumentation by default. To reproduce the automatic tests, install the sample and its test APK and run the targeted test class:
 
 ```powershell
-./gradlew.bat :app:installDebug :app:installDebugAndroidTest '-PlocaleEasy.instrumentActivities=true'
-adb shell am instrument -w -e instrumentActivities true -e class com.elianfabian.localeeasy.AutomaticActivityLocalizationTest com.elianfabian.localeeasy.test/androidx.test.runner.AndroidJUnitRunner
+./gradlew.bat :app:installDebug :app:installDebugAndroidTest
+adb shell am instrument -w -e class com.elianfabian.localeeasy.AutomaticActivityLocalizationTest com.elianfabian.localeeasy.test/androidx.test.runner.AndroidJUnitRunner
 ```
+
+### Sample language panel
+
+The sample now uses the plugin for its main and XML activities. On Android 15, instrumentation verified that the panel shows the sample catalog and that its Android button sends the app-language settings intent. Android Settings displayed the five declared languages. The Compose navigation and locale recreation tests passed, along with the controls opened from the XML activity, dialog and WebView. One repeated Espresso back-navigation run timed out waiting for window focus. On Android 12L, the panel showed the device and catalog languages and omitted the Android settings button. The plain and AppCompat activity instrumentation tests passed on both versions.
 
 ### System locales with an Android per-app language
 

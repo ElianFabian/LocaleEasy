@@ -19,9 +19,18 @@
 
     <string name="settings_title">État de LocaleEasy</string>
     <string name="follow_system_locale">Suivre la langue du système</string>
-    <string name="state_following_system">Suivi du système: %b</string>
-    <string name="state_app_locales">Locales de l\'App: %s</string>
-    <string name="state_system_locales">Locales du Système: %s</string>
+    <string name="state_app_locales">Appliquées par LocaleEasy : %s</string>
+    <string name="state_system_locales">Langues de l’appareil : %s</string>
+    <string name="state_catalog_locales">Catalogue LocaleEasy : %s</string>
+    <string name="state_catalog_default">Langue par défaut du catalogue : %s</string>
+    <string name="locale_not_configured">Non configuré</string>
+    <string name="android_languages_title">Langues de l’application dans Android</string>
+    <string name="state_android_locale">Sélection Android : %s</string>
+    <string name="android_locale_uses_device">Utiliser la langue de l’appareil</string>
+    <string name="state_android_supported_locales">Langues proposées par Android : %s</string>
+    <string name="android_languages_description">Le sélecteur ci-dessus change la langue des écrans de démonstration.</string>
+    <string name="open_android_languages">Ouvrir les paramètres de langue d’Android</string>
+    <string name="android_languages_unavailable">Les paramètres de langue d’Android ne sont pas disponibles sur cet appareil.</string>
 
     <string name="fix_webview">Corriger le Locale WebView &amp; Recharger</string>
     <string name="open_settings">Ouvrir État &amp; Contrôles</string>

@@ -2,7 +2,7 @@
     <string name="sample_intro" translatable="false">Change language and see how each screen responds. Green text comes from localizable resources; gray text stays in English.</string>
     <string name="legend_localizable">Localizable text</string>
     <string name="legend_english_only" translatable="false">English only</string>
-    <string name="local_recreation_status" translatable="false">Local activity recreation</string>
+    <string name="local_recreation_status" translatable="false">Local activity recreation · Gradle plugin</string>
     <string name="sample_screens" translatable="false">Explore the samples</string>
     <string name="compose_description" translatable="false">Reactive text, formatting, and saved navigation</string>
     <string name="activity_description" translatable="false">XML views, toolbar, and activity back stack</string>
@@ -27,9 +27,18 @@
 
     <string name="settings_title">LocaleEasy State</string>
     <string name="follow_system_locale">Follow System Locale</string>
-    <string name="state_following_system">Following System: %b</string>
-    <string name="state_app_locales">App Locales: %s</string>
-    <string name="state_system_locales">System Locales: %s</string>
+    <string name="state_app_locales">Applied by LocaleEasy: %s</string>
+    <string name="state_system_locales">Device languages: %s</string>
+    <string name="state_catalog_locales">LocaleEasy catalog: %s</string>
+    <string name="state_catalog_default">Catalog default: %s</string>
+    <string name="locale_not_configured">Not configured</string>
+    <string name="android_languages_title">Android app languages</string>
+    <string name="state_android_locale">Android selection: %s</string>
+    <string name="android_locale_uses_device">Use device language</string>
+    <string name="state_android_supported_locales">Languages offered by Android: %s</string>
+    <string name="android_languages_description">The picker above sets the language for the sample screens.</string>
+    <string name="open_android_languages">Open Android language settings</string>
+    <string name="android_languages_unavailable">Android language settings are unavailable on this device.</string>
 
     <string name="fix_webview">Fix WebView Locale &amp; Reload</string>
     <string name="open_settings">Open State &amp; Controls</string>

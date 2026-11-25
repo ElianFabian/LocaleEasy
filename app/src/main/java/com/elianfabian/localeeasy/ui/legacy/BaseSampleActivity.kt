@@ -1,8 +1,6 @@
 package com.elianfabian.localeeasy.ui.legacy
 
-import android.content.Context
 import android.os.Bundle
-import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -11,18 +9,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.ComposeView
-import com.elianfabian.locale_easy.LocaleEasy
-import com.elianfabian.localeeasy.MainViewModel
-import com.elianfabian.localeeasy.ui.screens.LocaleSettingsSheet
+import com.elianfabian.localeeasy.ui.settings.LocaleSettingsSheet
+import com.elianfabian.localeeasy.ui.settings.LocaleSettingsViewModel
 import com.elianfabian.localeeasy.ui.theme.LocaleEasyTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 abstract class BaseSampleActivity : AppCompatActivity() {
-	override fun attachBaseContext(newBase: Context) {
-		super.attachBaseContext(LocaleEasy.getInstance().localizedContext(newBase))
-	}
-
-	protected val viewModel: MainViewModel by viewModels()
+	private val viewModel: LocaleSettingsViewModel by viewModels()
 	private var showSettings by mutableStateOf(false)
 
 	override fun onCreate(savedInstanceState: Bundle?) {

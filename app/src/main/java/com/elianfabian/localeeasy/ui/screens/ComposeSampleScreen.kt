@@ -1,6 +1,5 @@
 package com.elianfabian.localeeasy.ui.screens
 
-import android.content.res.Resources
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,7 +14,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -23,10 +21,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.elianfabian.localeeasy.MainViewModel
+import androidx.core.os.ConfigurationCompat
+import com.elianfabian.localeeasy.ui.settings.LocaleSettingsSheet
+import com.elianfabian.localeeasy.ui.settings.LocaleSettingsViewModel
 import com.elianfabian.localeeasy.R
 import com.elianfabian.localeeasy.ui.theme.EnglishOnlyColor
 import com.elianfabian.localeeasy.ui.theme.TranslatedTextColor
@@ -38,7 +37,7 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ComposeSampleScreen(
-	viewModel: MainViewModel,
+	viewModel: LocaleSettingsViewModel,
 	onBack: () -> Unit,
 ) {
 	var showSettings by rememberSaveable { mutableStateOf(false) }
@@ -65,13 +64,14 @@ fun ComposeSampleScreen(
 			)
 
 			Text(
-				text = stringResource(R.string.string_resource_example) + " - ${Locale.getDefault()} + ${androidx.core.os.ConfigurationCompat.getLocales(resources().configuration)}",
+				text = stringResource(R.string.string_resource_example),
 				color = TranslatedTextColor,
 				style = MaterialTheme.typography.bodyLarge
 			)
 
 			val date = remember { Date() }
-			val dateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG)
+			val locale = ConfigurationCompat.getLocales(LocalConfiguration.current)[0] ?: Locale.getDefault()
+			val dateFormat = remember(locale) { DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG, locale) }
 			Text(
 				text = stringResource(R.string.date_format_example, dateFormat.format(date)),
 				color = TranslatedTextColor
@@ -94,12 +94,4 @@ fun ComposeSampleScreen(
 			)
 		}
 	}
-}
-
-@Composable
-@ReadOnlyComposable
-internal fun resources(): Resources {
-	LocalConfiguration.current
-	println("$$$ localcontext: ${LocalContext.current}")
-	return LocalContext.current.resources
 }

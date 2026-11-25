@@ -9,7 +9,6 @@ import com.elianfabian.locale_easy.LocaleEasy
 import com.elianfabian.locale_easy.setAppLocale
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotSame
-import org.junit.Assume.assumeTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.util.Locale
@@ -24,7 +23,6 @@ class AutomaticActivityLocalizationTest {
         verifyActivity(AutomaticAppCompatLocaleActivity::class.java)
 
     private fun <T : Activity> verifyActivity(activityClass: Class<T>) {
-        assumeTrue(InstrumentationRegistry.getArguments().getString("instrumentActivities") == "true")
         val instrumentation = InstrumentationRegistry.getInstrumentation()
         val api = LocaleEasy.getInstance()
         val originalPreference = api.preference.value

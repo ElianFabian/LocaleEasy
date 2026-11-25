@@ -28,7 +28,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.elianfabian.localeeasy.MainViewModel
+import com.elianfabian.localeeasy.ui.settings.LocaleSettingsSheet
+import com.elianfabian.localeeasy.ui.settings.LocaleSettingsViewModel
 import com.elianfabian.localeeasy.R
 import com.elianfabian.localeeasy.ui.theme.TranslatedTextColor
 import com.elianfabian.localeeasy.ui.theme.EnglishOnlyColor
@@ -37,7 +38,7 @@ import com.elianfabian.localeeasy.ui.theme.localizableButtonColors
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
-    viewModel: MainViewModel,
+    viewModel: LocaleSettingsViewModel,
     onOpenCompose: () -> Unit,
     onOpenActivity: () -> Unit,
     onOpenFragment: () -> Unit,

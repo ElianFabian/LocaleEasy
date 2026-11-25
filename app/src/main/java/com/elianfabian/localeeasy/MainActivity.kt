@@ -1,65 +1,42 @@
 package com.elianfabian.localeeasy
 
-import android.content.Context
 import android.content.Intent
-import android.content.res.Configuration
 import android.os.Bundle
-import android.view.View
+import androidx.activity.compose.BackHandler
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.ui.platform.ComposeView
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.core.os.LocaleListCompat
-import com.elianfabian.locale_easy.LocaleEasy
+import androidx.compose.ui.platform.ComposeView
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.elianfabian.localeeasy.ui.legacy.SampleActivity
 import com.elianfabian.localeeasy.ui.legacy.SampleFragment
 import com.elianfabian.localeeasy.ui.legacy.WebViewFragment
 import com.elianfabian.localeeasy.ui.screens.ComposeSampleScreen
 import com.elianfabian.localeeasy.ui.screens.MainScreen
+import com.elianfabian.localeeasy.ui.settings.LocaleSettingsViewModel
 import com.elianfabian.localeeasy.ui.theme.LocaleEasyTheme
 
 class MainActivity : AppCompatActivity() {
 	private val viewModel: MainViewModel by viewModels()
+	private val settingsViewModel: LocaleSettingsViewModel by viewModels()
 
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		enableEdgeToEdge()
-		setContentView(createContentView())
 		setTitle(R.string.app_name)
-
-		println("$$$$ string: ${getString(R.string.main_title)} | ${LocaleListCompat.getDefault()}")
-	}
-
-	override fun onConfigurationChanged(newConfig: Configuration) {
-		super.onConfigurationChanged(newConfig)
-
-		println("$$$ MainActivity onConfigurationChanged: ${LocaleListCompat.getDefault()} | ${androidx.core.os.ConfigurationCompat.getLocales(newConfig)}")
-	}
-
-	override fun attachBaseContext(newBase: Context) {
-		super.attachBaseContext(LocaleEasy.getInstance().localizedContext(newBase))
-
-		println("$$$ MainActivity attachBaseContext($newBase): ${LocaleListCompat.getDefault()}")
-	}
-
-	private fun createContentView(): View {
-		return ComposeView(this).apply {
+		setContentView(ComposeView(this).apply {
 			id = R.id.main_compose_view
 			setContent {
 				LocaleEasyTheme {
-					var currentScreen by rememberSaveable { mutableStateOf("main") }
-					androidx.activity.compose.BackHandler(enabled = currentScreen != "main") { currentScreen = "main" }
-
-					println("$$$ currentScreen: $currentScreen")
-					
-					when (currentScreen) {
-						"main" -> MainScreen(
-							viewModel = viewModel,
-							onOpenCompose = { currentScreen = "compose" },
+					val destination by viewModel.destination.collectAsStateWithLifecycle()
+					BackHandler(enabled = destination != MainDestination.Home) {
+						viewModel.navigateTo(MainDestination.Home)
+					}
+					when (destination) {
+						MainDestination.Home -> MainScreen(
+							viewModel = settingsViewModel,
+							onOpenCompose = { viewModel.navigateTo(MainDestination.Compose) },
 							onOpenActivity = { startActivity(Intent(this@MainActivity, SampleActivity::class.java)) },
 							onOpenFragment = {
 								SampleFragment().show(supportFragmentManager, "sample_fragment")
@@ -68,19 +45,13 @@ class MainActivity : AppCompatActivity() {
 								WebViewFragment().show(supportFragmentManager, "webview_fragment")
 							}
 						)
-						"compose" -> ComposeSampleScreen(
-							viewModel = viewModel,
-							onBack = { currentScreen = "main" }
+						MainDestination.Compose -> ComposeSampleScreen(
+							viewModel = settingsViewModel,
+							onBack = { viewModel.navigateTo(MainDestination.Home) }
 						)
 					}
 				}
 			}
-		}
-	}
-
-	override fun onDestroy() {
-		super.onDestroy()
-
-		println("$$$ onDestroy.isChangingConfigurations: $isChangingConfigurations")
+		})
 	}
 }

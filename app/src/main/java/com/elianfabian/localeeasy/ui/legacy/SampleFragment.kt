@@ -11,16 +11,16 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import com.elianfabian.localeeasy.MainViewModel
+import com.elianfabian.localeeasy.ui.settings.LocaleSettingsViewModel
 import com.elianfabian.localeeasy.R
 import com.elianfabian.localeeasy.databinding.FragmentSampleBinding
-import com.elianfabian.localeeasy.ui.screens.LocaleSettingsSheet
+import com.elianfabian.localeeasy.ui.settings.LocaleSettingsSheet
 import com.elianfabian.localeeasy.ui.theme.LocaleEasyTheme
 import java.text.DateFormat
 import java.util.Date
 
 class SampleFragment : DialogFragment() {
-	private val viewModel: MainViewModel by activityViewModels()
+	private val viewModel: LocaleSettingsViewModel by activityViewModels()
 	private var _binding: FragmentSampleBinding? = null
 	private val binding get() = _binding!!
 	

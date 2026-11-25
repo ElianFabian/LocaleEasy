@@ -161,13 +161,13 @@ The option defaults to `false`. It inserts the `localizedContext()` call when th
 
 Instrumentation applies to classes compiled in the application module. Activities provided directly by another module or dependency can use manual integration in their own code. If an external superclass has a final `attachBaseContext()`, the plugin skips that hierarchy with a build warning. LocaleEasy must be initialized before the first activity starts, which AndroidX Startup handles by default.
 
-The sample defaults to manual integration. Pass `'-PlocaleEasy.instrumentActivities=true'` to Gradle to build the sample with instrumentation enabled.
+The sample enables activity instrumentation in `app/build.gradle.kts`. Its main and XML sample activities use the plugin to supply their localized contexts.
 
 #### Configuration changes
 
 Android owns recreation for system configuration events. Apps that opt out through `configChanges` remain responsible for updating their own views for those events. Use one locale owner; independently changing AppCompatDelegate or framework app locales can conflict with LocaleEasy's current context strategy. Bundle needed translations or arrange their download before selecting them in language-split app bundles.
 
-Local mode owns its selection inside the app. The sample exposes its language choices in **Open State & Controls**. On API 33+, local mode preserves independently configured Android app locales and reads the device's language list through `LocaleManager.getSystemLocales()`.
+The sample's **Open State & Controls** panel shows the effective locales, device locales, and the LocaleEasy catalog and its default. On API 33+, it also shows the Android app language and the options declared in the sample's `android:localeConfig`. The Android section opens the real app-language screen in Settings. The sample screens continue to use the preference chosen in the LocaleEasy picker. On earlier versions, the panel shows the LocaleEasy controls and locale information.
 
 LocaleEasy recreates the activity through Android's lifecycle. Normal activity and fragment saved-state contracts apply. The sample gives its programmatic ComposeView a stable ID to support saved navigation state.
 

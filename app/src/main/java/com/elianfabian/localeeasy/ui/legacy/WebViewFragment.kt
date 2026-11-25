@@ -13,13 +13,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.elianfabian.locale_easy.LocaleEasy
-import com.elianfabian.localeeasy.MainViewModel
+import com.elianfabian.localeeasy.ui.settings.LocaleSettingsViewModel
 import com.elianfabian.localeeasy.databinding.FragmentWebviewBinding
-import com.elianfabian.localeeasy.ui.screens.LocaleSettingsSheet
+import com.elianfabian.localeeasy.ui.settings.LocaleSettingsSheet
 import com.elianfabian.localeeasy.ui.theme.LocaleEasyTheme
 
 class WebViewFragment : DialogFragment() {
-	private val viewModel: MainViewModel by activityViewModels()
+	private val viewModel: LocaleSettingsViewModel by activityViewModels()
 	private var _binding: FragmentWebviewBinding? = null
 	private val binding get() = _binding!!
 	
