@@ -130,7 +130,7 @@ An app can also supply the catalog directly as `src/main/res/xml/locale_easy_cat
 
 LocaleEasy currently uses **local activity recreation on every supported API**, including API 33+. It owns the persisted preference, updates application resources, and supplies localized activity contexts. Automatic framework locale recreation exposed a gap with no visible app surface in the tested configuration; [the investigation](framework-window-handoff-investigation.md) documents the evidence and a promising hybrid that has not been promoted into the normal backend. This does not mean every use of LocaleManager must flash.
 
-On **all API levels**, participating activities wrap their base context before inflation:
+Wrap the base context in `attachBaseContext()` when LocaleEasy should manage the language of an entire activity. This runs before `onCreate()`, so the activity starts with the selected resources when it inflates layouts and reads strings. LocaleEasy also uses that wrapper to identify which activities to recreate after a language change. For an individual resource lookup, call `localizedContext()` at the point of use, as shown below.
 
 ```kotlin
 override fun attachBaseContext(newBase: Context) {
@@ -148,27 +148,70 @@ LocaleEasy recreates the activity through Android's lifecycle. Normal activity a
 
 `fixWebViewLocale()` repairs the application resource locale in local mode if it differs from LocaleEasy's selection. Wrapped activities keep their own resource scope across relaunch and WebView manages its own web content. The sample loads deterministic local HTML for testing.
 
-### Resource lookups with `localizedContext()`
+### Use `localizedContext()` outside an activity
 
-The activity example above makes `getString()`, XML inflation, and Compose `stringResource()` use the localized activity context. For a resource lookup from a notification producer or a worker, obtain a localized context from the context you already have.
+Pass the context you already have to `localizedContext()` when building user-facing text. Obtain it at the point of use so the lookup picks up the current LocaleEasy preference.
+
+#### Build a notification
+
+Call this helper from a service, receiver, or worker with an existing notification channel ID.
 
 ```kotlin
-fun notificationTitle(context: Context, orderNumber: String): String {
+import android.app.Notification
+import android.content.Context
+import androidx.annotation.DrawableRes
+import androidx.core.app.NotificationCompat
+import com.elianfabian.locale_easy.LocaleEasy
+
+fun buildOrderReadyNotification(
+    context: Context,
+    channelId: String,
+    @DrawableRes smallIcon: Int,
+    orderNumber: String,
+): Notification {
     val localized = LocaleEasy.getInstance().localizedContext(context)
-    return localized.getString(R.string.order_ready_title, orderNumber)
+    return NotificationCompat.Builder(context, channelId)
+        .setSmallIcon(smallIcon)
+        .setContentTitle(localized.getString(R.string.order_ready_title, orderNumber))
+        .build()
 }
 ```
 
-For plurals, use the resources on the same localized context. Pass the count again when the string includes a placeholder for it.
+#### Resolve a plural in a WorkManager worker
+
+This example assumes the app already uses WorkManager. The worker generates a label when the job runs. The second `count` passed to `getQuantityString()` supplies the value for the number placeholder.
 
 ```kotlin
-fun unreadMessageLabel(context: Context, count: Int): String {
-    val localized = LocaleEasy.getInstance().localizedContext(context)
-    return localized.resources.getQuantityString(R.plurals.unread_messages, count, count)
+import android.content.Context
+import androidx.work.Worker
+import androidx.work.WorkerParameters
+import androidx.work.workDataOf
+import com.elianfabian.locale_easy.LocaleEasy
+
+class UnreadMessageLabelWorker(context: Context, parameters: WorkerParameters) :
+    Worker(context, parameters) {
+    override fun doWork(): Result {
+        val count = inputData.getInt("unread_count", 0)
+        val localized = LocaleEasy.getInstance().localizedContext(applicationContext)
+        val label = localized.resources.getQuantityString(R.plurals.unread_messages, count, count)
+        return Result.success(workDataOf("label" to label))
+    }
 }
 ```
 
-These examples use resource IDs defined by the consuming app. Obtain a fresh localized context after the user changes languages, and rebuild any text you previously rendered.
+Define the resource IDs in the app, for example in `res/values/strings.xml`, and add translations in the corresponding language folders.
+
+```xml
+<resources>
+    <string name="order_ready_title">Order %1$s is ready</string>
+    <plurals name="unread_messages">
+        <item quantity="one">%1$d unread message</item>
+        <item quantity="other">%1$d unread messages</item>
+    </plurals>
+</resources>
+```
+
+A string already built keeps its original language. If you need to show it again after the user changes languages, resolve it again using a fresh localized context.
 
 ## API and implementation review
 
