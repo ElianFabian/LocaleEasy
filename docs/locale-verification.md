@@ -16,6 +16,8 @@ The test passed on an Android 15 emulator (API 35). With the device set to `en-U
 | `LocaleManager.getSystemLocales()` | `en-US` | `en-US` |
 | LocaleEasy `systemLocaleList` | — | `en-US` |
 
+With the separate locale properties, the Android 15 tests also verified that `selectedAndroidAppLocale` reports an Android selection and its reset without changing LocaleEasy's own preference or effective locales. A second test replaced the platform's supported languages twice and verified that `androidSupportedLocaleList` reflected each change on the next read. Three additional tests passed for the generated catalog, resource lookup during a locale update, and activity recreation with restored input. All six Android 5 tests passed, including checks that both Android-specific properties are null and that a missing catalog has no default locale.
+
 Run the test from Android Studio or install the sample and its test APK on the same device and run:
 
 ```powershell

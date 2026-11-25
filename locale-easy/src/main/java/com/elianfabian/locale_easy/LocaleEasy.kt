@@ -13,23 +13,23 @@ public interface LocaleEasy {
 	/** The locale first applied by [setInitialLocale], or null if none was recorded. */
 	public val initialAppLocale: Locale?
 
-	/** The applied language selection and its resolution, available in one read. */
-	public val state: StateFlow<LocaleState>
+	/** Languages offered in Android Settings. Null if unavailable or not declared. */
+	public val androidSupportedLocaleList: List<Locale>?
 
 	/** The user's selection. This is not a signal that activity recreation has completed. */
 	public val preference: StateFlow<LocalePreference>
+
+	public val systemLocaleList: StateFlow<List<Locale>>
 
 	/**
 	 * Locales resolved from [preference] and system languages, in preference order.
 	 * Resource fallback may select a different supported language. Existing views may
 	 * still be awaiting refresh when this value changes.
 	 */
-	public val effectiveLocales: StateFlow<List<Locale>>
+	public val effectiveLocaleList: StateFlow<List<Locale>>
 
-	public val systemLocaleList: StateFlow<List<Locale>>
-
-	/** Compatibility alias for [effectiveLocales]. */
-	public val appLocaleList: StateFlow<List<Locale>> get() = effectiveLocales
+	/** The primary app language saved by Android. Null when unset or before Android 13. */
+	public val selectedAndroidAppLocale: StateFlow<Locale?>
 
 	/**
 	 * Apply and save [locale] if the app has no saved preference. An explicit [followSystem]
@@ -48,7 +48,11 @@ public interface LocaleEasy {
 		setAppLocale(requireNotNull(parseLocaleTag(tag)) { "Expected a BCP 47 tag with a language" })
 	}
 
-	/** Return a context for the current selection. Obtain a new one after a language change. */
+	/**
+	 * Return a context for the current selection. Wrap an activity's base context in
+	 * `attachBaseContext`, or use the result for one-off resource lookups.
+	 * Obtain a fresh context after a language change.
+	 */
 	public fun localizedContext(base: Context): Context
 
 	public companion object {

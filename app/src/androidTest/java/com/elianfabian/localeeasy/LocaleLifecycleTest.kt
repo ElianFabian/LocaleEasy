@@ -64,11 +64,11 @@ class LocaleLifecycleTest {
 
     @Test fun runtimeCatalogMatchesTheGeneratedBuildConfig() {
         val catalog = api.localeCatalog
-        assertEquals(BuildConfig.DEFAULT_LANGUAGE, catalog.defaultLocale.toLanguageTag())
+        assertEquals(BuildConfig.DEFAULT_LANGUAGE, catalog.defaultLocale?.toLanguageTag())
         assertEquals(BuildConfig.SUPPORTED_LANGUAGES.toList(), catalog.supportedLocales.map { it.toLanguageTag() })
         assertEquals(LocalePreference.FollowSystem, api.preference.value)
         main { api.setAppLocale(Locale.GERMAN) }
-        assertEquals(listOf(Locale.GERMAN), api.effectiveLocales.value)
+        assertEquals(listOf(Locale.GERMAN), api.effectiveLocaleList.value)
         assertEquals(Locale.ENGLISH, catalog.defaultLocale)
     }
 
@@ -76,10 +76,9 @@ class LocaleLifecycleTest {
         val expectedSystem = InstrumentationRegistry.getArguments().getString("catalogSystemLanguage")
         assumeTrue(expectedSystem == "de" || expectedSystem == "fr")
         val expected = if (expectedSystem == "fr") Locale.FRENCH else Locale.ENGLISH
-        val snapshot = api.state.value
-        assertEquals(expectedSystem, snapshot.systemLocales.single().language)
-        assertEquals(LocalePreference.FollowSystem, snapshot.preference)
-        assertEquals(expected.language, snapshot.effectiveLocales.single().language)
+        assertEquals(expectedSystem, api.systemLocaleList.value.single().language)
+        assertEquals(LocalePreference.FollowSystem, api.preference.value)
+        assertEquals(expected.language, api.effectiveLocaleList.value.single().language)
         ActivityScenario.launch(LocaleFixtureActivity::class.java).use { scenario ->
             scenario.onActivity {
                 assertEquals(expected.language, it.resources.configuration.locales[0].language)
@@ -109,7 +108,7 @@ class LocaleLifecycleTest {
     @Test fun duplicateLocalesAreNormalizedBeforeUpdatingResources() {
         main {
             api.setAppLocaleList(listOf(Locale.FRENCH, Locale.FRENCH, Locale.CANADA_FRENCH))
-            assertEquals(listOf(Locale.FRENCH, Locale.CANADA_FRENCH), api.state.value.effectiveLocales)
+            assertEquals(listOf(Locale.FRENCH, Locale.CANADA_FRENCH), api.effectiveLocaleList.value)
             assertEquals("fr,fr-CA", app.getSharedPreferences("locale_easy_prefs", 0).getString("KEY_LANGUAGES", null))
             assertEquals(translated("fr"), api.localizedContext(app).getString(R.string.string_resource_example))
         }
@@ -125,7 +124,7 @@ class LocaleLifecycleTest {
                     scope.launch {
                         api.preference.collect { preference ->
                             if (preference == LocalePreference.AppLocales(listOf(Locale.FRENCH))) {
-                                assertEquals(listOf(Locale.FRENCH), api.effectiveLocales.value)
+                                assertEquals(listOf(Locale.FRENCH), api.effectiveLocaleList.value)
                                 assertEquals(translated("fr"), app.getString(R.string.string_resource_example))
                                 observedFrench = true
                                 api.setLanguageTag("it")
@@ -134,9 +133,8 @@ class LocaleLifecycleTest {
                     }
                     api.setAppLocale(Locale.FRENCH)
                     assertTrue(observedFrench)
-                    assertEquals(italian, api.state.value.preference)
-                    assertEquals(italian.locales, api.state.value.effectiveLocales)
-                    assertEquals(italian.locales, api.effectiveLocales.value)
+                    assertEquals(italian, api.preference.value)
+                    assertEquals(italian.locales, api.effectiveLocaleList.value)
                     assertEquals("it", app.getSharedPreferences("locale_easy_prefs", 0).getString("KEY_LANGUAGES", null))
                     assertEquals(translated("it"), app.getString(R.string.string_resource_example))
                     assertEquals(translated("it"), api.localizedContext(app).getString(R.string.string_resource_example))
@@ -250,7 +248,7 @@ class LocaleLifecycleTest {
             var initialId = 0
             scenario.onActivity {
                 initialId = it.instanceId
-                api.setAppLocaleList(api.state.value.effectiveLocales)
+                api.setAppLocaleList(api.effectiveLocaleList.value)
             }
             await {
                 var replaced = false
@@ -313,7 +311,7 @@ class LocaleLifecycleTest {
             scenario.onActivity {
                 original = it
                 beforeTop = toolbarTop(it)
-                target = if (api.effectiveLocales.value.first().language == "fr") Locale.ITALIAN else Locale.FRENCH
+                target = if (api.effectiveLocaleList.value.first().language == "fr") Locale.ITALIAN else Locale.FRENCH
                 api.setAppLocale(target)
             }
             await {

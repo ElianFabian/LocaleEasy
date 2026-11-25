@@ -8,19 +8,15 @@ import java.util.Locale
 
 /** The languages declared by the app's generated resource catalog. */
 public class LocaleCatalog internal constructor(
-	public val defaultLocaleOrNull: Locale?,
+	/** Language of the unqualified resources, if the app declares a catalog. */
+	public val defaultLocale: Locale?,
 	supportedLocales: List<Locale>,
 ) {
 	public val supportedLocales: List<Locale> =
-		Collections.unmodifiableList((listOfNotNull(defaultLocaleOrNull) + supportedLocales).distinct())
-
-	public val defaultLocale: Locale
-		get() = checkNotNull(defaultLocaleOrNull) {
-			"Set unqualifiedResLocale in res/resources.properties and enable localeEasyLocales.generateFallbackCatalog."
-		}
+		Collections.unmodifiableList((listOfNotNull(defaultLocale) + supportedLocales).distinct())
 
 	internal fun resolveSystemLocales(systemLocales: List<Locale>): List<Locale> {
-		val fallback = defaultLocaleOrNull ?: return systemLocales
+		val fallback = defaultLocale ?: return systemLocales
 		return systemLocales.filter { desired ->
 			supportedLocales.any { supported -> LocaleListCompat.matchesLanguageAndScript(supported, desired) }
 		}.ifEmpty { listOf(fallback) }

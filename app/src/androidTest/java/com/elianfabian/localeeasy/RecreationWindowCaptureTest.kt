@@ -74,7 +74,7 @@ class RecreationWindowCaptureTest {
                     val trigger = SystemClock.elapsedRealtimeNanos()
                     instrumentation.runOnMainSync {
                         Trace.beginSection("LocaleEasy.change.$name")
-                        try { api.setAppLocale(if (api.effectiveLocales.value.first().language == "fr") Locale.ITALIAN else Locale.FRENCH) }
+                        try { api.setAppLocale(if (api.effectiveLocaleList.value.first().language == "fr") Locale.ITALIAN else Locale.FRENCH) }
                         finally { Trace.endSection() }
                     }
                     val deadline = SystemClock.uptimeMillis() + 15_000

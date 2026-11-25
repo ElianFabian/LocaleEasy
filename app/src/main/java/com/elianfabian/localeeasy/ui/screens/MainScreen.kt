@@ -45,8 +45,7 @@ fun MainScreen(
 ) {
     var showSettings by rememberSaveable { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val localeState by viewModel.localeState.collectAsStateWithLifecycle()
-    val locales = localeState.effectiveLocales
+    val locales by viewModel.effectiveLocaleList.collectAsStateWithLifecycle()
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = { TopAppBar(title = { Text(stringResource(R.string.main_title), color = TranslatedTextColor) }) }

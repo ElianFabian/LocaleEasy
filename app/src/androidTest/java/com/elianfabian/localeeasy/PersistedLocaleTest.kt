@@ -88,7 +88,7 @@ class PersistedLocaleTest {
             assertTrue(manager.applicationLocales.isEmpty)
         }
         assertEquals(LocalePreference.AppLocales(listOf(Locale.FRENCH)), api.preference.value)
-        assertEquals(listOf(Locale.FRENCH), api.effectiveLocales.value)
+        assertEquals(listOf(Locale.FRENCH), api.effectiveLocaleList.value)
         ActivityScenario.launch(LocaleFixtureActivity::class.java).use { scenario ->
             scenario.onActivity {
                 assertEquals("Chaîne Localisée: Vert", it.findViewById<TextView>(R.id.locale_fixture_label).text.toString())
@@ -107,7 +107,7 @@ class PersistedLocaleTest {
             assertTrue(prefs.edit().putBoolean("KEY_FOLLOW_SYSTEM_LOCALE", false)
                 .putString("KEY_LANGUAGES", "fr,fr,fr-CA").commit())
         } else {
-            assertEquals(listOf(Locale.FRENCH, Locale.CANADA_FRENCH), LocaleEasy.getInstance().state.value.effectiveLocales)
+            assertEquals(listOf(Locale.FRENCH, Locale.CANADA_FRENCH), LocaleEasy.getInstance().effectiveLocaleList.value)
             assertEquals("fr,fr-CA", prefs.getString("KEY_LANGUAGES", null))
             assertEquals("Chaîne Localisée: Vert", app.getString(R.string.string_resource_example))
         }
@@ -129,7 +129,7 @@ class PersistedLocaleTest {
             assertTrue(app.getSharedPreferences("locale_easy_prefs", 0).edit().commit())
         } else {
             assertEquals(LocaleList(Locale.ITALIAN), manager.applicationLocales)
-            assertEquals(listOf(Locale.FRENCH), api.state.value.effectiveLocales)
+            assertEquals(listOf(Locale.FRENCH), api.effectiveLocaleList.value)
             ActivityScenario.launch(LocaleFixtureActivity::class.java).use { scenario ->
                 scenario.onActivity {
                     assertEquals("Chaîne Localisée: Vert", it.findViewById<TextView>(R.id.locale_fixture_label).text.toString())
@@ -137,7 +137,7 @@ class PersistedLocaleTest {
                 }
                 instrumentation.waitForIdleSync()
                 scenario.onActivity {
-                    assertEquals(api.state.value.systemLocales, androidx.core.os.ConfigurationCompat
+                    assertEquals(api.systemLocaleList.value, androidx.core.os.ConfigurationCompat
                         .getLocales(it.resources.configuration).let { locales -> List(locales.size()) { locales[it] } })
                     assertEquals(LocaleList(Locale.ITALIAN), manager.applicationLocales)
                 }

@@ -1,6 +1,6 @@
 # Locale preference API
 
-`LocalePreference` describes the user's choice. `effectiveLocales` resolves that choice to an ordered locale list. Neither flow signals that activity recreation or view refresh has finished; Android may select a supported fallback language when loading resources.
+`LocalePreference` describes the user's choice. `effectiveLocaleList` resolves that choice to an ordered locale list. Android may select a supported fallback language when loading individual resources. Activity recreation and view refresh can finish after the locale flows emit.
 
 ```kotlin
 import com.elianfabian.locale_easy.followSystem
@@ -26,9 +26,9 @@ localeEasy.preference.collect { preference ->
     }
 }
 
-// Read the preference and its resolution together in a settings UI:
-localeEasy.state.collect { state ->
-    println("${state.preference} resolves to ${state.effectiveLocales}")
+// Observe the primary language Android has saved for this app:
+localeEasy.selectedAndroidAppLocale.collect { locale ->
+    println(locale?.toLanguageTag())
 }
 ```
 
@@ -36,15 +36,20 @@ localeEasy.state.collect { state ->
 
 Startup restores the preference before exposing effective locales. Storage uses BCP 47 language tags and accepts legacy underscore region tags on read. Startup normalizes previously stored duplicates and recovers from missing or invalid overrides by following the system. A reset clears the stored override.
 
-Existing consumer calls remain available:
+### Read the locale properties
 
-| Existing API | Meaning |
+| Property | Value |
 | --- | --- |
-| `appLocaleList` | Alias for `effectiveLocales` |
+| `preference` | Observable choice saved by LocaleEasy |
+| `systemLocaleList` | Observable device languages, in preference order |
+| `effectiveLocaleList` | Observable list applied by LocaleEasy |
+| `selectedAndroidAppLocale` | Observable primary app language saved by Android. Null before API 33 or when Android has no app language set. |
+| `androidSupportedLocaleList` | The current languages offered in Android Settings. Null before API 33 or without a valid Android locale configuration. |
+| `localeCatalog` | The optional catalog for the LocaleEasy picker and fallback |
 
-Use `state` for a single coherent read of preference, system locales, and effective locales. The existing flows project individual values from this snapshot. Custom implementations of `LocaleEasy` must also expose a `StateFlow<LocaleState>`.
+`androidSupportedLocaleList` reads the current Android `LocaleConfig` when accessed, including an override supplied by the host app on API 34+. `selectedAndroidAppLocale` emits even if the selection saved by LocaleEasy stays the same. LocaleEasy keeps its own preference when Android changes or clears its app language. Android supplies the saved language without its origin. [Android locale configuration](https://developer.android.com/reference/android/app/LocaleConfig) · [Android app language API](https://developer.android.com/reference/android/app/LocaleManager#getApplicationLocales())
 
-`followSystem()`, `setAppLocale()`, and `setAppLocaleList()` are Kotlin extensions over `setPreference()`. To check whether the app follows the system, compare `state.value.preference` with `LocalePreference.FollowSystem`.
+`followSystem()`, `setAppLocale()`, and `setAppLocaleList()` are Kotlin extensions over `setPreference()`. To check whether the app follows the system, compare `preference.value` with `LocalePreference.FollowSystem`.
 
 ## Android integration
 
@@ -106,7 +111,7 @@ localeEasyLocales {
 }
 ```
 
-LocaleEasy loads the generated resource at startup. The sample picker reads `LocaleEasy.getInstance().localeCatalog.supportedLocales`. The catalog is a read-only property separate from `state`. Without generated XML, the list is empty and `defaultLocaleOrNull` returns null. Reading `defaultLocale` then throws an `IllegalStateException`.
+LocaleEasy loads the catalog resource at startup. The sample picker reads `LocaleEasy.getInstance().localeCatalog.supportedLocales`. Without a generated or manually supplied catalog, the list is empty and `defaultLocale` returns null.
 
 While following the system, LocaleEasy keeps the system locales that match the catalog by language and script, in system preference order. It uses `defaultLocale` when none match. The stored preference stays `FollowSystem`, and subsequent system changes can select another language. Explicit app choices still apply. For example, an app with English fallback resources can call `setInitialLocale(Locale.FRENCH)` to save French on its first launch. A later explicit `followSystem()` uses English whenever the device has no supported language.
 
@@ -142,6 +147,28 @@ Local mode owns its selection inside the app. The sample exposes its language ch
 LocaleEasy recreates the activity through Android's lifecycle. Normal activity and fragment saved-state contracts apply. The sample gives its programmatic ComposeView a stable ID to support saved navigation state.
 
 `fixWebViewLocale()` repairs the application resource locale in local mode if it differs from LocaleEasy's selection. Wrapped activities keep their own resource scope across relaunch and WebView manages its own web content. The sample loads deterministic local HTML for testing.
+
+### Resource lookups with `localizedContext()`
+
+The activity example above makes `getString()`, XML inflation, and Compose `stringResource()` use the localized activity context. For a resource lookup from a notification producer or a worker, obtain a localized context from the context you already have.
+
+```kotlin
+fun notificationTitle(context: Context, orderNumber: String): String {
+    val localized = LocaleEasy.getInstance().localizedContext(context)
+    return localized.getString(R.string.order_ready_title, orderNumber)
+}
+```
+
+For plurals, use the resources on the same localized context. Pass the count again when the string includes a placeholder for it.
+
+```kotlin
+fun unreadMessageLabel(context: Context, count: Int): String {
+    val localized = LocaleEasy.getInstance().localizedContext(context)
+    return localized.resources.getQuantityString(R.plurals.unread_messages, count, count)
+}
+```
+
+These examples use resource IDs defined by the consuming app. Obtain a fresh localized context after the user changes languages, and rebuild any text you previously rendered.
 
 ## API and implementation review
 

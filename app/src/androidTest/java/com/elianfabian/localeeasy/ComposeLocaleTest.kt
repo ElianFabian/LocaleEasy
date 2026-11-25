@@ -56,6 +56,6 @@ class ComposeLocaleTest {
         val before = compose.activity
         compose.onNodeWithText(before.getString(R.string.follow_system_locale)).performClick()
         compose.waitUntil(15_000) { compose.activity !== before }
-        assertEquals(LocalePreference.FollowSystem, LocaleEasy.getInstance().state.value.preference)
+        assertEquals(LocalePreference.FollowSystem, LocaleEasy.getInstance().preference.value)
     }
 }

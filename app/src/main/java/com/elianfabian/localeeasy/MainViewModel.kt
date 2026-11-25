@@ -20,7 +20,7 @@ class MainViewModel : ViewModel() {
 
 	init {
 		viewModelScope.launch {
-			localeEasy.effectiveLocales.collect {
+			localeEasy.effectiveLocaleList.collect {
 				println("$$$ viewModel.appLocalesList: $it | ${LocaleListCompat.getDefault()}")
 			}
 		}
@@ -31,7 +31,9 @@ class MainViewModel : ViewModel() {
 		}
 	}
 
-	val localeState = localeEasy.state
+	val preference = localeEasy.preference
+	val effectiveLocaleList = localeEasy.effectiveLocaleList
+	val systemLocaleList = localeEasy.systemLocaleList
 
 	fun sendAction(action: UiAction) {
 		when (action) {

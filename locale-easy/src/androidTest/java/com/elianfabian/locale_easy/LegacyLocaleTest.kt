@@ -1,5 +1,6 @@
 package com.elianfabian.locale_easy
 
+import android.os.Build
 import android.widget.TextView
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -28,11 +29,14 @@ class LegacyLocaleTest {
         }
     }
 
-    @Test fun missingCatalogKeepsFollowSystemAndOnlyRequiredDefaultThrows() {
+    @Test fun missingCatalogKeepsFollowSystemWithNoDefaultLocale() {
         assertTrue(api.localeCatalog.supportedLocales.isEmpty())
-        assertNull(api.localeCatalog.defaultLocaleOrNull)
-        assertTrue(runCatching { api.localeCatalog.defaultLocale }.exceptionOrNull() is IllegalStateException)
-        assertEquals(api.state.value.systemLocales, api.state.value.effectiveLocales)
+        assertNull(api.localeCatalog.defaultLocale)
+        assertEquals(api.systemLocaleList.value, api.effectiveLocaleList.value)
+        if (Build.VERSION.SDK_INT < 33) {
+            assertNull(api.androidSupportedLocaleList)
+            assertNull(api.selectedAndroidAppLocale.value)
+        }
     }
 
     @Test fun catalogPreservesMatchingLocaleOrderAndScripts() {
@@ -57,7 +61,7 @@ class LegacyLocaleTest {
                 val selected = api.preference.value
                 api.setLanguageTag(modern)
                 assertEquals("Alias pair $legacy and $modern", selected, api.preference.value)
-                assertEquals(listOf(Locale.forLanguageTag(modern)), api.effectiveLocales.value)
+                assertEquals(listOf(Locale.forLanguageTag(modern)), api.effectiveLocaleList.value)
             }
         }
     }

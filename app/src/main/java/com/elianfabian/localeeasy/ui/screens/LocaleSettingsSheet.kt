@@ -37,10 +37,10 @@ fun LocaleSettingsSheet(
 	sheetState: SheetState,
 	onDismiss: () -> Unit
 ) {
-	val localeState by viewModel.localeState.collectAsStateWithLifecycle()
-	val isFollowingSystem = localeState.preference == LocalePreference.FollowSystem
-	val appLocales = localeState.effectiveLocales
-	val systemLocales = localeState.systemLocales
+	val preference by viewModel.preference.collectAsStateWithLifecycle()
+	val appLocales by viewModel.effectiveLocaleList.collectAsStateWithLifecycle()
+	val systemLocales by viewModel.systemLocaleList.collectAsStateWithLifecycle()
+	val isFollowingSystem = preference == LocalePreference.FollowSystem
 
 	ModalBottomSheet(
 		onDismissRequest = onDismiss,
