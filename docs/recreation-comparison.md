@@ -138,6 +138,6 @@ $env:ANDROID_SERIAL = 'DEVICE_SERIAL'
 
 The normal UI tests change French → Italian → Spanish in place, assert activity/root replacement within the same task, and check that framework locales remain empty on API 33+. Lifecycle checks cover XML input, stopped activities, runtime titles, Compose navigation, dialogs, and identical/rapid requests using local recreation.
 
-Run seed/verify persistence phases in separate processes. The `localeBackend=framework` seed reproduces the old persisted switch. `framework_only` and `framework_stale` test marked owners with missing or older local choices. Verification must preserve French, clear the stale marker and framework override, and return to local recreation. The separate `ownershipPhase` probe verifies that an independent platform override survives a restart while a locally wrapped activity uses the LocaleEasy preference.
+Run seed/verify persistence phases in separate processes. The `localePhase` probe verifies that a saved LocaleEasy choice survives a restart. The separate `ownershipPhase` probe verifies that an independent platform override survives a restart while a locally wrapped activity uses the LocaleEasy preference.
 
 Manual checks remain necessary for perceived transitions, marker readability on the affected device, dark mode, large text, RTL, and broader system-configuration behavior. Historical framework captures and the retired lab results remain available; they are not claims about the current default.

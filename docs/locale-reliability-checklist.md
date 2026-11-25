@@ -239,7 +239,7 @@ Verification — **Manual required:** reproduce on the device/API where the fail
 
 ## 12. Select and implement locale application strategies by Android version
 
-**Current status:** Local context wrapping and activity recreation now apply on all APIs by request, avoiding the demonstrated automatic-framework surface gap in the tested configuration. Startup still migrates preferences from marked framework experiments. Android per-app language settings have independent ownership. AppCompat autoStore metadata is removed to avoid a second owner. The framework-owner plan below remains a future integration task, not current default behavior.
+**Current status:** Local context wrapping and activity recreation apply on all APIs, avoiding the automatic framework relaunch that showed a surface gap in the tested configuration. Android per-app language settings have independent ownership. AppCompat autoStore metadata is removed to avoid a second owner. The framework-owner plan below describes a possible future integration.
 
 **Confirmed architectural gap.** The library currently mutates resources through deprecated `Resources.updateConfiguration()` and process defaults. It does not set the framework per-app locale preference. This is separate from a request to recreate an activity.
 

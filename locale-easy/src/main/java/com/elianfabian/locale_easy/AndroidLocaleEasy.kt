@@ -64,14 +64,8 @@ internal class AndroidLocaleEasy(
 
 	init {
 		checkMainThread()
-		val migrateFrameworkOverride = ownsFrameworkOverride()
 		// Normalize existing storage without recording the fresh-install system default as a choice.
-		if (hasSavedPreference() || migrateFrameworkOverride) persist(preference.value)
-		// Only clear an override left by a LocaleEasy framework experiment.
-		if (Build.VERSION.SDK_INT >= 33 && migrateFrameworkOverride) {
-			Api33.clearOverride(application)
-		}
-		clearFrameworkOwnership()
+		if (hasSavedPreference()) persist(preference.value)
 		updateResources(application, effectiveLocales.value)
 		application.registerActivityLifecycleCallbacks(this)
 		application.registerComponentCallbacks(this)
@@ -257,30 +251,11 @@ internal class AndroidLocaleEasy(
 	private fun hasSavedPreference(): Boolean =
 		preferences.contains(KEY_FOLLOW_SYSTEM_LOCALE) || preferences.contains(KEY_LANGUAGES)
 
-	private fun readInitialPreference(): LocalePreference {
-		val saved = restoreLocalePreference(
+	private fun readInitialPreference(): LocalePreference =
+		restoreLocalePreference(
 			preferences.getBoolean(KEY_FOLLOW_SYSTEM_LOCALE, true),
 			preferences.getString(KEY_LANGUAGES, null),
 		)
-		return if (Build.VERSION.SDK_INT >= 33 && ownsFrameworkOverride()) {
-			Api33.readPreference(application)
-		} else {
-			saved
-		}
-	}
-
-	private fun ownsFrameworkOverride(): Boolean =
-		preferences.getBoolean(KEY_FRAMEWORK_RECREATION, false) ||
-			preferences.getBoolean(KEY_FRAMEWORK_DIAGNOSTIC_OWNER, false)
-
-	private fun clearFrameworkOwnership() {
-		if (ownsFrameworkOverride()) {
-			preferences.edit {
-				remove(KEY_FRAMEWORK_RECREATION)
-				remove(KEY_FRAMEWORK_DIAGNOSTIC_OWNER)
-			}
-		}
-	}
 
 	private fun readSystemLocales(): List<Locale> =
 		if (Build.VERSION.SDK_INT >= 33) {
@@ -339,19 +314,6 @@ internal class AndroidLocaleEasy(
 
 		fun hasOverride(context: Context): Boolean = !manager(context).applicationLocales.isEmpty
 
-		fun readPreference(context: Context): LocalePreference {
-			val locales = manager(context).applicationLocales.toList()
-			return if (locales.isEmpty()) {
-				LocalePreference.FollowSystem
-			} else {
-				LocalePreference.AppLocales(locales).immutableCopy()
-			}
-		}
-
-		fun clearOverride(context: Context) {
-			manager(context).applicationLocales = LocaleList.getEmptyLocaleList()
-		}
-
 		private fun manager(context: Context): LocaleManager =
 			context.getSystemService(LocaleManager::class.java)
 
@@ -363,8 +325,6 @@ internal class AndroidLocaleEasy(
 		const val KEY_FOLLOW_SYSTEM_LOCALE = "KEY_FOLLOW_SYSTEM_LOCALE"
 		const val KEY_LANGUAGES = "KEY_LANGUAGES"
 		private const val KEY_INITIAL_APP_LOCALE = "KEY_INITIAL_APP_LOCALE"
-		private const val KEY_FRAMEWORK_RECREATION = "KEY_FRAMEWORK_RECREATION"
-		private const val KEY_FRAMEWORK_DIAGNOSTIC_OWNER = "KEY_FRAMEWORK_DIAGNOSTIC_OWNER"
 
 		private fun configurationLocales(configuration: Configuration): List<Locale> {
 			val locales = ConfigurationCompat.getLocales(configuration)

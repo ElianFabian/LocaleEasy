@@ -137,7 +137,7 @@ This works with plain `Activity`, `ComponentActivity`, and `AppCompatActivity`; 
 
 Android owns recreation for system configuration events. Apps that opt out through `configChanges` remain responsible for updating their own views for those events. Use one locale owner; independently changing AppCompatDelegate or framework app locales can conflict with LocaleEasy's current context strategy. Bundle needed translations or arrange their download before selecting them in language-split app bundles.
 
-Local mode owns its selection inside the app. The sample exposes its language choices in **Open State & Controls**. On API 33+, local mode preserves independently configured Android app locales and reads the system's actual locale list. If a stored marker identifies an earlier LocaleEasy framework experiment, startup imports that experiment's platform choice and clears the override and marker.
+Local mode owns its selection inside the app. The sample exposes its language choices in **Open State & Controls**. On API 33+, local mode preserves independently configured Android app locales and reads the device's language list through `LocaleManager.getSystemLocales()`.
 
 LocaleEasy recreates the activity through Android's lifecycle. Normal activity and fragment saved-state contracts apply. The sample gives its programmatic ComposeView a stable ID to support saved navigation state.
 
@@ -175,7 +175,3 @@ The executed emulator checks and remaining manual/device coverage are recorded i
 4. Reapply the same selection and verify no additional refresh. Check both XML and Compose screens.
 
 The [reliability checklist](locale-reliability-checklist.md) records implementation status separately from broader device acceptance.
-
-## Framework experiment migration
-
-The temporary `LocaleEasy.useFrameworkLocaleRecreation` switch was removed. LocaleEasy applies language changes through local activity recreation. Existing installs with a stored framework experiment marker still migrate their saved choice at startup. [Recreation comparison](recreation-comparison.md)

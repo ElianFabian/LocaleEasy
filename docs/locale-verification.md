@@ -4,6 +4,25 @@ Date: 2026-11-05; sample recreation selector verification updated 2026-11-06. Th
 
 ## Executed checks
 
+### System locales with an Android per-app language
+
+`SystemLocaleSourcesTest` runs on API 33 and newer. It temporarily selects an Android per-app language for the sample and waits for the process to receive that configuration. It prints the language tags from `Resources.getSystem().configuration`, `LocaleManager.getSystemLocales()`, and LocaleEasy's `systemLocaleList`. The test restores the sample's previous Android language setting in `finally`. It does not change the device language.
+
+The test passed on an Android 15 emulator (API 35). With the device set to `en-US` and the Android app language set to `fr`, the process reported:
+
+| Source | Before | With the Android app language |
+| --- | --- | --- |
+| `Resources.getSystem().configuration.locales` | `en-US` | `fr,en-US` |
+| `LocaleManager.getSystemLocales()` | `en-US` | `en-US` |
+| LocaleEasy `systemLocaleList` | — | `en-US` |
+
+Run the test from Android Studio or install the sample and its test APK on the same device and run:
+
+```powershell
+./gradlew.bat :app:installDebug :app:installDebugAndroidTest
+adb shell am instrument -w -r -e class com.elianfabian.localeeasy.SystemLocaleSourcesTest com.elianfabian.localeeasy.test/androidx.test.runner.AndroidJUnitRunner
+```
+
 ### Legacy locale aliases on Android 5
 
 The permanent regression tests now verify that the old and modern Hebrew, Indonesian, and Yiddish tags select equal preferences. They also load Hebrew, Serbian Latin, and Latin American Spanish fixture strings through `localizedContext()` on API 21. A Gradle unit test checks that the corresponding source directory names produce canonical, deduplicated catalog entries. All six API 21 instrumentation tests and the Gradle and preference unit tests passed.
@@ -196,7 +215,7 @@ The broader acceptance checkboxes in [the reliability checklist](locale-reliabil
 3. Exercise API 22–31 and 33–35 boundaries as needed, especially an API-23 sample startup smoke test and API-29 callbacks. API 21, 32, and 36 are the executed coverage, not the whole supported range.
 4. Test multiple tasks/windows, nested/navigation fragments, dialogs during saved-state transitions, and rapid background/foreground transitions.
 5. Verify RTL layout direction and unsupported-language fallback with suitable translated resources. The sample currently has English, Spanish, French, Portuguese, and Italian only.
-6. Verify Android Settings UI selection and one-time migration from an installed legacy version; direct external LocaleManager calls and fresh-process restoration are covered, an actual OS/app upgrade is not.
+6. Verify language selection through the Android Settings UI. Instrumentation covers direct external LocaleManager calls and fresh-process restoration.
 7. Reproduce the old WebView issue with the affected provider version, and separately check web navigation/content state. The current test checks native locale preservation, not remote website translation.
 8. Validate language availability in a production app bundle. Library lint still warns that dynamic legacy locale changes require translations to be bundled or downloaded; the library cannot choose a consumer app's delivery policy.
 

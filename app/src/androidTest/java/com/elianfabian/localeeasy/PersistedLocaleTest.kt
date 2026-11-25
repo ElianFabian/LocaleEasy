@@ -79,26 +79,13 @@ class PersistedLocaleTest {
         assumeTrue(phase == "seed" || phase == "verify")
         val instrumentation = InstrumentationRegistry.getInstrumentation()
         val api = LocaleEasy.getInstance()
-        val backend = InstrumentationRegistry.getArguments().getString("localeBackend")
-        val framework = backend in listOf("framework", "framework_only", "framework_stale")
-        assumeTrue(!framework || Build.VERSION.SDK_INT >= 33)
         if (phase == "seed") instrumentation.runOnMainSync {
             api.setAppLocale(Locale.FRENCH)
-            if (framework) {
-                instrumentation.targetContext.getSystemService(LocaleManager::class.java)
-                    .applicationLocales = LocaleList(Locale.FRENCH)
-                // Reproduce the obsolete persisted switch written by older experiments.
-                instrumentation.targetContext.getSharedPreferences("locale_easy_prefs", 0).edit()
-                    .putBoolean("KEY_FRAMEWORK_RECREATION", true).commit()
-            }
         }
         instrumentation.waitForIdleSync()
-        // A framework seed represents an older experiment/install. The next process
-        // must keep its saved language but return to the normal local-recreation path.
-        if (phase == "verify") org.junit.Assert.assertFalse(
-            instrumentation.targetContext.getSharedPreferences("locale_easy_prefs", 0).contains("KEY_FRAMEWORK_RECREATION"))
-        if (android.os.Build.VERSION.SDK_INT >= 33 && (phase == "verify" || !framework)) {
-            org.junit.Assert.assertTrue(instrumentation.targetContext.getSystemService(android.app.LocaleManager::class.java).applicationLocales.isEmpty)
+        if (Build.VERSION.SDK_INT >= 33) {
+            val manager = instrumentation.targetContext.getSystemService(LocaleManager::class.java)
+            assertTrue(manager.applicationLocales.isEmpty)
         }
         assertEquals(LocalePreference.AppLocales(listOf(Locale.FRENCH)), api.preference.value)
         assertEquals(listOf(Locale.FRENCH), api.effectiveLocales.value)
@@ -106,18 +93,6 @@ class PersistedLocaleTest {
             scenario.onActivity {
                 assertEquals("Chaîne Localisée: Vert", it.findViewById<TextView>(R.id.locale_fixture_label).text.toString())
             }
-        }
-        if (phase == "seed" && backend == "framework_only") {
-            // Simulate a legacy framework owner with no saved local preference.
-            instrumentation.waitForIdleSync()
-            instrumentation.targetContext.getSharedPreferences("locale_easy_prefs", 0).edit().clear()
-                .putBoolean("KEY_FRAMEWORK_RECREATION", true).commit()
-        }
-        if (phase == "seed" && backend == "framework_stale") {
-            // Older library storage can lag a framework selection made outside the process.
-            // Keep French in LocaleManager, but leave Spanish in the old library snapshot.
-            instrumentation.targetContext.getSharedPreferences("locale_easy_prefs", 0).edit()
-                .putBoolean("KEY_FOLLOW_SYSTEM_LOCALE", false).putString("KEY_LANGUAGES", "es").commit()
         }
         Log.i("LocaleEasyFixture", "persistence phase=$phase process=${android.os.Process.myPid()}")
     }
