@@ -4,13 +4,15 @@
 
 ```kotlin
 import com.elianfabian.locale_easy.followSystem
+import com.elianfabian.locale_easy.setAppLocale
+import com.elianfabian.locale_easy.setAppLocaleList
 
 val localeEasy = LocaleEasy.getInstance()
 
 localeEasy.followSystem()
 localeEasy.setAppLocale(Locale.FRENCH)
 localeEasy.setLanguageTag("fr-CA")
-localeEasy.setAppLocales(listOf(Locale.forLanguageTag("fr-CA"), Locale.ENGLISH))
+localeEasy.setAppLocaleList(listOf(Locale.forLanguageTag("fr-CA"), Locale.ENGLISH))
 
 // Equivalent explicit selection:
 localeEasy.setPreference(LocalePreference.AppLocales(listOf(Locale.FRENCH)))
@@ -38,16 +40,13 @@ Existing consumer calls remain available:
 
 | Existing API | Meaning |
 | --- | --- |
-| `setLocale(locale)` | Deprecated alias for `setAppLocale(locale)` |
-| `setLocales(locales)`, `setAppLocaleList(locales)` | Deprecated aliases for `setAppLocales(locales)` |
 | `appLocaleList` | Alias for `effectiveLocales` |
-| `isFollowingSystemLocale` | Compatibility flow indicating follow-system mode |
 | `followSystemLocale = true` | Select `FollowSystem` |
 | `followSystemLocale = false` | If following system, freeze current effective locales as `AppLocales`; otherwise keep the app selection |
 
 Use `state` for a single coherent read of preference, system locales, and effective locales. The existing flows project individual values from this snapshot. Custom implementations of `LocaleEasy` must also expose a `StateFlow<LocaleState>`.
 
-`followSystem()` is a Kotlin extension. Import `com.elianfabian.locale_easy.followSystem` when updating existing call sites. The Java member call can use `setPreference(LocalePreference.FollowSystem.INSTANCE)` instead.
+`followSystem()`, `setAppLocale()`, and `setAppLocaleList()` are Kotlin extensions over `setPreference()`. To check whether the app follows the system, compare `state.value.preference` with `LocalePreference.FollowSystem`.
 
 ## Android integration
 
@@ -140,7 +139,7 @@ Android owns recreation for system configuration events. Apps that opt out throu
 
 Local mode owns its selection inside the app. The sample exposes its language choices in **Open State & Controls**. On API 33+, local mode preserves independently configured Android app locales and reads the system's actual locale list. If a stored marker identifies an earlier LocaleEasy framework experiment, startup imports that experiment's platform choice and clears the override and marker.
 
-`ViewCreatorComponent` is deprecated and is not called. LocaleEasy does not detach fragments, replace activity content, or reset runtime titles. Normal activity/fragment saved-state contracts apply. The sample gives its programmatic ComposeView a stable ID to support saved navigation state.
+LocaleEasy recreates the activity through Android's lifecycle. Normal activity and fragment saved-state contracts apply. The sample gives its programmatic ComposeView a stable ID to support saved navigation state.
 
 `fixWebViewLocale()` repairs the application resource locale in local mode if it differs from LocaleEasy's selection. Wrapped activities keep their own resource scope across relaunch and WebView manages its own web content. The sample loads deterministic local HTML for testing.
 

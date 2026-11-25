@@ -9,6 +9,7 @@ import androidx.compose.ui.test.performClick
 import androidx.test.espresso.Espresso
 import com.elianfabian.locale_easy.LocaleEasy
 import com.elianfabian.locale_easy.followSystem
+import com.elianfabian.locale_easy.setAppLocale
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Rule

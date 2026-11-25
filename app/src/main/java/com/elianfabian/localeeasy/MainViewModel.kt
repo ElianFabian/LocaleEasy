@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.elianfabian.locale_easy.LocaleEasy
 import com.elianfabian.locale_easy.followSystem
+import com.elianfabian.locale_easy.setAppLocale
 import com.elianfabian.locale_easy.LocalePreference
 import kotlinx.coroutines.launch
 import java.util.Locale

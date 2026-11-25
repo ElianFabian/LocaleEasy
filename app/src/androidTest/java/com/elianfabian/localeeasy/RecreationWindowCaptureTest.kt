@@ -10,6 +10,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.elianfabian.locale_easy.LocaleEasy
 import com.elianfabian.locale_easy.followSystem
+import com.elianfabian.locale_easy.setAppLocale
 import com.elianfabian.localeeasy.ui.legacy.SampleActivity
 import org.json.JSONArray
 import org.json.JSONObject

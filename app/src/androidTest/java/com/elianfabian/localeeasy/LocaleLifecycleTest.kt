@@ -14,6 +14,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.elianfabian.locale_easy.LocaleEasy
 import com.elianfabian.locale_easy.followSystem
+import com.elianfabian.locale_easy.setAppLocale
+import com.elianfabian.locale_easy.setAppLocaleList
 import com.elianfabian.locale_easy.LocalePreference
 import com.elianfabian.localeeasy.ui.legacy.SampleFragment
 import com.elianfabian.localeeasy.ui.legacy.SampleActivity
@@ -96,7 +98,7 @@ class LocaleLifecycleTest {
         val prefs = app.getSharedPreferences("locale_easy_prefs", 0)
         val before = prefs.all
         main {
-            assertTrue(runCatching { api.setAppLocales(emptyList()) }.exceptionOrNull() is IllegalArgumentException)
+            assertTrue(runCatching { api.setAppLocaleList(emptyList()) }.exceptionOrNull() is IllegalArgumentException)
             assertTrue(runCatching { api.setAppLocale(Locale("fr-CA")) }.exceptionOrNull() is IllegalArgumentException)
             assertTrue(runCatching { api.setLanguageTag("fr_CA") }.exceptionOrNull() is IllegalArgumentException)
             assertEquals(LocalePreference.FollowSystem, api.preference.value)
@@ -106,7 +108,7 @@ class LocaleLifecycleTest {
 
     @Test fun duplicateLocalesAreNormalizedBeforeUpdatingResources() {
         main {
-            api.setAppLocales(listOf(Locale.FRENCH, Locale.FRENCH, Locale.CANADA_FRENCH))
+            api.setAppLocaleList(listOf(Locale.FRENCH, Locale.FRENCH, Locale.CANADA_FRENCH))
             assertEquals(listOf(Locale.FRENCH, Locale.CANADA_FRENCH), api.state.value.effectiveLocales)
             assertEquals("fr,fr-CA", app.getSharedPreferences("locale_easy_prefs", 0).getString("KEY_LANGUAGES", null))
             assertEquals(translated("fr"), api.localizedContext(app).getString(R.string.string_resource_example))

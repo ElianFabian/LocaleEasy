@@ -46,7 +46,6 @@ internal class AndroidLocaleEasy(
 	override val systemLocaleList = state.project { it.systemLocales }
 	override val preference = state.project { it.preference }
 	override val effectiveLocales = state.project { it.effectiveLocales }
-	override val isFollowingSystemLocale = state.project { it.preference == LocalePreference.FollowSystem }
 	private val localeReceiver = object : BroadcastReceiver() {
 		override fun onReceive(context: Context, intent: Intent) {
 			// A system locale change may leave the app's effective locales unchanged.

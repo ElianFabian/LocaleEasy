@@ -8,7 +8,7 @@ The numbered findings below describe the initial source review. Progress and exe
 
 ## Progress
 
-The public model is `LocalePreference.FollowSystem` / `AppLocales`. Implementation now includes automatic/idempotent installation, main-thread enforcement, explicit context participation on every API, queued local activity refresh, and a bounded native WebView-resource repair. LocaleEasy uses local recreation on API 21+. The fragment detach/attach and title-reset paths have been removed; `ViewCreatorComponent` is deprecated.
+The public model is `LocalePreference.FollowSystem` / `AppLocales`. Implementation now includes automatic/idempotent installation, main-thread enforcement, explicit context participation on every API, queued local activity refresh, and a bounded native WebView-resource repair. LocaleEasy uses local recreation on API 21+. The library removed the fragment detach/attach and title-reset paths and the legacy `ViewCreatorComponent` interface.
 
 See [the API guide](locale-preference-api.md) for integration and [the verification report](locale-verification.md) for actual test counts, traces, and remaining checks. Historical findings below are retained to explain each task; their status lines describe the current implementation. Broader acceptance checkboxes stay open where coverage remains incomplete.
 
@@ -265,7 +265,7 @@ Fix:
 
 1. Define behavior for resumed, started, stopped, finishing, and already-recreating activities, including multiple tasks/windows and nonparticipating third-party activities.
 2. For custom integrations, consider recording the locale generation applied to each activity and refreshing stale activities when appropriate, rather than immediately rebuilding every tracked instance. Coordinate this with framework-owned configuration changes.
-3. Decide whether `ViewCreatorComponent` is removed/deprecated or retained as an optional opt-in contract after step 11. Avoid making it required merely to compensate for an unresolved context bug.
+3. Use the normal activity lifecycle for view creation. The library removed `ViewCreatorComponent`.
 4. If retained, define state saving/restoration, old-view cleanup, bindings/listeners, toolbars, fragment containers, and Compose disposal. Creating a root view alone does not manage these responsibilities.
 5. Let activity-owned runtime titles be recomputed by the activity; do not blindly overwrite them from manifest metadata.
 6. Make the sample's navigation usable during verification: MainActivity currently installs an enabled, empty back callback that consumes back presses.
