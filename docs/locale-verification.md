@@ -4,6 +4,29 @@ This report records verification runs from 2026-11-05 through 2026-11-25.
 
 ## Executed checks
 
+### WebView resource repair and page state
+
+`WebViewLocaleTest.repairsAnActualApplicationResourceMismatch` deliberately sets the application resources to Spanish while LocaleEasy's preference and effective locales are French. It verifies the Spanish resource lookup before calling `fixWebViewLocale()`, then checks that the application resources return French again and the preference is preserved.
+
+`WebViewLocaleTest.observesLoadedWebViewAcrossLocalRecreation` opens the sample's WebView dialog in a fresh process. It reads the application and activity resource languages before and after WebView initialization, waits for the local page to load, navigates to a second URL, enters text, and scrolls. It calls the native repair with the page still open and asserts that the page state and history are intact. It then changes the app language to Spanish and checks the native strings and the replacement WebView's loaded HTML. The test reports the URL, form value, scroll position and history of the replacement.
+
+First WebView initialization switched the application resources from French to the device's English (`en-US`). The wrapped activity continued to resolve French strings. The helper restored French in the application context while preserving the loaded URL, history, form text, and scroll position. Changing the app language to Spanish then recreated the activity, translated the native controls, and loaded the sample's initial HTML in a new WebView. That view started with an empty form, no back history and a scroll position of zero.
+
+Both tests passed on the three configurations below. The provider on API 24 was identified from the framework's `WebViewFactory` log.
+
+| Android API | WebView provider |
+| --- | --- |
+| 24 | Chrome `51.0.2704.90` |
+| 32 | Google WebView `120.0.6099.193` |
+| 35 | Google WebView `124.0.6367.219` |
+
+To isolate first initialization after installing the sample and its test APK:
+
+```powershell
+adb shell am force-stop com.elianfabian.localeeasy
+adb shell am instrument -w -e class 'com.elianfabian.localeeasy.WebViewLocaleTest#observesLoadedWebViewAcrossLocalRecreation' com.elianfabian.localeeasy.test/androidx.test.runner.AndroidJUnitRunner
+```
+
 ### Context composition and Android picker
 
 On 2026-11-25, all eight library fixture tests passed on API 21 and again on API 35. They exercise a French context retained across a return to Follow system, a lookup in an explicit language, and preservation of a host's night mode and text scale. Eight focused sample tests passed on API 35. They exercise those overrides through the generated activity integration and check that a context without an explicit night override follows a real night-mode change. The manual activity fixture also verifies translated XML and restored input after local recreation.
@@ -257,7 +280,7 @@ The broader acceptance checkboxes in [the reliability checklist](locale-reliabil
 4. Test multiple tasks/windows, nested/navigation fragments, dialogs during saved-state transitions, and rapid background/foreground transitions.
 5. Verify RTL layout direction and unsupported-language fallback with suitable translated resources. The sample currently has English, Spanish, French, Portuguese, and Italian only.
 6. Verify language selection through the Android Settings UI. Instrumentation covers direct external LocaleManager calls and fresh-process restoration.
-7. Reproduce the old WebView issue with the affected provider version, and separately check web navigation/content state. The current test checks native locale preservation, not remote website translation.
+7. Verify any host-specific requirement to restore WebView state across activity recreation. The sample's local-page results and provider versions are recorded above.
 8. Validate language availability in a production app bundle. Library lint still warns that dynamic legacy locale changes require translations to be bundled or downloaded; the library cannot choose a consumer app's delivery policy.
 
 Other lint warnings include SDK/dependency updates and sample UI/style findings. They were not hidden with a baseline and are not reported as fixed by this work.

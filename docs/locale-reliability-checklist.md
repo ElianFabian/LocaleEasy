@@ -276,7 +276,7 @@ Verification — **Manual required:** navigate Main → Sample level 1 → Sampl
 
 ## 14. Verify and constrain the WebView workaround
 
-**Current status:** Implemented a narrower contract: repair native resources in manual mode without creating another WebView; no-op during explicit framework experiments; local HTML sample and WebView cleanup. Native-locale preservation is tested on API 32 and API 36, including manual mode on modern Android. Original affected provider/version behavior and web-state preservation remain open.
+**Current status:** The helper repairs application resources. Fresh-process instrumentation reproduces a WebView-induced reset of their language and checks that repair restores the translation while the WebView keeps its loaded page and state. The sample recreates the WebView during a language switch, which resets its page state. See the [provider and lifecycle results](locale-verification.md#webview-resource-repair-and-page-state).
 
 **Unverified workaround.** `fixWebViewLocale()` creates/destroys a new WebView and reapplies application resources. It has a TODO to test it. This does not establish that existing activity resources, existing WebViews, or remote website language preferences are repaired. The sample loads a remote website, which is not a deterministic locale test.
 
@@ -287,7 +287,7 @@ Fix:
 3. If a workaround is still necessary, run it on the main thread and restore the intended state after the demonstrated mutation. Avoid creating extra WebViews without evidence that doing so is necessary.
 4. Document its exact scope. Website language can depend on server behavior, account preferences, cookies, or request headers independently of Android resources.
 
-Verification — **Manual required:** record Android API and WebView provider version. Capture locale state and native translations before first WebView creation, immediately afterward, after changing locale with a WebView open, and after reopening/restarting. Check navigation and web content state are preserved where promised. Repeat on a provider/device combination that originally exhibited the problem if available.
+The automated test covers native translation and the local page's URL, history, form text, and scroll position. Any host-specific remote page or visual behavior needs its own device verification.
 
 - [ ] The workaround is either supported by a reproducible regression test and device check, or removed with its limitations documented.
 

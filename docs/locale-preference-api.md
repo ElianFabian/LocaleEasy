@@ -173,7 +173,7 @@ The sample's **Open State & Controls** panel shows the effective locales, device
 
 LocaleEasy recreates the activity through Android's lifecycle. Normal activity and fragment saved-state contracts apply. The sample gives its programmatic ComposeView a stable ID to support saved navigation state.
 
-`fixWebViewLocale()` repairs the application resource locale in local mode if it differs from LocaleEasy's selection. Wrapped activities keep their own resource scope across relaunch and WebView manages its own web content. The sample loads deterministic local HTML for testing.
+`fixWebViewLocale()` repairs the application resource locale in local mode if it differs from LocaleEasy's selection. Call it on the main thread after WebView initialization if the provider reset that locale. The helper operates on native application resources. The sample's repair button separately reloads its local HTML fixture. See the [WebView verification results](locale-verification.md#webview-resource-repair-and-page-state).
 
 ### Use `localizedContext()` outside an activity
 
