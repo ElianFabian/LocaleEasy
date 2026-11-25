@@ -6,11 +6,13 @@ import android.content.IntentFilter
 import android.os.Build
 import android.provider.Settings
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions
@@ -19,9 +21,12 @@ import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.filters.SdkSuppress
 import androidx.test.platform.app.InstrumentationRegistry
 import com.elianfabian.locale_easy.LocaleEasy
+import com.elianfabian.locale_easy.LocalePreference
+import com.elianfabian.locale_easy.followSystem
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
+import java.util.Locale
 
 class SettingsControlsTest {
     @get:Rule val compose = createAndroidComposeRule<MainActivity>()
@@ -91,6 +96,35 @@ class SettingsControlsTest {
     @Test fun fragmentSampleOpensSettings() {
         tapText(R.string.fragment_sample_btn)
         tapNativeSettings(inDialog = true)
+    }
+
+    @Test fun fragmentSettingsStayOpenWhileSelectingSeveralLanguages() =
+        verifyNativeDialogLanguageSelection(R.string.fragment_sample_btn)
+
+    @Test fun webViewSettingsStayOpenWhileSelectingSeveralLanguages() =
+        verifyNativeDialogLanguageSelection(R.string.webview_sample_btn)
+
+    private fun verifyNativeDialogLanguageSelection(screen: Int) {
+        val api = LocaleEasy.getInstance()
+        val initialPreference = api.preference.value
+        try {
+            compose.runOnUiThread { api.followSystem() }
+            tapText(screen)
+            tapNativeSettings(inDialog = true)
+            val before = compose.activity
+            compose.onNodeWithText("French").performClick()
+            compose.waitUntil(15_000) { compose.activity !== before }
+            compose.onNodeWithText("French").assertIsSelected()
+
+            val frenchActivity = compose.activity
+            compose.onNodeWithText("Italian").performClick()
+            compose.waitUntil(15_000) { compose.activity !== frenchActivity }
+            assertEquals(LocalePreference.AppLocales(listOf(Locale.FRENCH, Locale.ITALIAN)), api.preference.value)
+            compose.onNodeWithText("French").assertIsSelected()
+            compose.onNodeWithText("Italian").assertIsSelected()
+        } finally {
+            compose.runOnUiThread { api.setPreference(initialPreference) }
+        }
     }
 
     @Test fun webViewSampleOpensSettings() {

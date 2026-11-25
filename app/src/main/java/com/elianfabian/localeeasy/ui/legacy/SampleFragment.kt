@@ -34,6 +34,7 @@ class SampleFragment : DialogFragment() {
 	@OptIn(ExperimentalMaterial3Api::class)
 	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 		super.onViewCreated(view, savedInstanceState)
+		showSettings = savedInstanceState?.getBoolean("settings_open") ?: showSettings
 
 		val date = Date()
 		val dateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG)
@@ -55,6 +56,11 @@ class SampleFragment : DialogFragment() {
 				}
 			}
 		}
+	}
+
+	override fun onSaveInstanceState(outState: Bundle) {
+		outState.putBoolean("settings_open", showSettings)
+		super.onSaveInstanceState(outState)
 	}
 
 	override fun onStart() {

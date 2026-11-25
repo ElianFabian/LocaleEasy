@@ -183,6 +183,8 @@ Android owns recreation for system configuration events. Apps that opt out throu
 
 The sample home screen shows the effective locales and the languages with a `strings.xml` file in the sample's resource source sets. **Open State & Controls** shows device locales, the LocaleEasy catalog and its default. On API 33+, it also shows the Android app language and the options declared in the sample's `android:localeConfig`. The Android section opens the real app-language screen in Settings. The sample screens continue to use the preference chosen in the LocaleEasy picker. On earlier versions, the panel shows the LocaleEasy controls and locale information.
 
+Tap languages in the LocaleEasy picker to add them in preference order. Tap a selected language again to remove it. Removing the final language or selecting **Follow system** clears the explicit list and follows the device languages.
+
 LocaleEasy recreates the activity through Android's lifecycle. Normal activity and fragment saved-state contracts apply. The sample gives its programmatic ComposeView a stable ID to support saved navigation state.
 
 On Android 7.0 (API 24) and later, `fixWebViewLocale()` repairs the application resource locale if it differs from LocaleEasy's selection. Call it on the main thread after WebView initialization if the provider reset that locale. On earlier versions the helper returns before inspecting the resources. The sample enables `instrumentWebViewLoads` for its first navigation and keeps a manual repair button that separately reloads its local HTML fixture. See the [WebView verification results](locale-verification.md#webview-resource-repair-and-page-state).

@@ -73,9 +73,9 @@ fun LocaleSettingsSheet(
 
 			LanguageButtons(
 				languages = catalog.supportedLocales,
-				selectedLocale = (preference as? LocalePreference.AppLocales)?.locales?.firstOrNull(),
+				selectedLocales = (preference as? LocalePreference.AppLocales)?.locales.orEmpty(),
 				onFollowSystemSelected = viewModel::followSystem,
-				onLanguageSelected = viewModel::selectLocale,
+				onLanguageToggled = viewModel::toggleLocale,
 			)
 			HorizontalDivider()
 
@@ -151,27 +151,23 @@ private fun Context.openAndroidAppLanguages() {
 @Composable
 private fun LanguageButtons(
 	languages: List<Locale>,
-	selectedLocale: Locale?,
+	selectedLocales: List<Locale>,
 	onFollowSystemSelected: () -> Unit,
-	onLanguageSelected: (Locale) -> Unit,
+	onLanguageToggled: (Locale) -> Unit,
 ) {
-	val selectedLanguage = selectedLocale?.let { selected ->
-		languages.firstOrNull { it == selected } ?: Locale.forLanguageTag(selected.language)
-	}
-
 	FlowRow(
 		modifier = Modifier.fillMaxWidth(),
 		horizontalArrangement = Arrangement.spacedBy(8.dp)
 	) {
 		FilterChip(
-			selected = selectedLocale == null,
+			selected = selectedLocales.isEmpty(),
 			onClick = onFollowSystemSelected,
 			label = { Text(text = stringResource(R.string.follow_system_locale), color = TranslatedTextColor) },
 		)
-		languages.forEach { locale ->
+		(languages + selectedLocales).distinct().forEach { locale ->
 			FilterChip(
-				selected = selectedLanguage == locale,
-				onClick = { onLanguageSelected(locale) },
+				selected = locale in selectedLocales,
+				onClick = { onLanguageToggled(locale) },
 				label = { Text(text = locale.getDisplayName(Locale.ENGLISH), color = EnglishOnlyColor) },
 			)
 		}

@@ -9,6 +9,8 @@ import android.view.KeyEvent
 import android.view.View
 import android.view.WindowManager
 import android.view.inspector.WindowInspector
+import androidx.compose.ui.test.assertIsNotSelected
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
@@ -69,6 +71,47 @@ class ComposeLocaleTest {
         compose.onNodeWithText(before.getString(R.string.follow_system_locale)).performClick()
         compose.waitUntil(15_000) { compose.activity !== before }
         assertEquals(LocalePreference.FollowSystem, LocaleEasy.getInstance().preference.value)
+    }
+
+    @Test fun languageControlsToggleAnOrderedSelectionAndReturnToFollowSystem() {
+        val api = LocaleEasy.getInstance()
+        compose.runOnUiThread { api.followSystem() }
+        compose.onNodeWithText(compose.activity.getString(R.string.open_settings)).performClick()
+        val spanish = Locale.forLanguageTag("es")
+
+        followSystemChip().assertIsSelected()
+        toggleLocaleAndWait("Spanish")
+        toggleLocaleAndWait("French")
+        assertEquals(LocalePreference.AppLocales(listOf(spanish, Locale.FRENCH)), api.preference.value)
+        compose.onNodeWithText("Spanish").assertIsSelected()
+        compose.onNodeWithText("French").assertIsSelected()
+        followSystemChip().assertIsNotSelected()
+
+        toggleLocaleAndWait("Spanish")
+        assertEquals(LocalePreference.AppLocales(listOf(Locale.FRENCH)), api.preference.value)
+        compose.onNodeWithText("Spanish").assertIsNotSelected()
+
+        toggleLocaleAndWait("French")
+        assertEquals(LocalePreference.FollowSystem, api.preference.value)
+        followSystemChip().assertIsSelected()
+
+        toggleLocaleAndWait("French")
+        toggleLocaleAndWait("Spanish")
+        toggleLocaleAndWait(compose.activity.getString(R.string.follow_system_locale))
+        assertEquals(LocalePreference.FollowSystem, api.preference.value)
+        followSystemChip().assertIsSelected()
+        compose.onNodeWithText("French").assertIsNotSelected()
+        compose.onNodeWithText("Spanish").assertIsNotSelected()
+    }
+
+    private fun followSystemChip() =
+        compose.onNodeWithText(compose.activity.getString(R.string.follow_system_locale))
+
+    private fun toggleLocaleAndWait(label: String) {
+        val before = compose.activity
+        compose.onNodeWithText(label).performClick()
+        compose.waitUntil(15_000) { compose.activity !== before }
+        compose.waitForIdle()
     }
 
     private fun pressBackFromSettings(language: String) {

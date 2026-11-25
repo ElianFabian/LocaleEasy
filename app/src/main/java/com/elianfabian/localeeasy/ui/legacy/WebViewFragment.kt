@@ -33,6 +33,7 @@ class WebViewFragment : DialogFragment() {
 	@OptIn(ExperimentalMaterial3Api::class)
 	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 		super.onViewCreated(view, savedInstanceState)
+		showSettings = savedInstanceState?.getBoolean("settings_open") ?: showSettings
 
 		binding.webView.webViewClient = WebViewClient()
 		binding.webView.loadUrl("file:///android_asset/locale-fixture.html")
@@ -58,6 +59,11 @@ class WebViewFragment : DialogFragment() {
 				}
 			}
 		}
+	}
+
+	override fun onSaveInstanceState(outState: Bundle) {
+		outState.putBoolean("settings_open", showSettings)
+		super.onSaveInstanceState(outState)
 	}
 
 	override fun onStart() {
