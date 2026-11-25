@@ -7,7 +7,6 @@ import kotlinx.coroutines.flow.StateFlow
 import java.util.Locale
 
 public interface LocaleEasy {
-
 	/** The app's language catalog, read once at startup. Its default is optional. */
 	public val localeCatalog: LocaleCatalog get() = LocaleCatalog.Empty
 
@@ -27,8 +26,10 @@ public interface LocaleEasy {
 	 */
 	public val effectiveLocales: StateFlow<List<Locale>>
 
-	@MainThread
-	public fun setPreference(preference: LocalePreference)
+	public val systemLocaleList: StateFlow<List<Locale>>
+
+	/** Compatibility alias for [effectiveLocales]. */
+	public val appLocaleList: StateFlow<List<Locale>> get() = effectiveLocales
 
 	/**
 	 * Apply and save [locale] if the app has no saved preference. An explicit [followSystem]
@@ -38,33 +39,36 @@ public interface LocaleEasy {
 	@MainThread
 	public fun setInitialLocale(locale: Locale)
 
+	@MainThread
+	public fun setPreference(preference: LocalePreference)
+
 	/** Select a language using a well-formed BCP 47 tag such as `fr-CA`. */
 	@MainThread
 	public fun setLanguageTag(tag: String) {
 		setAppLocale(requireNotNull(parseLocaleTag(tag)) { "Expected a BCP 47 tag with a language" })
 	}
 
-	public val systemLocaleList: StateFlow<List<Locale>>
-
-	/** Compatibility alias for [effectiveLocales]. */
-	public val appLocaleList: StateFlow<List<Locale>> get() = effectiveLocales
-
 	/** Return a context for the current selection. Obtain a new one after a language change. */
 	public fun localizedContext(base: Context): Context
 
 	public companion object {
-		@Volatile private var _instance: LocaleEasy? = null
+		@Volatile
+		private var _instance: LocaleEasy? = null
 
 		public fun getInstance(): LocaleEasy {
 			return _instance ?: error("Attempt to access LocaleEasy instance before being initialized")
 		}
 
-		/** Automatically installed by AndroidX Startup. For manual initialization, call from
-		 * Application.onCreate() on the main thread. Repeated calls are safe. */
+		/**
+		 * Automatically installed by AndroidX Startup. For manual initialization, call from
+		 * Application.onCreate() on the main thread. Repeated calls are safe.
+		 */
 		@MainThread
 		public fun install(context: Context) {
 			checkMainThread()
-			if (_instance == null) _instance = AndroidLocaleEasy(context.applicationContext as Application)
+			if (_instance == null) {
+				_instance = AndroidLocaleEasy(context.applicationContext as Application)
+			}
 		}
 
 		/**
