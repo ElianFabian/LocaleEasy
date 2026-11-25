@@ -11,6 +11,7 @@ localeEasyLocales {
 	generateFallbackCatalog.set(true)
 	instrumentActivities.set(true)
 	instrumentWebViewLoads.set(true)
+	instrumentWebViewInflation.set(true)
 }
 
 android {

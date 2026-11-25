@@ -3,6 +3,7 @@ package com.elianfabian.locale_easy
 import android.app.Application
 import android.content.Context
 import android.os.Build
+import android.os.Looper
 import androidx.annotation.MainThread
 import androidx.annotation.RequiresApi
 import kotlinx.coroutines.flow.StateFlow
@@ -101,6 +102,14 @@ public interface LocaleEasy {
 			checkMainThread()
 			if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) return
 			(getInstance() as? AndroidLocaleEasy)?.reapplyResources()
+		}
+
+		// Called by the Gradle plugin after layout inflation, including layouts without a WebView.
+		@PublishedApi
+		internal fun repairAfterLayoutInflation() {
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && Looper.myLooper() == Looper.getMainLooper()) {
+				(_instance as? AndroidLocaleEasy)?.reapplyResources()
+			}
 		}
 	}
 }

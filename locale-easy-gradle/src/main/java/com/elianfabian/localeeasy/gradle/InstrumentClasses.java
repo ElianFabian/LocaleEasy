@@ -9,7 +9,6 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.function.Predicate;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
@@ -36,6 +35,7 @@ import org.objectweb.asm.Opcodes;
 public abstract class InstrumentClasses extends DefaultTask {
     private static final String ACTIVITY = "android/app/Activity";
     private static final String WEB_VIEW = "android/webkit/WebView";
+    private static final String LAYOUT_INFLATER = "android/view/LayoutInflater";
     private static final String LOCALE_EASY = "com/elianfabian/locale_easy/LocaleEasy";
     private static final String COMPANION = LOCALE_EASY + "$Companion";
     private static final String ATTACH = "attachBaseContext";
@@ -47,6 +47,7 @@ public abstract class InstrumentClasses extends DefaultTask {
     @Classpath public abstract ConfigurableFileCollection getClasspath();
     @Input public abstract Property<Boolean> getInstrumentActivities();
     @Input public abstract Property<Boolean> getInstrumentWebViewLoads();
+    @Input public abstract Property<Boolean> getInstrumentWebViewInflation();
     @OutputFile public abstract RegularFileProperty getOutputJar();
 
     @TaskAction
@@ -68,6 +69,7 @@ public abstract class InstrumentClasses extends DefaultTask {
         Files.createDirectories(output.getParent());
         boolean activities = getInstrumentActivities().get();
         boolean webViewLoads = getInstrumentWebViewLoads().get();
+        boolean inflation = getInstrumentWebViewInflation().get();
         try (var loader = new URLClassLoader(urls, null);
                 var jar = new JarOutputStream(Files.newOutputStream(output))) {
             if (loader.getResource(LOCALE_EASY + ".class") == null) {
@@ -88,8 +90,8 @@ public abstract class InstrumentClasses extends DefaultTask {
                             activity = projectClasses.get(reader.getClassName());
                         }
                     }
-                    if (activity != null || webViewLoads) {
-                        bytes = instrumentClass(reader, activity, webViewLoads ? hierarchy::isWebView : null);
+                    if (activity != null || webViewLoads || inflation) {
+                        bytes = instrumentClass(reader, activity, hierarchy, webViewLoads, inflation);
                     }
                 }
                 var outputEntry = new JarEntry(entry.getKey());
@@ -130,7 +132,8 @@ public abstract class InstrumentClasses extends DefaultTask {
         }
     }
 
-    private static byte[] instrumentClass(ClassReader reader, ActivityClass activity, Predicate<String> isWebView) {
+    private static byte[] instrumentClass(ClassReader reader, ActivityClass activity, ClassHierarchy hierarchy,
+            boolean webViewLoads, boolean inflation) {
         var writer = new ClassWriter(reader, ClassWriter.COMPUTE_MAXS);
         reader.accept(new ClassVisitor(Opcodes.ASM9, writer) {
             private boolean wrappedSuperCall;
@@ -139,7 +142,7 @@ public abstract class InstrumentClasses extends DefaultTask {
             public MethodVisitor visitMethod(int access, String name, String descriptor, String signature,
                     String[] exceptions) {
                 MethodVisitor method = super.visitMethod(access, name, descriptor, signature, exceptions);
-                if (isWebView == null && activity.attachAccess < 0) return method;
+                if (!webViewLoads && !inflation && activity.attachAccess < 0) return method;
                 return new MethodVisitor(Opcodes.ASM9, method) {
                     @Override
                     public void visitMethodInsn(int opcode, String owner, String calledName,
@@ -150,13 +153,20 @@ public abstract class InstrumentClasses extends DefaultTask {
                             wrapContext(this);
                             wrappedSuperCall = true;
                         }
-                        if (isWebView != null && (opcode == Opcodes.INVOKEVIRTUAL || opcode == Opcodes.INVOKESPECIAL)
-                                && isWebViewLoad(calledName, calledDescriptor) && isWebView.test(owner)) {
+                        boolean instanceCall = opcode == Opcodes.INVOKEVIRTUAL || opcode == Opcodes.INVOKESPECIAL;
+                        if (webViewLoads && instanceCall && isWebViewLoad(calledName, calledDescriptor)
+                                && hierarchy.isSubtype(owner, WEB_VIEW)) {
                             // Preserve the receiver and navigation arguments already on the stack.
                             readCompanion(this);
                             super.visitMethodInsn(Opcodes.INVOKEVIRTUAL, COMPANION, "fixWebViewLocale", "()V", false);
                         }
                         super.visitMethodInsn(opcode, owner, calledName, calledDescriptor, isInterface);
+                        if (inflation && instanceCall && isLayoutInflation(hierarchy, owner, calledName, calledDescriptor)) {
+                            // Keep the layout result on the stack for the original caller.
+                            readCompanion(this);
+                            super.visitMethodInsn(Opcodes.INVOKEVIRTUAL, COMPANION,
+                                    "repairAfterLayoutInflation", "()V", false);
+                        }
                     }
                 };
             }
@@ -198,6 +208,21 @@ public abstract class InstrumentClasses extends DefaultTask {
             case "loadData" -> descriptor.equals("(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
             case "loadDataWithBaseURL" -> descriptor.equals(
                     "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
+            default -> false;
+        };
+    }
+
+    private static boolean isLayoutInflation(ClassHierarchy hierarchy, String owner, String name, String descriptor) {
+        if (name.equals("setContentView") && descriptor.equals("(I)V")) {
+            return hierarchy.isSubtype(owner, ACTIVITY);
+        }
+        if (!name.equals("inflate")) return false;
+        return switch (descriptor) {
+            case "(ILandroid/view/ViewGroup;)Landroid/view/View;",
+                 "(ILandroid/view/ViewGroup;Z)Landroid/view/View;",
+                 "(Lorg/xmlpull/v1/XmlPullParser;Landroid/view/ViewGroup;)Landroid/view/View;",
+                 "(Lorg/xmlpull/v1/XmlPullParser;Landroid/view/ViewGroup;Z)Landroid/view/View;" ->
+                    hierarchy.isSubtype(owner, LAYOUT_INFLATER);
             default -> false;
         };
     }
@@ -249,9 +274,9 @@ public abstract class InstrumentClasses extends DefaultTask {
             return false;
         }
 
-        boolean isWebView(String name) {
+        boolean isSubtype(String name, String ancestor) {
             try {
-                return isSubclassOf(name, WEB_VIEW);
+                return isSubclassOf(name, ancestor);
             } catch (IOException error) {
                 throw new UncheckedIOException("Unable to resolve the hierarchy of " + name, error);
             }

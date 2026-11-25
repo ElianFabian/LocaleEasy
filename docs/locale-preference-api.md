@@ -188,6 +188,19 @@ localeEasyLocales {
 
 The setting defaults to `false` and can be enabled on its own. The plugin inserts `LocaleEasy.fixWebViewLocale()` before direct calls to `WebView.loadUrl()` (with or without headers), `loadData()`, and `loadDataWithBaseURL()` compiled in the application module. This covers both a WebView inflated from XML and one created by Compose's `AndroidView`. Use an explicit repair call after construction when native resources are needed before the first load or when a dependency owns the load call.
 
+A native view populated with a string from `applicationContext` between WebView creation and the first load can retain the device-language text after the plugin repairs the resources. For activity UI, read strings from the localized activity context. If the lookup needs the application context, call `LocaleEasy.fixWebViewLocale()` immediately after inflation or construction, before that lookup.
+
+For XML layouts, the experimental option below performs the check automatically when an instrumented inflation call returns.
+
+```kotlin
+localeEasyLocales {
+    instrumentWebViewInflation.set(true)
+    instrumentWebViewLoads.set(true)
+}
+```
+
+`instrumentWebViewInflation` defaults to `false` and works independently of `instrumentWebViewLoads`. It checks application resources after successful calls to `LayoutInflater.inflate()` and `Activity.setContentView(layoutResId)` in the app module, including the inflation call in View Binding classes generated there. The check runs on the main thread from API 24 onward and skips calls made before LocaleEasy is installed. It also runs for layouts without WebViews, since the plugin instruments the inflation call rather than individual XML elements. The option requires a LocaleEasy runtime version that supports it. Keep the load hook for WebViews created programmatically. The inflation hook runs after the layout returns, so code inside a view's constructor still needs to use a localized context if it reads resources during that inflation.
+
 #### Configuration changes
 
 Android owns recreation for system configuration events. Apps that opt out through `configChanges` remain responsible for updating their own views for those events. Use one locale owner; independently changing AppCompatDelegate or framework app locales can conflict with LocaleEasy's current context strategy. Bundle needed translations or arrange their download before selecting them in language-split app bundles.

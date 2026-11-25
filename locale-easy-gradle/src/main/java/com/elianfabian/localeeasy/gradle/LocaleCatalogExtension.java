@@ -14,4 +14,7 @@ public abstract class LocaleCatalogExtension {
 
     /** Repair native resources before WebView loads called from the app module. */
     public abstract Property<Boolean> getInstrumentWebViewLoads();
+
+    /** Repair native resources after XML layout inflation performed by the app module. */
+    public abstract Property<Boolean> getInstrumentWebViewInflation();
 }
