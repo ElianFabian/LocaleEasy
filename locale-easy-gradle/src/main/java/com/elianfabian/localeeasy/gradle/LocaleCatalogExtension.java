@@ -1,6 +1,7 @@
 package com.elianfabian.localeeasy.gradle;
 
 import org.gradle.api.provider.Property;
+import org.gradle.api.provider.SetProperty;
 
 public abstract class LocaleCatalogExtension {
     /** BCP 47 tag for the app's unqualified values resources. */
@@ -20,4 +21,7 @@ public abstract class LocaleCatalogExtension {
 
     /** Repair resources while creating WebViews in app code and explicit XML inflation calls. */
     public abstract Property<Boolean> getInstrumentWebViewCreation();
+
+    /** Activities that opt into View Binding style inflation for direct setContentView calls in onCreate. */
+    public abstract SetProperty<String> getWebViewContentViewActivities();
 }

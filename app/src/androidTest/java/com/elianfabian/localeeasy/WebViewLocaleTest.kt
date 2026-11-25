@@ -18,6 +18,7 @@ import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotSame
 import org.junit.Assert.assertTrue
+import org.junit.Assume.assumeTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.util.Locale
@@ -163,6 +164,7 @@ class WebViewLocaleTest {
         verifyComposeLoad(ComposeWebViewFixtureActivity.Load.DATA_WITH_BASE_URL)
 
     private fun verifyComposeLoad(load: ComposeWebViewFixtureActivity.Load) = preservePreference {
+        assumeTrue(BuildConfig.WEB_VIEW_FALLBACKS)
         instrumentation.runOnMainSync { api.setAppLocale(Locale.FRENCH) }
         val intent = Intent(app, ComposeWebViewFixtureActivity::class.java)
             .putExtra(ComposeWebViewFixtureActivity.EXTRA_LOAD, load.name)

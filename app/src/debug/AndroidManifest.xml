@@ -6,5 +6,6 @@
         <activity android:name=".AutomaticPlainLocaleActivity" android:exported="false" />
         <activity android:name=".AutomaticAppCompatLocaleActivity" android:exported="false" />
         <activity android:name=".ComposeWebViewFixtureActivity" android:exported="false" />
+        <activity android:name=".WebViewContentFixtureActivity" android:exported="false" />
     </application>
 </manifest>

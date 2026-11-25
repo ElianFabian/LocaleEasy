@@ -20,6 +20,7 @@ import org.gradle.api.file.RegularFile;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.Property;
+import org.gradle.api.provider.SetProperty;
 import org.gradle.api.tasks.CacheableTask;
 import org.gradle.api.tasks.Classpath;
 import org.gradle.api.tasks.Input;
@@ -39,6 +40,7 @@ public abstract class InstrumentClasses extends DefaultTask {
     private static final String LOCALE_EASY = "com/elianfabian/locale_easy/LocaleEasy";
     private static final String COMPANION = LOCALE_EASY + "$Companion";
     private static final String WEB_VIEW_INFLATION = "com/elianfabian/locale_easy/WebViewLayoutInflation";
+    private static final String WEB_VIEW_CONTENT = "com/elianfabian/locale_easy/WebViewContentView";
     private static final String ATTACH = "attachBaseContext";
     private static final String CONTEXT = "Landroid/content/Context;";
     private static final String ATTACH_DESCRIPTOR = "(" + CONTEXT + ")V";
@@ -50,6 +52,7 @@ public abstract class InstrumentClasses extends DefaultTask {
     @Input public abstract Property<Boolean> getInstrumentWebViewLoads();
     @Input public abstract Property<Boolean> getInstrumentWebViewInflation();
     @Input public abstract Property<Boolean> getInstrumentWebViewCreation();
+    @Input public abstract SetProperty<String> getWebViewContentViewActivities();
     @OutputFile public abstract RegularFileProperty getOutputJar();
 
     @TaskAction
@@ -73,6 +76,7 @@ public abstract class InstrumentClasses extends DefaultTask {
         boolean webViewLoads = getInstrumentWebViewLoads().get();
         boolean inflation = getInstrumentWebViewInflation().get();
         boolean creation = getInstrumentWebViewCreation().get();
+        var contentViewActivities = getWebViewContentViewActivities().get();
         try (var loader = new URLClassLoader(urls, null);
                 var jar = new JarOutputStream(Files.newOutputStream(output))) {
             if (loader.getResource(LOCALE_EASY + ".class") == null) {
@@ -80,6 +84,9 @@ public abstract class InstrumentClasses extends DefaultTask {
             }
             if (creation && loader.getResource(WEB_VIEW_INFLATION + ".class") == null) {
                 throw new GradleException("Use a LocaleEasy runtime that supports instrumentWebViewCreation.");
+            }
+            if (!contentViewActivities.isEmpty() && loader.getResource(WEB_VIEW_CONTENT + ".class") == null) {
+                throw new GradleException("Use a LocaleEasy runtime that supports webViewContentViewActivities.");
             }
             var hierarchy = new ClassHierarchy(projectClasses, new HashMap<>(), loader);
             for (var entry : entries.entrySet()) {
@@ -97,7 +104,10 @@ public abstract class InstrumentClasses extends DefaultTask {
                         }
                     }
                     if (activity != null || webViewLoads || inflation || creation) {
-                        bytes = instrumentClass(reader, activity, hierarchy, webViewLoads, inflation, creation);
+                        boolean rewriteContentView = contentViewActivities.contains(reader.getClassName().replace('/', '.'))
+                                && hierarchy.isSubclassOf(parent, ACTIVITY);
+                        bytes = instrumentClass(reader, activity, hierarchy, webViewLoads, inflation, creation,
+                                rewriteContentView);
                     }
                 }
                 var outputEntry = new JarEntry(entry.getKey());
@@ -139,7 +149,7 @@ public abstract class InstrumentClasses extends DefaultTask {
     }
 
     private static byte[] instrumentClass(ClassReader reader, ActivityClass activity, ClassHierarchy hierarchy,
-            boolean webViewLoads, boolean inflation, boolean creation) {
+            boolean webViewLoads, boolean inflation, boolean creation, boolean rewriteContentView) {
         var writer = new ClassWriter(reader, ClassWriter.COMPUTE_MAXS);
         reader.accept(new ClassVisitor(Opcodes.ASM9, writer) {
             private boolean wrappedSuperCall;
@@ -149,6 +159,8 @@ public abstract class InstrumentClasses extends DefaultTask {
                     String[] exceptions) {
                 MethodVisitor method = super.visitMethod(access, name, descriptor, signature, exceptions);
                 if (!webViewLoads && !inflation && !creation && activity.attachAccess < 0) return method;
+                boolean rewriteHere = rewriteContentView && name.equals("onCreate")
+                        && descriptor.equals("(Landroid/os/Bundle;)V");
                 return new MethodVisitor(Opcodes.ASM9, method) {
                     @Override
                     public void visitMethodInsn(int opcode, String owner, String calledName,
@@ -168,7 +180,12 @@ public abstract class InstrumentClasses extends DefaultTask {
                             readCompanion(this);
                             super.visitMethodInsn(Opcodes.INVOKEVIRTUAL, COMPANION, "fixWebViewLocale", "()V", false);
                         }
-                        if (creation && inflaterCall && opcode == Opcodes.INVOKEVIRTUAL) {
+                        boolean activityLayoutCall = (inflation || rewriteHere) && instanceCall
+                                && isActivityLayoutCall(hierarchy, owner, calledName, calledDescriptor);
+                        if (rewriteHere && opcode == Opcodes.INVOKEVIRTUAL && activityLayoutCall) {
+                            super.visitMethodInsn(Opcodes.INVOKESTATIC, WEB_VIEW_CONTENT,
+                                    "setContentView", "(L" + ACTIVITY + ";I)V", false);
+                        } else if (creation && inflaterCall && opcode == Opcodes.INVOKEVIRTUAL) {
                             String descriptorWithInflater = "(L" + LAYOUT_INFLATER + ";" + calledDescriptor.substring(1);
                             super.visitMethodInsn(Opcodes.INVOKESTATIC, WEB_VIEW_INFLATION,
                                     "inflate", descriptorWithInflater, false);
@@ -180,8 +197,7 @@ public abstract class InstrumentClasses extends DefaultTask {
                             super.visitMethodInsn(Opcodes.INVOKESTATIC, WEB_VIEW_INFLATION,
                                     "repairAfterWebViewCreation", "()V", false);
                         }
-                        if (inflation && instanceCall && (inflaterCall
-                                || isActivityLayoutCall(hierarchy, owner, calledName, calledDescriptor))) {
+                        if (inflation && (inflaterCall || activityLayoutCall)) {
                             // Keep the layout result on the stack for the original caller.
                             readCompanion(this);
                             super.visitMethodInsn(Opcodes.INVOKEVIRTUAL, COMPANION,

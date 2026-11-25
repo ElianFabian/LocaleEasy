@@ -201,9 +201,20 @@ localeEasyLocales {
 
 `instrumentWebViewInflation` defaults to `false` and works independently of `instrumentWebViewLoads`. It checks application resources after successful calls to `LayoutInflater.inflate()` and `Activity.setContentView(layoutResId)` in the app module, including the inflation call in View Binding classes generated there. The check runs on the main thread from API 24 onward and skips calls made before LocaleEasy is installed. It also runs for layouts without WebViews, since the plugin instruments the inflation call rather than individual XML elements. The option requires a LocaleEasy runtime version that supports it. Used on its own, the inflation hook runs after the layout returns. A view constructor that runs earlier can read from its localized context.
 
-For earlier repair, `instrumentWebViewCreation.set(true)` is an independent experimental option. It repairs resources when a WebView constructor called from the app module returns, including direct construction in a Compose `AndroidView` factory. For explicit `LayoutInflater.inflate()` calls, including generated View Binding calls in the app module, it inflates with a clone of the inflater. The clone preserves the existing public factory and handles the standard `WebView` and `android.webkit.WebView` tags. It repairs as soon as that view is created, before subsequent XML elements are inflated.
+For earlier repair, `instrumentWebViewCreation.set(true)` is an independent experimental option. It repairs resources when a WebView or subclass constructor called from the app module returns, including direct construction in a Compose `AndroidView` factory. For explicit `LayoutInflater.inflate()` calls, including generated View Binding calls in the app module, it inflates with a clone of the inflater. The clone preserves the existing public factory and handles both standard WebView tags and fully qualified WebView subclasses declared in XML. A subclass can come from a dependency and use the normal public `(Context, AttributeSet)` XML constructor. Repair runs as soon as the view is created, before subsequent XML elements are inflated.
 
-This option is disabled by default and requires a matching LocaleEasy runtime. It clones the inflater for each supported call on the main thread from API 24 onward, including layouts without a WebView. If the public factory leaves a standard WebView tag unhandled, the clone creates a platform WebView itself. An activity that supplies its own WebView for those tags through an `onCreateView()` fallback can keep using the post-inflation and load options. Inflation performed entirely inside Android or a dependency is outside the transformation's scope. For `setContentView(layoutResId)`, the separate inflation option still checks resources when the call returns. The load hook can still repair resources when a WebView created elsewhere is navigated from the app module.
+This option is disabled by default and requires a matching LocaleEasy runtime. It clones the inflater for each supported call on the main thread from API 24 onward, including layouts without a WebView. If the public factory leaves a WebView tag unhandled, the clone creates the requested WebView class. An activity that supplies its own WebView for those tags through an `onCreateView()` fallback can use the post-inflation and load options. The load hook can still repair resources when a WebView created elsewhere is navigated from the app module.
+
+To include a direct `setContentView(layoutResId)` call from an activity's `onCreate(Bundle)`, opt that activity in by its fully qualified name.
+
+```kotlin
+localeEasyLocales {
+    instrumentWebViewCreation.set(true)
+    webViewContentViewActivities.add("com.example.PaymentActivity")
+}
+```
+
+This uses View Binding style inflation from API 24 onward. It inflates the XML with no parent and passes the resulting view to `setContentView(view)`, which can change root layout parameters. Use it for screens that accept those mounting semantics and do not rely on an override of the resource-ID overload. A layout with a `<merge>` root, an explicit `super.setContentView(...)` call, or a call inside another method still uses the original resource-ID overload. The separate inflation option can repair subsequent reads after that overload returns. The sample defaults to early repair and exposes `-PsampleWebViewFallbacks=true` to build it with both fallback hooks enabled.
 
 #### Configuration changes
 

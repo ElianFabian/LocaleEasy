@@ -7,12 +7,15 @@ plugins {
 	id("com.elianfabian.localeeasy.locales")
 }
 
+val webViewFallbacks = providers.gradleProperty("sampleWebViewFallbacks").map(String::toBooleanStrict).orElse(false)
+
 localeEasyLocales {
 	generateFallbackCatalog.set(true)
 	instrumentActivities.set(true)
-	instrumentWebViewLoads.set(true)
-	instrumentWebViewInflation.set(true)
+	instrumentWebViewLoads.set(webViewFallbacks)
+	instrumentWebViewInflation.set(webViewFallbacks)
 	instrumentWebViewCreation.set(true)
+	webViewContentViewActivities.add("com.elianfabian.localeeasy.WebViewContentFixtureActivity")
 }
 
 android {
@@ -51,6 +54,10 @@ android {
 }
 
 androidComponents.onVariants { variant ->
+	requireNotNull(variant.buildConfigFields).put(
+		"WEB_VIEW_FALLBACKS",
+		webViewFallbacks.map { BuildConfigField("boolean", it.toString(), null) },
+	)
 	val localeQualifier = Regex(
 		"""^values-(?:mcc\d{3}-)?(?:mnc\d{1,3}-)?(b\+[a-z0-9+]+|(?!car(?:-|$))[a-z]{2,3}(?:-r[a-z]{2})?)(?:-|$)""",
 		RegexOption.IGNORE_CASE,

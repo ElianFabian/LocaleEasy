@@ -10,8 +10,10 @@ import com.android.build.api.variant.SourceDirectories;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringJoiner;
 import org.gradle.api.Action;
+import org.gradle.api.GradleException;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.file.Directory;
@@ -27,6 +29,7 @@ public final class LocaleCatalogPlugin implements Plugin<Project> {
         locales.getInstrumentWebViewLoads().convention(false);
         locales.getInstrumentWebViewInflation().convention(false);
         locales.getInstrumentWebViewCreation().convention(false);
+        locales.getWebViewContentViewActivities().convention(Set.of());
         project.getPluginManager().withPlugin("com.android.application", plugin -> {
             ApplicationAndroidComponentsExtension android =
                     project.getExtensions().getByType(ApplicationAndroidComponentsExtension.class);
@@ -38,6 +41,10 @@ public final class LocaleCatalogPlugin implements Plugin<Project> {
                         boolean webViewLoads = locales.getInstrumentWebViewLoads().get();
                         boolean inflation = locales.getInstrumentWebViewInflation().get();
                         boolean creation = locales.getInstrumentWebViewCreation().get();
+                        var contentViewActivities = locales.getWebViewContentViewActivities().get();
+                        if (!contentViewActivities.isEmpty() && !creation) {
+                            throw new GradleException("webViewContentViewActivities requires instrumentWebViewCreation.");
+                        }
                         if (activities || webViewLoads || inflation || creation) {
                             var task = project.getTasks().register(
                                     "instrumentLocaleEasyClasses_" + variant.getName(),
@@ -46,6 +53,7 @@ public final class LocaleCatalogPlugin implements Plugin<Project> {
                                         instrument.getInstrumentWebViewLoads().set(webViewLoads);
                                         instrument.getInstrumentWebViewInflation().set(inflation);
                                         instrument.getInstrumentWebViewCreation().set(creation);
+                                        instrument.getWebViewContentViewActivities().set(contentViewActivities);
                                         instrument.getClasspath().from(variant.getCompileClasspath(),
                                                 android.getSdkComponents().getBootClasspath());
                                     });
