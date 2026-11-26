@@ -6,6 +6,8 @@ build/
 
 # Local configuration file (sdk path, etc)
 local.properties
+# Gradle Plugin Portal credentials for the standalone plugin build
+/locale-easy-gradle/gradle.properties
 
 # Log/OS Files
 *.log

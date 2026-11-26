@@ -75,3 +75,7 @@ LocaleEasy's in-app choice and Android Settings are independent. If Settings sav
 See the [API and usage examples](docs/locale-preference-api.md) and [verification results](docs/locale-verification.md).
 
 See [Android locale pitfalls](docs/android-locale-pitfalls.md) for the behavior observed across Android versions, including activity recreation and WebView initialization.
+
+## Publish the Gradle plugin
+
+Set `GRADLE_PUBLISH_KEY` and `GRADLE_PUBLISH_SECRET` in the repository's [Actions secrets](https://github.com/ElianFabian/LocaleEasy/settings/secrets/actions). Run [Publish Gradle plugin](https://github.com/ElianFabian/LocaleEasy/actions/workflows/publish-plugin.yml) from `main` and enter an existing release tag such as `0.1.0`. The workflow checks that the tag matches the plugin version, runs the plugin tests and submits the plugin to the Portal.
