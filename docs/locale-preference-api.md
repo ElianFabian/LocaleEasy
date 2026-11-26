@@ -104,7 +104,7 @@ The companion plugin generates BCP 47 language tags in the app's `BuildConfig`. 
 ```kotlin
 plugins {
     id("com.android.application")
-    id("com.elianfabian.localeeasy.locales")
+    id("io.github.elianfabian.localeeasy.locales") version "0.1.0"
 }
 
 localeEasyLocales {
@@ -128,7 +128,7 @@ LocaleEasy loads the catalog resource at startup. The sample picker reads `Local
 
 While following the system, LocaleEasy keeps the system locales that match the catalog by language and script, in system preference order. It uses `defaultLocale` when none match. The stored preference stays `FollowSystem`, and subsequent system changes can select another language. Explicit app choices still apply. For example, an app with English fallback resources can call `setInitialLocale(Locale.FRENCH)` to save French on its first launch. A later explicit `followSystem()` uses English whenever the device has no supported language.
 
-The repository includes the plugin build through `pluginManagement.includeBuild("locale-easy-gradle")`. To test it in another project, publish it locally with `./gradlew -p locale-easy-gradle publishToMavenLocal`. Add `mavenLocal()` to the consumer's `pluginManagement.repositories` and use plugin version `0.1.0`. The plugin is verified with the project's AGP version.
+The [installation instructions](../README.md#install) list repositories for the runtime and plugin. This checkout resolves the plugin through `pluginManagement.includeBuild("locale-easy-gradle")`. To test a local plugin build in another project, run `./gradlew -p locale-easy-gradle publishToMavenLocal` and add `mavenLocal()` to the consumer's `pluginManagement.repositories`. The plugin is verified with the project's AGP version.
 
 An app can also supply the catalog directly as `src/main/res/xml/locale_easy_catalog.xml`. The default locale is included in the supported list automatically. List the other languages the app wants to offer.
 
@@ -162,7 +162,7 @@ Apply the LocaleEasy Gradle plugin in the application module and enable `instrum
 ```kotlin
 plugins {
     id("com.android.application")
-    id("com.elianfabian.localeeasy.locales")
+    id("io.github.elianfabian.localeeasy.locales") version "0.1.0"
 }
 
 localeEasyLocales {

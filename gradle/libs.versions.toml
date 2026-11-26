@@ -1,8 +1,7 @@
 [versions]
 
 # Project Metadata
-localeEasyProviderVersion = "2.0.1"
-localeEasyProviderGroup = "com.github.ElianFabian.YuruPermissions"
+localeEasy = "0.1.0"
 
 
 agp = "9.2.1"

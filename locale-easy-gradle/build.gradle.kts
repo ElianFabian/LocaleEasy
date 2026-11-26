@@ -1,10 +1,9 @@
 plugins {
-	`java-gradle-plugin`
-	`maven-publish`
+	id("com.gradle.plugin-publish") version "2.2.1"
 }
 
-group = "com.elianfabian.localeeasy"
-version = "0.1.0"
+group = "io.github.elianfabian.localeeasy"
+version = libs.versions.localeEasy.get()
 
 java {
 	sourceCompatibility = JavaVersion.VERSION_17
@@ -18,12 +17,15 @@ dependencies {
 }
 
 gradlePlugin {
+	website = "https://github.com/ElianFabian/LocaleEasy"
+	vcsUrl = "https://github.com/ElianFabian/LocaleEasy.git"
 	plugins {
 		create("localeEasyLocales") {
-			id = "com.elianfabian.localeeasy.locales"
+			id = "io.github.elianfabian.localeeasy.locales"
 			implementationClass = "com.elianfabian.localeeasy.gradle.LocaleCatalogPlugin"
 			displayName = "LocaleEasy language catalog"
 			description = "Discovers app languages and optionally integrates LocaleEasy with activities."
+			tags.set(listOf("android", "localization", "internationalization"))
 		}
 	}
 }

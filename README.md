@@ -4,6 +4,26 @@ LocaleEasy is an Android library for changing the app language and observing the
 
 Apps consuming the runtime AAR need Android `compileSdk` 35 or higher. The AAR uses Kotlin 1.9 language and API settings, with a consumer build verified on Kotlin 1.8.22 and 1.9.24. The sample builds with Kotlin 2.2.10. See the [compatibility checks](docs/locale-verification.md#kotlin-consumer-compatibility).
 
+## Install
+
+Add JitPack to `dependencyResolutionManagement.repositories` in `settings.gradle.kts` alongside Google's repository and Maven Central:
+
+```kotlin
+maven("https://jitpack.io") {
+    content { includeGroup("com.github.ElianFabian.LocaleEasy") }
+}
+```
+
+Add the runtime dependency to the Android app module:
+
+```kotlin
+dependencies {
+    implementation("com.github.ElianFabian.LocaleEasy:locale-easy:0.1.0")
+}
+```
+
+For the optional Gradle integration, add the Plugin Portal to `pluginManagement.repositories` and apply `id("io.github.elianfabian.localeeasy.locales") version "0.1.0"` in the app module. The plugin is tested with AGP 9.2.1. See the [Gradle integration options](docs/locale-preference-api.md#optional-gradle-integration).
+
 ## Try it in this checkout
 
 Open the root project in Android Studio or run `./gradlew :app:assembleDebug`. The sample uses `implementation(project(":locale-easy"))` and applies the optional activity plugin. See the [integration guide](docs/locale-preference-api.md) for the Gradle and AndroidX Startup setup.

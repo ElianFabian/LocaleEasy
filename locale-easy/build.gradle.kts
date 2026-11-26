@@ -2,7 +2,13 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
 plugins {
 	alias(libs.plugins.android.library)
+	`maven-publish`
 }
+
+val publicationVersion = providers.environmentVariable("JITPACK")
+	.filter { it == "true" }
+	.flatMap { providers.environmentVariable("VERSION") }
+	.orElse(libs.versions.localeEasy)
 
 android {
 	namespace = "com.elianfabian.locale_easy"
@@ -28,6 +34,35 @@ android {
 	}
 	kotlin {
 		explicitApi()
+	}
+	publishing {
+		singleVariant("release") {
+			withSourcesJar()
+		}
+	}
+}
+
+afterEvaluate {
+	publishing {
+		publications {
+			create<MavenPublication>("release") {
+				from(components["release"])
+				groupId = "com.github.ElianFabian.LocaleEasy"
+				artifactId = project.name
+				version = publicationVersion.get()
+				pom {
+					name.set("LocaleEasy")
+					description.set("Reactive Android app language preferences and localized resources.")
+					url.set("https://github.com/ElianFabian/LocaleEasy")
+					licenses {
+						license {
+							name.set("MIT License")
+							url.set("https://opensource.org/license/mit")
+						}
+					}
+				}
+			}
+		}
 	}
 }
 
