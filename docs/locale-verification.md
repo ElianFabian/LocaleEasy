@@ -16,6 +16,12 @@ The runtime AAR uses Kotlin language and API version 1.9. The runtime module dec
 
 A separate Gradle 8.11.1 / AGP 8.8 consumer compiled against the release AAR and its runtime dependencies with Kotlin 1.8.22 and 1.9.24. Both consumer APKs were optimized with R8 and ran on API 21. AndroidX Startup initialized the library, and the app read the public locale flows and resolved a French string through a context with an ordered locale list. The sample also assembled with Kotlin 2.2.10, and the runtime's eleven instrumentation tests passed on API 21.
 
+### Published runtime
+
+JitPack built the `0.1.0` tag at `7f5b129` and published the AAR as `com.github.ElianFabian:LocaleEasy:0.1.0`. An external AGP 9.2.1 app assembled and ran lint against that remote dependency. It applied the companion plugin from an isolated local Maven publication and had no project dependency on the LocaleEasy source tree. A separate AGP 8.8 app with Kotlin 1.8.22 also built its R8 release against the remote AAR using the published transitive dependencies. The AAR contains the embedded lint rules and consumer ProGuard rules. [JitPack build log](https://jitpack.io/com/github/ElianFabian/LocaleEasy/0.1.0/build.log)
+
+JitPack's Gradle metadata points the sources variant at a `.jar` URL that returns 404. The [sources archive](https://jitpack.io/com/github/ElianFabian/LocaleEasy/0.1.0/LocaleEasy-0.1.0-sources.jar) is downloadable directly. Both binary variants resolve the AAR.
+
 ### WebView resource repair and page state
 
 `WebViewLocaleTest.repairsAnApplicationResourceMismatchFromApi24` deliberately sets the application resources to Spanish while LocaleEasy's preference and effective locales are French. It verifies the Spanish resource lookup before calling `fixWebViewLocale()`. On API 24 and later it expects French after the call. On earlier versions it expects the resource locale to stay Spanish. In both cases it checks that the preference is preserved.
