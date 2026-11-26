@@ -310,6 +310,21 @@ Use `adb -s DEVICE` when multiple devices are connected. Each phase must report 
 
 Tests used headless emulators with `-read-only -no-snapshot`; saved AVD state was not overwritten. The API-36 AVD hit a low-storage installation reserve after its first suite; the temporary session's storage threshold was lowered to install the persistence fixture. No saved AVD setting was changed. Initial offline dependency-resolution failures were resolved by downloading missing build/test dependencies.
 
+## Physical-device global language and sheet checks (2026-11-26)
+
+The Realme RMX2001 (API 30) and Pixel 8 Pro (API 37) both reported the new global language through `systemLocaleList`. With Follow System, the XML fixture switched to French. With an Italian override, it stayed in Italian. Both devices passed the foreground cases, including preservation of entered text. The Pixel passed both background cases after returning from Home. The Realme returned successfully via Android Settings and passed Follow System. The fixed-Italian case lost the text field contents once even though the replacement activity received saved state. The isolated retry preserved the text, so this remains an intermittent observation. The original ordered language lists were verified after testing.
+
+The sample's Compose settings sheet was captured during the same English-to-French change on both devices. Local changes used the sample's Apply button. Global changes used Android's system locale configuration while the app followed the system and the sheet stayed open.
+
+| Device | Local recreation with sheet open | Global configuration change with sheet open | Local recreation with sheet closed |
+| --- | --- | --- | --- |
+| Pixel 8 Pro | All three captures exposed the underlying screen briefly before the translated sheet appeared. No mostly black samples. | All three captures showed the old sheet until the transition to the translated sheet. No sampled frame showed the underlying screen alone or a mostly black image. | — |
+| Realme RMX2001 | Mostly black frames in all three captures. The translated sheet returned afterward. | Mostly black frames in the completed capture. The translated sheet returned afterward. | Mostly black frames in both completed captures. |
+
+A mostly black sample had more than 90% of sampled pixels below RGB 20 in all channels. These screenshots were sampled asynchronously and do not establish exact flash duration or identify which window owned the black pixels. The Realme control confirms the black frames can occur without a sheet. The Pixel comparison shows a sheet continuity difference for this global locale change. It does not establish the behavior of other configuration changes.
+
+The opt-in tests are `PhysicalLocaleVerificationTest` and `LocaleSheetCaptureTest`. For a global change, read the full original list with `adb shell settings get system system_locales` and pass it as `-e restoreSystemLocales <tags>` to `am instrument --no-hidden-api-checks`. The global fixture expects French as a secondary system language. The sheet comparison expects English and French on the device. Select `-e captureLocaleSheet local`, `system`, or `closed` to capture one transition. Frames and timestamps are written to the sample's `cache/locale-sheet-capture`. If instrumentation is interrupted, run `PhysicalLocaleVerificationTest#restoreGlobalLanguageList` with the original tags and `-e restoreOnly true`. Verify the complete list after the system finishes saving it.
+
 ## Remaining verification
 
 A follow-up [isolated profiling lab](../recreation-lab/README.md) now compares real rotation, local recreation, framework locale changes, LocaleEasy, and view-only rebuilding. Its [findings](recreation-lab-findings.md) record actual method paths, window identities, memory/class inventories, and Perfetto captures. That controlled workload supplements these sample tests; it does not close the original-device reproduction or the sample's full system-configuration matrix.
@@ -317,7 +332,7 @@ A follow-up [isolated profiling lab](../recreation-lab/README.md) now compares r
 The broader acceptance checkboxes in [the reliability checklist](locale-reliability-checklist.md) remain open where appropriate:
 
 1. Reproduce the originally reported failure on its actual device/API with the creation trace enabled.
-2. Change actual device system languages in follow-system and app-locale modes, foreground and background; rotate and toggle dark mode. ActivityScenario recreation is not a substitute for all real configuration events.
+2. Broaden the physical-device configuration matrix beyond the tested foreground and background language changes. Repeat the Realme background saved-input case, rotate, and toggle dark mode across representative host screens.
 3. Exercise API 22–31 and 33–35 boundaries as needed, especially an API-23 sample startup smoke test and API-29 callbacks. API 21, 32, and 36 are the executed coverage, not the whole supported range.
 4. Test multiple tasks/windows, nested/navigation fragments, dialogs during saved-state transitions, and rapid background/foreground transitions.
 5. Verify RTL layout direction and unsupported-language fallback with suitable translated resources. The sample currently has English, Spanish, French, Portuguese, and Italian only.
