@@ -22,7 +22,7 @@ dependencies {
 }
 ```
 
-For the optional Gradle integration, add the Plugin Portal to `pluginManagement.repositories`. Once the plugin is listed there, apply `id("io.github.elianfabian.localeeasy.locales") version "0.1.0"` in the app module. The plugin is tested with AGP 9.2.1. See the [Gradle integration options](docs/locale-preference-api.md#optional-gradle-integration).
+For the optional Gradle integration, add the Plugin Portal to `pluginManagement.repositories`. Once the plugin is listed there, apply `id("io.github.elianfabian.localeeasy") version "0.1.1"` in the app module. The plugin is tested with AGP 9.2.1. See the [Gradle integration options](docs/locale-preference-api.md#optional-gradle-integration).
 
 ## Try it in this checkout
 
@@ -78,4 +78,4 @@ See [Android locale pitfalls](docs/android-locale-pitfalls.md) for the behavior 
 
 ## Publish the Gradle plugin
 
-Set `GRADLE_PUBLISH_KEY` and `GRADLE_PUBLISH_SECRET` in the repository's [Actions secrets](https://github.com/ElianFabian/LocaleEasy/settings/secrets/actions). Run [Publish Gradle plugin](https://github.com/ElianFabian/LocaleEasy/actions/workflows/publish-plugin.yml) from `main` and enter an existing release tag such as `0.1.0`. The workflow checks that the tag matches the plugin version, runs the plugin tests and submits the plugin to the Portal.
+Set `GRADLE_PUBLISH_KEY` and `GRADLE_PUBLISH_SECRET` in the repository's [Actions secrets](https://github.com/ElianFabian/LocaleEasy/settings/secrets/actions). Tag the plugin release with a tag such as `plugin-0.1.1`, then run [Publish Gradle plugin](https://github.com/ElianFabian/LocaleEasy/actions/workflows/publish-plugin.yml) from `main` and enter `0.1.1`. The workflow checks that the tag matches the plugin version, runs the plugin tests and submits the plugin to the Portal.

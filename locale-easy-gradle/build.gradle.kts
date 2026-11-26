@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "io.github.elianfabian.localeeasy"
-version = libs.versions.localeEasy.get()
+version = libs.versions.localeEasyPlugin.get()
 
 java {
 	sourceCompatibility = JavaVersion.VERSION_17
@@ -21,7 +21,7 @@ gradlePlugin {
 	vcsUrl = "https://github.com/ElianFabian/LocaleEasy.git"
 	plugins {
 		create("localeEasyLocales") {
-			id = "io.github.elianfabian.localeeasy.locales"
+			id = "io.github.elianfabian.localeeasy"
 			implementationClass = "com.elianfabian.localeeasy.gradle.LocaleCatalogPlugin"
 			displayName = "LocaleEasy language catalog"
 			description = "Discovers app languages and optionally integrates LocaleEasy with activities."

@@ -4,7 +4,7 @@ import java.util.Locale
 plugins {
 	alias(libs.plugins.android.application)
 	alias(libs.plugins.kotlin.compose)
-	id("io.github.elianfabian.localeeasy.locales")
+	id("io.github.elianfabian.localeeasy")
 }
 
 val webViewFallbacks = providers.gradleProperty("sampleWebViewFallbacks").map(String::toBooleanStrict).orElse(false)

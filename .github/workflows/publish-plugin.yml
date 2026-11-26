@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: Existing release tag, such as 0.1.0
+        description: Plugin version, such as 0.1.1
         required: true
         type: string
 
@@ -20,16 +20,16 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: refs/tags/${{ inputs.version }}
+          ref: refs/tags/plugin-${{ inputs.version }}
           persist-credentials: false
 
       - name: Verify the release version
         env:
-          RELEASE_TAG: ${{ inputs.version }}
+          RELEASE_VERSION: ${{ inputs.version }}
         run: |
-          version="$(sed -n 's/^localeEasy = "\([^"]*\)"$/\1/p' gradle/libs.versions.toml)"
-          if [[ -z "$version" || "$version" != "$RELEASE_TAG" ]]; then
-            echo "::error::The release tag must match the LocaleEasy version in gradle/libs.versions.toml."
+          version="$(sed -n 's/^localeEasyPlugin = "\([^"]*\)"$/\1/p' gradle/libs.versions.toml)"
+          if [[ -z "$version" || "$version" != "$RELEASE_VERSION" ]]; then
+            echo "::error::The requested version must match localeEasyPlugin in gradle/libs.versions.toml."
             exit 1
           fi
 

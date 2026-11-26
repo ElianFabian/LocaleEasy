@@ -104,7 +104,7 @@ The companion plugin generates BCP 47 language tags in the app's `BuildConfig`. 
 ```kotlin
 plugins {
     id("com.android.application")
-    id("io.github.elianfabian.localeeasy.locales") version "0.1.0"
+    id("io.github.elianfabian.localeeasy") version "0.1.1"
 }
 
 localeEasyLocales {
@@ -162,7 +162,7 @@ Apply the LocaleEasy Gradle plugin in the application module and enable `instrum
 ```kotlin
 plugins {
     id("com.android.application")
-    id("io.github.elianfabian.localeeasy.locales") version "0.1.0"
+    id("io.github.elianfabian.localeeasy") version "0.1.1"
 }
 
 localeEasyLocales {
