@@ -104,7 +104,7 @@ The companion plugin generates BCP 47 language tags in the app's `BuildConfig`. 
 ```kotlin
 plugins {
     id("com.android.application")
-    id("io.github.elianfabian.localeeasy") version "0.1.1"
+    id("io.github.elianfabian.localeeasy") version "0.1.2"
 }
 
 localeEasyLocales {
@@ -162,7 +162,7 @@ Apply the LocaleEasy Gradle plugin in the application module and enable `instrum
 ```kotlin
 plugins {
     id("com.android.application")
-    id("io.github.elianfabian.localeeasy") version "0.1.1"
+    id("io.github.elianfabian.localeeasy") version "0.1.2"
 }
 
 localeEasyLocales {
@@ -178,7 +178,11 @@ The sample enables activity instrumentation in `app/build.gradle.kts`. Its main 
 
 #### Optional WebView repair
 
-Enable the WebView hook in the Android application module:
+Use `instrumentWebViewCreation` for WebViews created by a covered XML inflation or constructed directly in app code, including an `AndroidView` factory in Compose. Leave the navigation hook disabled for these paths.
+
+##### WebView navigation fallback
+
+Enable `instrumentWebViewLoads` in the Android application module when a WebView is created outside the instrumented paths and your app owns the navigation call. For example, an SDK can create the WebView internally and return it for your app to load a URL.
 
 ```kotlin
 localeEasyLocales {
@@ -186,16 +190,17 @@ localeEasyLocales {
 }
 ```
 
-The setting defaults to `false` and can be enabled on its own. The plugin inserts `LocaleEasy.fixWebViewLocale()` before direct calls to `WebView.loadUrl()` (with or without headers), `loadData()`, and `loadDataWithBaseURL()` compiled in the application module. This covers both a WebView inflated from XML and one created by Compose's `AndroidView`. Use an explicit repair call after construction when native resources are needed before the first load or when a dependency owns the load call.
+The setting defaults to `false` and can be enabled on its own. The plugin inserts `LocaleEasy.fixWebViewLocale()` before direct calls to `WebView.loadUrl()` (with or without headers), `loadData()`, and `loadDataWithBaseURL()` compiled in the application module. Calls inside the dependency are outside this hook.
 
-A native view populated with a string from `applicationContext` between WebView creation and the first load can retain the device-language text after the plugin repairs the resources. For activity UI, read strings from the localized activity context. If the lookup needs the application context, call `LocaleEasy.fixWebViewLocale()` immediately after inflation or construction, before that lookup.
+For manual integration with an SDK, call `LocaleEasy.fixWebViewLocale()` as soon as the SDK hands the WebView back, before reading application resources. When the app owns creation, call it immediately after construction or inflation. A repair at navigation time only helps later resource reads. For activity UI, use the localized activity context to look up strings.
+
+##### XML inflation and WebView creation
 
 For XML layouts, the experimental option below performs the check automatically when an instrumented inflation call returns.
 
 ```kotlin
 localeEasyLocales {
     instrumentWebViewInflation.set(true)
-    instrumentWebViewLoads.set(true)
 }
 ```
 
@@ -229,17 +234,27 @@ The LocaleEasy AAR includes informational Android Lint checks for the options en
 | `LocaleEasyLayoutInflationRewrite` | Supported `LayoutInflater.inflate()` calls and app-generated View Binding inflation calls. With the post-inflation hook enabled, it also covers `Activity.setContentView(Int)`. |
 | `LocaleEasyFragmentLayoutRewrite` | AndroidX `Fragment(layoutId)` and `DialogFragment(layoutId)` constructor calls when early repair is enabled. |
 | `LocaleEasyWebViewConstructionRewrite` | A WebView or WebView subclass constructor call when early repair is enabled. |
-| `LocaleEasyWebViewLoadRewrite` | `loadUrl()`, `loadData()` or `loadDataWithBaseURL()` on a WebView when the navigation hook is enabled. |
+| `LocaleEasyWebViewLoadRewrite` | `loadUrl()`, `loadData()` or `loadDataWithBaseURL()` on a WebView when the navigation fallback is enabled. The message explains when the fallback is useful and when early repair is enough. |
 
 Hover over an underlined call in Android Studio to read the explanation, or run `./gradlew :app:lintDebug` for the debug report. The source code can stay as written.
 
-To hide all LocaleEasy instrumentation hints in Android Studio and lint reports, set:
+To hide the messages that explain automatic rewrites in Android Studio and lint reports, set:
 
 ```kotlin
 localeEasyLocales {
     showInstrumentationHints.set(false)
 }
 ```
+
+The AAR also ships informational checks for manual integrations. These work without the plugin and are independent of `showInstrumentationHints`. Each check can be disabled by ID through the app's Android lint configuration. [Lint suppression options](https://googlesamples.github.io/android-custom-lint-rules/usage/lintxml.md.html)
+
+| Inspection | Where it appears |
+| --- | --- |
+| `LocaleEasyManualActivityContext` | An Activity calls a LocaleEasy preference setter and lint finds neither automatic activity integration nor a localized `attachBaseContext()` in its hierarchy. Activities that only display content or observe the language are outside this check. |
+| `LocaleEasyManualWebViewCreation` | Code creates a WebView without early instrumentation or an immediate manual repair that lint can recognize. The message recommends repair when code subsequently reads application resources. |
+| `LocaleEasyManualWebViewInflation` | A resource-ID inflation, View Binding inflation, content view, or AndroidX Fragment layout constructor resolves to a local layout containing a WebView. The message distinguishes repair after inflation from the earlier repair needed when a later view can read localized resources during inflation. |
+
+Lint can miss code routed through helpers, dynamic resource IDs, or layouts owned by a dependency. Pair the AAR with the matching plugin version for reliable detection when rewrite hints are silenced. Older plugin versions can omit all instrumentation metadata in that mode.
 
 This setting defaults to `true`. Instrumentation and other Android Lint checks keep running when the hints are hidden.
 

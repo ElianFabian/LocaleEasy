@@ -51,6 +51,13 @@ public final class LocaleCatalogPlugin implements Plugin<Project> {
                         if (!contentViewActivities.isEmpty() && !creation) {
                             throw new GradleException("webViewContentViewActivities requires instrumentWebViewCreation.");
                         }
+                        var instrumentation = new StringJoiner(",");
+                        if (activities) instrumentation.add("ACTIVITIES");
+                        if (webViewLoads) instrumentation.add("WEB_VIEW_LOADS");
+                        if (inflation) instrumentation.add("WEB_VIEW_INFLATION");
+                        if (creation) instrumentation.add("WEB_VIEW_CREATION");
+                        publishLintString(variant, "LOCALE_EASY_INSTRUMENTATION", instrumentation.toString());
+
                         if (hints && activities) publishLintFlag(variant, "ACTIVITIES");
                         if (hints && webViewLoads) publishLintFlag(variant, "WEB_VIEW_LOADS");
                         if (hints && inflation) publishLintFlag(variant, "WEB_VIEW_INFLATION");
@@ -60,11 +67,11 @@ public final class LocaleCatalogPlugin implements Plugin<Project> {
                                     InstrumentationScope.ALL, unused -> Unit.INSTANCE);
                         }
                         if (!contentViewActivities.isEmpty()) {
+                            var names = String.join("\n", contentViewActivities.stream().sorted().toList());
+                            var encoded = Base64.getEncoder().encodeToString(names.getBytes(StandardCharsets.UTF_8));
+                            publishLintString(variant, "LOCALE_EASY_CONTENT_VIEW_ACTIVITIES", encoded);
                             if (hints) {
-                                var names = String.join("\n", contentViewActivities.stream().sorted().toList());
-                                var encoded = Base64.getEncoder().encodeToString(names.getBytes(StandardCharsets.UTF_8));
-                                variant.getBuildConfigFields().put("LOCALE_EASY_LINT_CONTENT_VIEW_ACTIVITIES",
-                                        new BuildConfigField<>("String", quote(encoded), "LocaleEasy Lint variant configuration."));
+                                publishLintString(variant, "LOCALE_EASY_LINT_CONTENT_VIEW_ACTIVITIES", encoded);
                             }
                             variant.getInstrumentation().transformClassesWith(AppCompatContentInstrumentation.class,
                                     InstrumentationScope.ALL, unused -> Unit.INSTANCE);
@@ -94,6 +101,11 @@ public final class LocaleCatalogPlugin implements Plugin<Project> {
     private static void publishLintFlag(ApplicationVariant variant, String name) {
         variant.getBuildConfigFields().put("LOCALE_EASY_LINT_" + name,
                 new BuildConfigField<>("boolean", true, "LocaleEasy Lint variant configuration."));
+    }
+
+    private static void publishLintString(ApplicationVariant variant, String name, String value) {
+        variant.getBuildConfigFields().put(name,
+                new BuildConfigField<>("String", quote(value), "LocaleEasy Lint variant configuration."));
     }
 
     private static void configureCatalog(Project project, ApplicationVariant variant, LocaleCatalogExtension extension) {

@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: Plugin version, such as 0.1.1
+        description: Plugin version, such as 0.1.2
         required: true
         type: string
 

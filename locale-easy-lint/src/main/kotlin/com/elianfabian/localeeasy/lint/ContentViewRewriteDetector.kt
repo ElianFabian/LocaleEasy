@@ -24,22 +24,9 @@ class ContentViewRewriteDetector : Detector(), SourceCodeScanner {
 	override fun getApplicableMethodNames() = listOf("setContentView")
 
 	override fun visitMethodCall(context: JavaContext, node: UCallExpression, method: PsiMethod) {
-		if (context.isTestSource || node.receiver is USuperExpression || !method.takes("int")) return
-		val receiver = when (val type = node.receiverType) {
-			is PsiClassType -> type.resolve()
-			else -> method.containingClass
-		}
-		if (!isActivity(context, receiver)) return
-
-		var enclosing = node.uastParent
-		while (enclosing != null && enclosing !is UMethod) {
-			if (enclosing is ULambdaExpression || enclosing is UClass) return
-			enclosing = enclosing.uastParent
-		}
-		val onCreate = enclosing?.javaPsi ?: return
-		if (onCreate.name != "onCreate" || !onCreate.takes("android.os.Bundle")) return
-		val activity = onCreate.containingClass ?: return
-		if (!isActivity(context, activity) || !isEnabledForActivity(context, activity)) return
+		if (context.isTestSource) return
+		val activity = activityForRewrite(context, node, method) ?: return
+		if (ClassUtil.getJVMClassName(activity) !in contentViewActivities(buildConfig(context), ACTIVITIES_FIELD)) return
 
 		val reason = "On API 24+, creating a WebView can change the app's resource locales, causing later views " +
 			"in the same layout to load text in the wrong language. LocaleEasy restores the locales after " +
@@ -55,31 +42,43 @@ class ContentViewRewriteDetector : Detector(), SourceCodeScanner {
 		context.report(ISSUE, node, context.getNameLocation(node), "$reason $rewrite$SILENCE_HINTS")
 	}
 
-	private fun PsiMethod.takes(parameterType: String): Boolean =
-		returnType == PsiTypes.voidType() &&
-			parameterList.parameters.singleOrNull()?.type?.equalsToText(parameterType) == true
-
-	private fun isActivity(context: JavaContext, type: PsiClass?): Boolean =
-		type != null && (type.qualifiedName == ACTIVITY || context.evaluator.extendsClass(type, ACTIVITY, false))
-
-	private fun isEnabledForActivity(context: JavaContext, activity: PsiClass): Boolean {
-		val encoded = buildConfig(context)
-			?.findFieldByName(ACTIVITIES_FIELD, false)
-			?.computeConstantValue() as? String ?: return false
-		val names = try {
-			Base64.getDecoder().decode(encoded).toString(Charsets.UTF_8)
-		} catch (_: IllegalArgumentException) {
-			return false
-		}
-		return ClassUtil.getJVMClassName(activity) in names.split('\n')
-	}
-
 	companion object {
 		private const val ACTIVITY = "android.app.Activity"
 		private const val APP_COMPAT = "androidx.appcompat.app.AppCompatActivity"
 		private const val ACTIVITIES_FIELD = "LOCALE_EASY_LINT_CONTENT_VIEW_ACTIVITIES"
 		const val SILENCE_HINTS = " To hide LocaleEasy instrumentation hints, set " +
 			"`showInstrumentationHints.set(false)` in `localeEasyLocales`."
+
+		internal fun activityForRewrite(context: JavaContext, node: UCallExpression, method: PsiMethod): PsiClass? {
+			if (node.receiver is USuperExpression || !method.takes("int")) return null
+			val receiver = (node.receiverType as? PsiClassType)?.resolve() ?: method.containingClass
+			if (!isActivity(context, receiver)) return null
+
+			var enclosing = node.uastParent
+			while (enclosing != null && enclosing !is UMethod) {
+				if (enclosing is ULambdaExpression || enclosing is UClass) return null
+				enclosing = enclosing.uastParent
+			}
+			val onCreate = enclosing?.javaPsi ?: return null
+			if (onCreate.name != "onCreate" || !onCreate.takes("android.os.Bundle")) return null
+			return onCreate.containingClass?.takeIf { isActivity(context, it) }
+		}
+
+		internal fun contentViewActivities(config: PsiClass?, field: String): List<String> {
+			val encoded = config?.findFieldByName(field, false)?.computeConstantValue() as? String ?: return emptyList()
+			return try {
+				Base64.getDecoder().decode(encoded).toString(Charsets.UTF_8).split('\n')
+			} catch (_: IllegalArgumentException) {
+				emptyList()
+			}
+		}
+
+		private fun PsiMethod.takes(parameterType: String): Boolean =
+			returnType == PsiTypes.voidType() &&
+				parameterList.parameters.singleOrNull()?.type?.equalsToText(parameterType) == true
+
+		private fun isActivity(context: JavaContext, type: PsiClass?): Boolean =
+			type != null && (type.qualifiedName == ACTIVITY || context.evaluator.extendsClass(type, ACTIVITY, false))
 
 		@JvmField
 		val ISSUE: Issue = Issue.create(

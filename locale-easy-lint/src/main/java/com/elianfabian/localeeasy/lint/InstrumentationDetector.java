@@ -48,7 +48,8 @@ public final class InstrumentationDetector extends Detector implements SourceCod
             "The plugin checks for changes to application resource locales during or after layout inflation.");
     static final Issue WEB_VIEW_LOAD = issue("LocaleEasyWebViewLoadRewrite",
             "LocaleEasy repairs locales before WebView navigation",
-            "The optional navigation hook checks application resource locales before loading this WebView's content.");
+            "The optional navigation fallback repairs application resource locales when a WebView was created "
+                    + "outside the instrumented paths, such as by a dependency.");
     static final Issue FRAGMENT_LAYOUT = issue("LocaleEasyFragmentLayoutRewrite",
             "LocaleEasy instruments AndroidX Fragment layout inflation", EARLY_REPAIR);
 
@@ -113,7 +114,7 @@ public final class InstrumentationDetector extends Detector implements SourceCod
         };
     }
 
-    private static boolean flag(PsiClass config, String name) {
+    static boolean flag(PsiClass config, String name) {
         PsiField field = config.findFieldByName("LOCALE_EASY_LINT_" + name, false);
         return field != null && Boolean.TRUE.equals(field.computeConstantValue());
     }
@@ -202,21 +203,23 @@ public final class InstrumentationDetector extends Detector implements SourceCod
         if (supported) {
             context.report(WEB_VIEW_LOAD, node, context.getNameLocation(node),
                     "LocaleEasy inserts `fixWebViewLocale()` before this call to restore application resource "
-                            + "locales if the WebView provider changed them on API 24+." + SILENCE_HINTS);
+                            + "locales on API 24+. Use this fallback when creation happens outside instrumented paths, "
+                            + "for example in an SDK. If early repair already covers creation, you can leave "
+                            + "`instrumentWebViewLoads` disabled." + SILENCE_HINTS);
         }
     }
 
-    private static PsiClass receiver(UCallExpression node, PsiMethod method) {
+    static PsiClass receiver(UCallExpression node, PsiMethod method) {
         return node.getReceiverType() instanceof PsiClassType
                 ? ((PsiClassType) node.getReceiverType()).resolve() : method.getContainingClass();
     }
 
-    private static boolean isType(JavaContext context, PsiClass type, String name) {
+    static boolean isType(JavaContext context, PsiClass type, String name) {
         return type != null && (name.equals(type.getQualifiedName())
                 || context.getEvaluator().inheritsFrom(type, name, false));
     }
 
-    private static boolean parameters(PsiMethod method, String... types) {
+    static boolean parameters(PsiMethod method, String... types) {
         var params = method.getParameterList().getParameters();
         if (params.length != types.length) return false;
         for (int i = 0; i < types.length; i++) {

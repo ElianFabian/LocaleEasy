@@ -12,7 +12,8 @@ public final class LocaleEasyIssueRegistry extends IssueRegistry {
         return List.of(ContentViewRewriteDetector.ISSUE,
                 InstrumentationDetector.ACTIVITY_CONTEXT, InstrumentationDetector.WEB_VIEW_CONSTRUCTION,
                 InstrumentationDetector.LAYOUT_INFLATION, InstrumentationDetector.WEB_VIEW_LOAD,
-                InstrumentationDetector.FRAGMENT_LAYOUT);
+                InstrumentationDetector.FRAGMENT_LAYOUT, ManualIntegrationDetector.ACTIVITY_CONTEXT,
+                ManualIntegrationDetector.WEB_VIEW_CREATION, ManualIntegrationDetector.WEB_VIEW_INFLATION);
     }
 
     @Override

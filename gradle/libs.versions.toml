@@ -1,8 +1,8 @@
 [versions]
 
 # Project Metadata
-localeEasy = "0.1.0"
-localeEasyPlugin = "0.1.1"
+localeEasy = "0.1.1"
+localeEasyPlugin = "0.1.2"
 
 
 agp = "9.2.1"

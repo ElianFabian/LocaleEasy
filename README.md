@@ -18,11 +18,11 @@ Add the runtime dependency to the Android app module:
 
 ```kotlin
 dependencies {
-    implementation("com.github.ElianFabian:LocaleEasy:0.1.0")
+    implementation("com.github.ElianFabian:LocaleEasy:0.1.1")
 }
 ```
 
-For the optional Gradle integration, add the Plugin Portal to `pluginManagement.repositories`. Once the plugin is listed there, apply `id("io.github.elianfabian.localeeasy") version "0.1.1"` in the app module. The plugin is tested with AGP 9.2.1. See the [Gradle integration options](docs/locale-preference-api.md#optional-gradle-integration).
+For the optional Gradle integration, add the Plugin Portal to `pluginManagement.repositories`. Once the plugin is listed there, apply `id("io.github.elianfabian.localeeasy") version "0.1.2"` in the app module. The plugin is tested with AGP 9.2.1. See the [Gradle integration options](docs/locale-preference-api.md#optional-gradle-integration).
 
 ## Try it in this checkout
 
@@ -55,7 +55,7 @@ override fun attachBaseContext(newBase: Context) {
 
 The optional Gradle plugin inserts the wrap for activities compiled in the application module. Activities supplied directly by other modules can use the manual integration where they are defined. See the [plugin setup and scope](docs/locale-preference-api.md#optional-gradle-integration).
 
-For WebViews, the optional plugin settings can repair native application resources during WebView creation, after XML inflation, or before navigation. See [WebView integration](docs/locale-preference-api.md#optional-webview-repair).
+For WebViews, use [early repair](docs/locale-preference-api.md#optional-webview-repair) when the app creates or inflates the WebView. The [optional navigation fallback](docs/locale-preference-api.md#webview-navigation-fallback) is useful when a dependency creates the WebView and the app calls `loadUrl()`.
 
 Use `localizedContext(context)` at the point of use for notifications, workers, and other resource lookups. Pass an explicit `Locale` or ordered `List<Locale>` when the text needs to follow someone else's language preferences.
 
@@ -78,4 +78,4 @@ See [Android locale pitfalls](docs/android-locale-pitfalls.md) for the behavior 
 
 ## Publish the Gradle plugin
 
-Set `GRADLE_PUBLISH_KEY` and `GRADLE_PUBLISH_SECRET` in the repository's [Actions secrets](https://github.com/ElianFabian/LocaleEasy/settings/secrets/actions). Tag the plugin release with a tag such as `plugin-0.1.1`, then run [Publish Gradle plugin](https://github.com/ElianFabian/LocaleEasy/actions/workflows/publish-plugin.yml) from `main` and enter `0.1.1`. The workflow checks that the tag matches the plugin version, runs the plugin tests and submits the plugin to the Portal.
+Set `GRADLE_PUBLISH_KEY` and `GRADLE_PUBLISH_SECRET` in the repository's [Actions secrets](https://github.com/ElianFabian/LocaleEasy/settings/secrets/actions). Tag the plugin release with a tag such as `plugin-0.1.2`, then run [Publish Gradle plugin](https://github.com/ElianFabian/LocaleEasy/actions/workflows/publish-plugin.yml) from `main` and enter `0.1.2`. The workflow checks that the tag matches the plugin version, runs the plugin tests and submits the plugin to the Portal.
